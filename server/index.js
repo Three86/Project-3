@@ -2,7 +2,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { fetchGameData } = require('./tarkovdev');
+const { fetchGameData, queryVariants, API_URL } = require('./tarkovdev');
 const { LogWatcher } = require('./logwatcher');
 
 const PORT = Number(process.env.PORT || 3000);
@@ -171,12 +171,15 @@ async function handleApi(req, res, url) {
       return send(res, 200, status());
     case 'GET /api/data':
       return gameData ? send(res, 200, gameData) : send(res, 404, { error: 'no game data yet', ...status() });
+    case 'GET /api/data/queries':
+      return send(res, 200, { url: API_URL, gameMode: progress.settings.gameMode || 'regular', queries: queryVariants({ gameMode: progress.settings.gameMode || 'regular' }) });
     case 'POST /api/data/refresh':
       await refreshGameData('manual');
       return send(res, lastRefreshError ? 502 : 200, status());
     case 'POST /api/data/import': {
       const body = await readBody(req);
       if (!Array.isArray(body.tasks) || !Array.isArray(body.hideout)) return send(res, 400, { error: 'expected { tasks: [], hideout: [], prestige: [] }' });
+      lastRefreshError = null;
       gameData = { meta: { source: 'import', fetchedAt: new Date().toISOString(), ...(body.meta || {}) }, tasks: body.tasks, hideout: body.hideout, prestige: body.prestige || [] };
       writeJson(GAME_FILE, gameData);
       return send(res, 200, status());

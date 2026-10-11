@@ -40,6 +40,10 @@ Requires Node 18 or newer. There are no dependencies to install.
 EFT_LOGS_DIR="C:/Battlestate Games/EFT/Logs" npm start
 ```
 
+## Troubleshooting
+
+**"No game data yet" / tarkov.dev errors.** The container downloads game data itself. If tarkov.dev rejects those requests (for example HTTP 422), the page in your browser downloads the data directly from tarkov.dev and hands it to the tracker. The **Refresh** button in Settings does the same. If both fail, the error message shows tarkov.dev's full response. `docker compose logs tarkov-tracker` shows the server's side.
+
 ## Configuration
 
 | Variable | Default | Meaning |

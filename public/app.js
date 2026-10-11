@@ -807,8 +807,44 @@ document.addEventListener('submit', (e) => {
 // ---------------------------------------------------------------- loading & sync
 async function refreshData() {
   banner('Downloading game data from tarkov.dev…');
-  try { await api('/api/data/refresh', { method: 'POST' }); } catch { /* reported via status */ }
+  let serverOk = false;
+  try { serverOk = (await api('/api/data/refresh', { method: 'POST' })).ok; } catch { /* fall back below */ }
+  if (!serverOk) await browserDownload();
   await loadAll();
+}
+
+// Fallback for when the container's own requests to tarkov.dev are rejected: the browser runs
+// the same queries (tarkov.dev allows cross-origin requests) and uploads the result.
+let browserTried = false;
+async function browserDownload() {
+  browserTried = true;
+  banner('Server download failed – trying to download game data directly from your browser…');
+  try {
+    const { body: cfg } = await api('/api/data/queries');
+    const out = {};
+    const errors = [];
+    for (const [key, variants] of Object.entries(cfg.queries)) {
+      for (const query of variants) {
+        try {
+          const res = await fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
+          if (!res.ok) throw new Error(`HTTP ${res.status} ${(await res.text()).slice(0, 200)}`);
+          const json = await res.json();
+          if (!json.data?.[key]) throw new Error((json.errors || []).map((e) => e.message).join('; ') || 'empty response');
+          out[key] = json.data[key];
+          break;
+        } catch (err) { errors.push(`${key}: ${err.message}`); }
+      }
+    }
+    if (!out.tasks || !out.hideoutStations) throw new Error(errors.join(' / '));
+    const payload = { meta: { source: `${cfg.url} (via browser)`, gameMode: cfg.gameMode, prestigeError: out.prestige ? null : errors.filter((e) => e.startsWith('prestige')).join(' / ') }, tasks: out.tasks, hideout: out.hideoutStations, prestige: out.prestige || [] };
+    const res = await api('/api/data/import', { method: 'POST', body: JSON.stringify(payload) });
+    if (!res.ok) throw new Error(res.body.error);
+    banner('');
+    return true;
+  } catch (err) {
+    banner(`Browser download failed too: ${esc(err.message)}`);
+    return false;
+  }
 }
 
 async function loadAll() {
@@ -817,7 +853,11 @@ async function loadAll() {
   S.progress = prog.body;
   if (data.ok) { S.data = data.body; buildIndex(); }
   memo = {};
-  banner(S.status.refreshError && S.data ? `Could not refresh game data (${esc(S.status.refreshError)}). Using cached data from ${esc(S.data.meta?.fetchedAt)}.` : '');
+  if (!S.data && S.status.refreshError && !S.status.refreshing && !browserTried) {
+    if (await browserDownload()) return loadAll();
+  }
+  if (S.data && !S.status.refreshError) banner('');
+  else if (S.status.refreshError && S.data) banner(`Could not refresh game data (${esc(S.status.refreshError)}). Using cached data from ${esc(S.data.meta?.fetchedAt)}.`);
   render();
 }
 
