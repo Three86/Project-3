@@ -243,7 +243,13 @@ server.listen(PORT, () => {
   log(`Tarkov tracker listening on http://localhost:${PORT}`);
   log(`data dir: ${DATA_DIR}; game logs: ${LOGS_DIR} (${watcher.available ? 'found' : 'not found – auto quest detection disabled'})`);
   if (dataIsStale()) refreshGameData(gameData ? 'cache older than REFRESH_HOURS' : 'no cached data');
-  setInterval(() => dataIsStale() && refreshGameData('scheduled'), 3600 * 1000).unref();
+  // Without any data, keep retrying every 5 minutes (tarkov.dev outages are usually short).
+  let ticks = 0;
+  setInterval(() => {
+    ticks++;
+    if (!gameData) refreshGameData('retry: no data yet');
+    else if (ticks % 12 === 0 && dataIsStale()) refreshGameData('scheduled');
+  }, 5 * 60 * 1000).unref();
   watcher.start();
 });
 

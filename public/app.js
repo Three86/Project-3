@@ -322,6 +322,7 @@ function renderNoData() {
     <h2>No game data yet</h2>
     <p>${st.refreshing ? 'Downloading quest &amp; hideout data from tarkov.dev…' : 'Quest and hideout definitions are downloaded once from tarkov.dev and cached locally.'}</p>
     ${st.refreshError ? `<p style="color:var(--bad)">Last attempt failed: ${esc(st.refreshError)}</p>` : ''}
+    ${/server unavailable/i.test(st.refreshError || '') ? '<p>tarkov.dev reports its own server is down. That is an outage on their side, not a problem with your setup. The tracker retries every 5 minutes and loads as soon as tarkov.dev is back.</p>' : ''}
     <p><button class="btn primary" data-act="refresh">Download now</button> or import a data file under <a href="#" data-act="tab" data-tab="settings">Settings</a>.</p>
   </div>`;
 }
@@ -842,7 +843,8 @@ async function browserDownload() {
     banner('');
     return true;
   } catch (err) {
-    banner(`Browser download failed too: ${esc(err.message)}`);
+    const msg = /failed to fetch/i.test(err.message) ? 'your browser could not reach tarkov.dev either (it is down or blocked)' : esc(err.message);
+    banner(`Browser download failed too: ${msg}. The tracker keeps retrying automatically.`);
     return false;
   }
 }
