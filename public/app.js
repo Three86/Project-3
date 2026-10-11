@@ -20,10 +20,11 @@ function loadUi() {
     search: '',
     searchCompleted: false,
     open: {},
+    groups: {},
   };
   try {
     const saved = JSON.parse(localStorage.getItem('tt-ui') || '{}');
-    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items } };
+    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, groups: { ...saved.groups } };
   } catch {
     return defaults;
   }
@@ -369,6 +370,8 @@ function sortTasks(list) {
   });
 }
 
+const groupKey = (name) => `${S.ui.q.groupBy}:${name}`;
+
 function groupTasks(list) {
   const g = S.ui.q.groupBy;
   if (g === 'none') return [['', list]];
@@ -405,14 +408,25 @@ function renderQuests() {
     <span class="count">${list.length} quests</span>
   </div>`;
   if (!list.length) return toolbar + `<div class="empty">No quests match these filters.</div>`;
-  return toolbar + groupTasks(list).map(([name, ts]) => `${name ? `<div class="group-title">${esc(name)} <span class="count">(${ts.length})</span></div>` : ''}<div class="grid">${ts.map(taskCard).join('')}</div>`).join('');
+  const groups = groupTasks(list);
+  const tools = `<div class="collapse-tools">
+    <button class="btn small" data-act="quests-open" data-v="1">Expand all quests</button><button class="btn small" data-act="quests-open" data-v="0">Collapse all quests</button>
+    ${groups.length > 1 ? '<button class="btn small" data-act="groups-open" data-v="1">Expand all groups</button><button class="btn small" data-act="groups-open" data-v="0">Collapse all groups</button>' : ''}</div>`;
+  return toolbar + tools + groups.map(([name, ts]) => {
+    const grid = `<div class="grid">${ts.map(taskCard).join('')}</div>`;
+    if (!name) return grid;
+    const key = groupKey(name);
+    const active = ts.filter((t) => taskStatus(t.id) === 'active').length;
+    return `<details class="group" data-group="${esc(key)}" ${S.ui.groups[key] === false ? '' : 'open'}>
+      <summary class="group-title"><span class="caret"></span>${esc(name)} <span class="count">${ts.length} quest${ts.length === 1 ? '' : 's'}${active ? ` · ${active} active` : ''}</span></summary>${grid}</details>`;
+  }).join('');
 }
 
 function taskCard(t) {
   const st = taskStatus(t.id);
   const p = S.progress.tasks[t.id];
   const pct = Math.round(taskProgress(t) * 100);
-  const open = S.ui.open[t.id] ?? (st === 'active');
+  const open = S.ui.open[t.id] ?? false;
   const actions = [];
   if (st !== 'active' && st !== 'completed') actions.push(`<button class="btn small" data-act="task" data-id="${t.id}" data-v="active">Start</button>`);
   if (st !== 'completed') actions.push(`<button class="btn small" data-act="task" data-id="${t.id}" data-v="completed">Complete</button>`);
@@ -423,19 +437,21 @@ function taskCard(t) {
     const ok = autoValue({ type: 'taskStatus', task: r.task, status: r.status }).done;
     return `<span class="${ok ? 'ok' : ''}">${ok ? '✓' : '✗'} <a href="#" data-act="goto" data-id="${r.task.id}">${esc(r.task.name)}</a>${reqStatuses(r).join() !== 'complete' ? ` (${esc(reqStatuses(r).join('/'))})` : ''}</span>`;
   });
-  return `<div class="card st-${st}" id="task-${t.id}">
-    <div class="card-head"><div class="title">${t.wikiLink ? `<a href="${esc(t.wikiLink)}" target="_blank" rel="noopener">${esc(t.name)}</a>` : esc(t.name)}</div>
-      <span class="badge status-${st}">${STATUS_LABEL[st]}</span>${p?.source === 'log' ? '<span class="badge log" title="Detected from game logs">log</span>' : ''}</div>
-    <div class="meta"><span>${esc(t.trader?.name || '?')}</span>·<span>${esc(taskMaps(t).join(', '))}</span>·<span>Lvl ${t.minPlayerLevel || 1}</span>
-      ${t.kappaRequired ? '<span class="badge kappa">Kappa</span>' : ''}${t.lightkeeperRequired ? '<span class="badge kappa">Lightkeeper</span>' : ''}
-      ${t.factionName && t.factionName !== 'Any' ? `<span class="badge">${esc(t.factionName)}</span>` : ''}</div>
-    ${t.objectives.length ? `<div class="progressbar"><div style="width:${pct}%"></div></div>` : ''}
-    <details data-open="${t.id}" ${open ? 'open' : ''}><summary>${t.objectives.length} objectives · ${pct}%</summary>
-      <ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
-      ${prereqs.length ? `<div class="prereqs">Requires: ${prereqs.join(', ')}</div>` : ''}
-    </details>
-    <div class="actions">${actions.join('')}</div>
-  </div>`;
+  const pending = t.objectives.filter((o) => !o.optional && !objValue('objectives', o.id, o).done).length;
+  return `<details class="card quest st-${st}" id="task-${t.id}" data-open="${t.id}" ${open ? 'open' : ''}>
+    <summary class="quest-sum">
+      <div class="card-head"><span class="caret"></span><div class="title">${esc(t.name)}</div>
+        ${p?.source === 'log' ? '<span class="badge log" title="Detected from game logs">log</span>' : ''}<span class="badge status-${st}">${STATUS_LABEL[st]}</span></div>
+      <div class="meta"><span>${esc(t.trader?.name || '?')}</span>·<span>${esc(taskMaps(t).join(', '))}</span>·<span>Lvl ${t.minPlayerLevel || 1}</span>
+        ${t.objectives.length ? `·<span>${pending ? `${pending} left` : 'all objectives done'} (${pct}%)</span>` : ''}
+        ${t.kappaRequired ? '<span class="badge kappa">Kappa</span>' : ''}${t.lightkeeperRequired ? '<span class="badge kappa">Lightkeeper</span>' : ''}
+        ${t.factionName && t.factionName !== 'Any' ? `<span class="badge">${esc(t.factionName)}</span>` : ''}</div>
+      ${t.objectives.length ? `<div class="progressbar"><div style="width:${pct}%"></div></div>` : ''}
+    </summary>
+    <ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
+    ${prereqs.length ? `<div class="prereqs">Requires: ${prereqs.join(', ')}</div>` : ''}
+    <div class="actions">${actions.join('')}${t.wikiLink ? `<a class="btn small" href="${esc(t.wikiLink)}" target="_blank" rel="noopener">Wiki ↗</a>` : ''}</div>
+  </details>`;
 }
 
 // ---------------------------------------------------------------- render: hideout
@@ -704,7 +720,12 @@ function gotoTask(id) {
   saveUi();
   render();
   const el = document.getElementById(`task-${id}`);
-  if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('flash'); }
+  if (el) {
+    const group = el.closest('details.group');
+    if (group && !group.open) group.open = true;
+    el.scrollIntoView({ block: 'center' });
+    el.classList.add('flash');
+  }
 }
 
 document.addEventListener('click', async (e) => {
@@ -741,6 +762,16 @@ document.addEventListener('click', async (e) => {
       setProgress(ops); break;
     }
     case 'goto': gotoTask(id); break;
+    case 'quests-open': {
+      const v = el.dataset.v === '1';
+      for (const t of filteredTasks()) S.ui.open[t.id] = v;
+      saveUi(); render(); break;
+    }
+    case 'groups-open': {
+      const v = el.dataset.v === '1';
+      for (const [name] of groupTasks(filteredTasks())) S.ui.groups[groupKey(name)] = v;
+      saveUi(); render(); break;
+    }
     case 'custom-del': setProgress({ section: 'custom', id, value: null }); break;
     case 'refresh': await refreshData(); break;
     case 'rescan': await api('/api/logs/rescan', { method: 'POST' }); await poll(true); break;
@@ -792,6 +823,8 @@ document.addEventListener('change', async (e) => {
 document.addEventListener('toggle', (e) => {
   const id = e.target.dataset?.open;
   if (id) { S.ui.open[id] = e.target.open; saveUi(); }
+  const g = e.target.dataset?.group;
+  if (g) { S.ui.groups[g] = e.target.open; saveUi(); }
 }, true);
 
 // Text inputs re-render while typing; keep focus and caret position.

@@ -46,7 +46,7 @@ main { padding: 16px; max-width: 1400px; margin: 0 auto; }
 .chip.on { color: #111; background: var(--accent); border-color: var(--accent); }
 .count { color: var(--muted); font-size: 12px; margin-left: auto; }
 
-.group-title { margin: 22px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.group-title { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; margin: 22px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 10px; }
 @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } #globalSearch { flex: 1 1 100%; } }
 
@@ -115,3 +115,16 @@ table.items .num { text-align: right; font-variant-numeric: tabular-nums; }
 .empty { padding: 30px; text-align: center; color: var(--muted); background: var(--panel); border: 1px dashed var(--line); border-radius: 6px; }
 .custom-add { display: flex; gap: 6px; margin-top: 8px; }
 .custom-add input { flex: 1; }
+
+/* collapsible quests and groups */
+details.group > summary::-webkit-details-marker, details.quest > summary::-webkit-details-marker { display: none; }
+.group-title .count { margin-left: 4px; text-transform: none; letter-spacing: 0; }
+.caret { display: inline-block; width: 0; height: 0; border-left: 5px solid var(--muted); border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform .15s; flex: none; margin-top: 2px; }
+details[open] > summary .caret { transform: rotate(90deg); }
+.card-head .caret { margin-top: 7px; }
+.grid { align-items: start; }
+details.quest > summary.quest-sum { list-style: none; cursor: pointer; color: inherit; font-size: inherit; margin: 0; }
+details.quest .meta { margin: 2px 0 4px; }
+details.quest .progressbar { margin: 4px 0 0; }
+details.quest[open] > summary { margin-bottom: 8px; }
+.collapse-tools { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 6px; }
