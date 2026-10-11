@@ -3,6 +3,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { fetchGameData, queryVariants, API_URL } = require('./tarkovdev');
+const { fetchGameDataJson } = require('./tarkovjson');
 const { LogWatcher } = require('./logwatcher');
 
 const PORT = Number(process.env.PORT || 3000);
@@ -75,7 +76,19 @@ async function refreshGameData(reason) {
   refreshing = (async () => {
     log(`refreshing game data from tarkov.dev (${reason})`);
     try {
-      const data = await fetchGameData({ gameMode: progress.settings.gameMode || 'regular', log });
+      const opts = { gameMode: progress.settings.gameMode || 'regular', log };
+      // The static JSON feed is what tarkov.dev's own website uses; GraphQL is the fallback.
+      let data;
+      try {
+        data = await fetchGameDataJson(opts);
+      } catch (err) {
+        log(`json.tarkov.dev failed (${err.message}), trying the GraphQL API`);
+        try {
+          data = await fetchGameData(opts);
+        } catch (gqlErr) {
+          throw new Error(`json.tarkov.dev: ${err.message} | GraphQL: ${gqlErr.message}`);
+        }
+      }
       gameData = data;
       writeJson(GAME_FILE, data);
       lastRefreshError = null;

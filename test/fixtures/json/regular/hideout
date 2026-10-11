@@ -1,0 +1,66 @@
+{
+ "data": {
+  "s-gen": {
+   "id": "s-gen",
+   "name": "genKey",
+   "normalizedName": "generator",
+   "levels": [
+    {
+     "id": "gen1",
+     "level": 1,
+     "constructionTime": 7200,
+     "description": "d",
+     "itemRequirements": [
+      {
+       "item": "i-mp133",
+       "count": 1,
+       "attributes": {
+        "foundInRaid": true
+       }
+      }
+     ],
+     "stationLevelRequirements": [
+      {
+       "station": "s-med",
+       "level": 1
+      }
+     ],
+     "skillRequirements": [
+      {
+       "skill": "enduranceKey",
+       "level": 2
+      }
+     ],
+     "traderRequirements": [
+      {
+       "trader": "54cb50c76803fa8b248b4571",
+       "value": 2
+      }
+     ],
+     "bonuses": []
+    }
+   ]
+  },
+  "s-med": {
+   "id": "s-med",
+   "name": "medKey",
+   "normalizedName": "medstation",
+   "levels": [
+    {
+     "id": "med1",
+     "level": 1,
+     "constructionTime": 0,
+     "itemRequirements": [],
+     "stationLevelRequirements": [],
+     "skillRequirements": [],
+     "traderRequirements": []
+    }
+   ]
+  }
+ },
+ "translations": [
+  "$.data.*.name",
+  "$.data.*.levels[*].description",
+  "$.data.*.levels[*].skillRequirements[*].skill"
+ ]
+}

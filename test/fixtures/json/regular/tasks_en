@@ -1,0 +1,19 @@
+{
+ "data": {
+  "5936d90786f7742b1420ba5b name": "Debut",
+  "t2 name": "Checking",
+  "o1": "Eliminate 5 Scavs",
+  "o2": "Hand over 2 MP-133",
+  "o3": "Find the watch",
+  "o4": "Mark the tank",
+  "o5": "Reach Strength 5",
+  "o6": "Complete Debut",
+  "ScavKey": "Scav",
+  "zoneKey": "Crossroads",
+  "q1 name": "Bronze pocket watch",
+  "q1 short": "Watch",
+  "p1 name": "Prestige 1",
+  "c1": "Reach level 55",
+  "c2": "Hand over an MP-133"
+ }
+}

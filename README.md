@@ -13,7 +13,7 @@ A self-hosted quest, hideout and prestige tracker for Escape from Tarkov. It run
 
 ## Where the data comes from
 
-Quest, hideout and prestige definitions are stored inside the game's binary asset bundles, so they can't be read from local files. The tracker downloads them from the community [tarkov.dev](https://tarkov.dev) API on first start and caches them in `data/gamedata.json`. After that it works offline. By default it refreshes the cache every 24 hours. You can also refresh it or import a data file from **Settings**.
+Quest, hideout and prestige definitions are stored inside the game's binary asset bundles, so they can't be read from local files. The tracker downloads them from [tarkov.dev](https://tarkov.dev)'s public JSON data feed (`json.tarkov.dev`, the same feed the tarkov.dev website uses) on first start, falling back to the tarkov.dev GraphQL API if the feed is unavailable, and caches them in `data/gamedata.json`. After that it works offline. By default it refreshes the cache every 24 hours. You can also refresh it or import a data file from **Settings**.
 
 Your progress is stored only on your PC, in `data/progress.json`.
 
@@ -52,7 +52,8 @@ EFT_LOGS_DIR="C:/Battlestate Games/EFT/Logs" npm start
 | `GAME_MODE` | `regular` | `regular` (PvP) or `pve`. Can also be changed in Settings |
 | `REFRESH_HOURS` | `24` | Re-download game data when the cache is older than this. `0` disables refreshing |
 | `TRACKER_PORT` | `3000` | Port on localhost |
-| `TARKOV_API_URL` | tarkov.dev | GraphQL endpoint override |
+| `TARKOV_JSON_URL` | `https://json.tarkov.dev/` | JSON data feed override |
+| `TARKOV_API_URL` | `https://api.tarkov.dev/graphql` | GraphQL fallback override |
 
 ## Development
 

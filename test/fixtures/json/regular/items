@@ -1,0 +1,32 @@
+{
+ "data": {
+  "items": {
+   "i-mp133": {
+    "id": "i-mp133",
+    "name": "i-mp133 Name",
+    "shortName": "i-mp133 ShortName",
+    "iconLink": "https://assets.tarkov.dev/i-mp133-icon.webp"
+   },
+   "i-ms2000": {
+    "id": "i-ms2000",
+    "name": "ms Name",
+    "shortName": "ms Short"
+   },
+   "w1": {
+    "id": "w1",
+    "name": "w1 Name",
+    "shortName": "w1 Short"
+   },
+   "a1": {
+    "id": "a1",
+    "name": "a1 Name",
+    "shortName": "a1 Short"
+   }
+  },
+  "fleaMarket": {}
+ },
+ "translations": [
+  "$.data.items.*.name",
+  "$.data.items.*.shortName"
+ ]
+}

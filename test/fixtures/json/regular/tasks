@@ -1,0 +1,165 @@
+{
+ "data": {
+  "tasks": {
+   "5936d90786f7742b1420ba5b": {
+    "id": "5936d90786f7742b1420ba5b",
+    "name": "5936d90786f7742b1420ba5b name",
+    "trader": "54cb50c76803fa8b248b4571",
+    "map": null,
+    "minPlayerLevel": 1,
+    "kappaRequired": true,
+    "lightkeeperRequired": false,
+    "factionName": "Any",
+    "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Debut",
+    "taskRequirements": [],
+    "traderRequirements": [],
+    "objectives": [
+     {
+      "id": "o1",
+      "type": "shoot",
+      "description": "o1",
+      "optional": false,
+      "maps": [],
+      "targetNames": [
+       "ScavKey"
+      ],
+      "count": 5,
+      "zones": [],
+      "bodyParts": [],
+      "usingWeapon": [
+       "w1"
+      ],
+      "wearing": [
+       [
+        "a1"
+       ]
+      ],
+      "notWearing": []
+     },
+     {
+      "id": "o2",
+      "type": "giveItem",
+      "description": "o2",
+      "optional": false,
+      "items": [
+       "i-mp133"
+      ],
+      "count": 2,
+      "foundInRaid": true
+     }
+    ],
+    "finishRewards": {
+     "customization": []
+    }
+   },
+   "t2": {
+    "id": "t2",
+    "name": "t2 name",
+    "trader": "54cb50c76803fa8b248b4571",
+    "map": "m-customs",
+    "minPlayerLevel": 2,
+    "factionName": "Any",
+    "taskRequirements": [
+     {
+      "task": "5936d90786f7742b1420ba5b",
+      "status": [
+       "complete"
+      ]
+     }
+    ],
+    "objectives": [
+     {
+      "id": "o3",
+      "type": "findQuestItem",
+      "description": "o3",
+      "optional": false,
+      "maps": [
+       "m-customs"
+      ],
+      "questItem": "q1",
+      "count": 1,
+      "zones": [
+       {
+        "id": "z",
+        "name": "zoneKey"
+       }
+      ]
+     },
+     {
+      "id": "o4",
+      "type": "mark",
+      "description": "o4",
+      "optional": true,
+      "maps": [
+       "m-customs"
+      ],
+      "markerItem": "i-ms2000"
+     },
+     {
+      "id": "o5",
+      "type": "skill",
+      "description": "o5",
+      "optional": false,
+      "skill": "Strength",
+      "level": 5
+     },
+     {
+      "id": "o6",
+      "type": "taskStatus",
+      "description": "o6",
+      "optional": false,
+      "task": "5936d90786f7742b1420ba5b",
+      "status": [
+       "complete"
+      ]
+     }
+    ]
+   }
+  },
+  "questItems": {
+   "q1": {
+    "id": "q1",
+    "name": "q1 name",
+    "shortName": "q1 short"
+   }
+  },
+  "achievements": {},
+  "prestige": [
+   {
+    "id": "p1",
+    "name": "p1 name",
+    "prestigeLevel": 1,
+    "conditions": [
+     {
+      "id": "c1",
+      "type": "playerLevel",
+      "description": "c1",
+      "playerLevel": 55
+     },
+     {
+      "id": "c2",
+      "type": "giveItem",
+      "description": "c2",
+      "items": [
+       "i-mp133"
+      ],
+      "count": 1,
+      "foundInRaid": false
+     }
+    ]
+   }
+  ]
+ },
+ "translations": [
+  "$.data.tasks.*.name",
+  "$.data.tasks.*.objectives[*].description",
+  "$.data.tasks.*.objectives[*].zones[*].name",
+  "$.data.tasks.*.objectives[*].targetNames[*]",
+  "$.data.tasks.*.objectives[*]..bodyParts[*]",
+  "$.data.tasks.*['startRewards','finishRewards','failureOutcome'][*].customization[*].name",
+  "$.data.questItems.*.name",
+  "$.data.questItems.*.shortName",
+  "$.data.prestige[*].name",
+  "$.data.prestige[*].conditions[*].description"
+ ]
+}

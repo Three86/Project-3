@@ -1,0 +1,14 @@
+{
+ "data": {
+  "maps": {
+   "m-customs": {
+    "id": "m-customs",
+    "name": "cKey"
+   }
+  },
+  "mobs": {}
+ },
+ "translations": [
+  "$.data.maps.*.name"
+ ]
+}

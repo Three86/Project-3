@@ -1,0 +1,11 @@
+{
+ "data": {
+  "54cb50c76803fa8b248b4571": {
+   "id": "54cb50c76803fa8b248b4571",
+   "name": "pKey"
+  }
+ },
+ "translations": [
+  "$.data.*.name"
+ ]
+}
