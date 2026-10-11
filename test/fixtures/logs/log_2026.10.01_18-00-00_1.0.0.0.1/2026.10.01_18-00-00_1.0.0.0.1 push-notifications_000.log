@@ -1,0 +1,30 @@
+2026-10-01 18:05:00.000|1.0.0.0.1|Info|push-notifications|Got notification | ChatMessageReceived
+{
+  "type": "new_message",
+  "eventId": "abc",
+  "dialogId": "54cb50c76803fa8b248b4571",
+  "message": {
+    "_id": "m1",
+    "uid": "54cb50c76803fa8b248b4571",
+    "type": 10,
+    "dt": 1790000000,
+    "hasRewards": false,
+    "text": "",
+    "templateId": "5936d90786f7742b1420ba5b description"
+  }
+}
+2026-10-01 18:35:00.000|1.0.0.0.1|Info|push-notifications|Got notification | ChatMessageReceived
+{
+  "type": "new_message",
+  "message": {
+    "_id": "m2",
+    "type": 12,
+    "dt": 1790001800,
+    "templateId": "5936d90786f7742b1420ba5b successMessageText",
+    "items": { "data": [ { "_id": "x", "type": 4 } ] }
+  }
+}
+2026-10-01 18:36:00.000|1.0.0.0.1|Info|push-notifications|Got notification | ChatMessageReceived
+{
+  "message": { "type": 10, "dt": 1790001860, "templateId": "59674cd986f7744ab26e32f2 description" }
+}

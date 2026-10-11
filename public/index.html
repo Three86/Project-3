@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tarkov Tracker</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">TARKOV<span>TRACKER</span></div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="quests">Quests</button>
+      <button data-tab="hideout">Hideout</button>
+      <button data-tab="prestige">Prestige</button>
+      <button data-tab="items">Needed items</button>
+      <button data-tab="search">Search</button>
+      <button data-tab="settings">Settings</button>
+    </nav>
+    <input id="globalSearch" type="search" placeholder="Search quests &amp; items…" autocomplete="off">
+  </header>
+  <div id="banner" class="banner hidden"></div>
+  <main id="view"></main>
+  <script src="app.js"></script>
+</body>
+</html>

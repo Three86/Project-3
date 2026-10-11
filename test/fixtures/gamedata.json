@@ -1,0 +1,42 @@
+{
+  "meta": { "source": "fixture", "fetchedAt": "2099-01-01T00:00:00.000Z", "gameMode": "regular" },
+  "tasks": [
+    { "id": "5936d90786f7742b1420ba5b", "name": "Debut", "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Debut", "minPlayerLevel": 1, "kappaRequired": true, "lightkeeperRequired": false, "factionName": "Any",
+      "trader": { "id": "p", "name": "Prapor" }, "map": null, "taskRequirements": [],
+      "objectives": [
+        { "__typename": "TaskObjectiveShoot", "id": "o1", "type": "shoot", "description": "Eliminate Scavs all over the Tarkov territory", "optional": false, "maps": [], "targetNames": ["Scav"], "count": 5, "zoneNames": [], "bodyParts": [], "usingWeapon": [], "wearing": [], "notWearing": [] },
+        { "__typename": "TaskObjectiveItem", "id": "o2", "type": "giveItem", "description": "Hand over 2 MP-133 shotguns", "optional": false, "maps": [], "items": [{ "id": "i-mp133", "name": "MP-133 12ga pump-action shotgun", "shortName": "MP-133" }], "count": 2, "foundInRaid": true }
+      ] },
+    { "id": "59674cd986f7744ab26e32f2", "name": "Checking", "minPlayerLevel": 1, "kappaRequired": true, "factionName": "Any",
+      "trader": { "id": "p", "name": "Prapor" }, "map": { "id": "m1", "name": "Customs" },
+      "taskRequirements": [{ "task": { "id": "5936d90786f7742b1420ba5b", "name": "Debut" }, "status": ["complete"] }],
+      "objectives": [
+        { "__typename": "TaskObjectiveQuestItem", "id": "o3", "type": "findQuestItem", "description": "Locate and obtain the bronze pocket watch", "optional": false, "maps": [{ "id": "m1", "name": "Customs" }], "questItem": { "id": "q1", "name": "Bronze pocket watch" }, "count": 1 },
+        { "__typename": "TaskObjectiveQuestItem", "id": "o4", "type": "giveQuestItem", "description": "Hand over the pocket watch", "optional": false, "maps": [], "questItem": { "id": "q1", "name": "Bronze pocket watch" }, "count": 1 }
+      ] },
+    { "id": "t3", "name": "Shooting Cans", "minPlayerLevel": 10, "kappaRequired": false, "factionName": "Any",
+      "trader": { "id": "j", "name": "Jaeger" }, "map": { "id": "m2", "name": "Woods" }, "taskRequirements": [],
+      "objectives": [
+        { "__typename": "TaskObjectiveShoot", "id": "o5", "type": "shoot", "description": "Eliminate PMCs while wearing a 6B43 armor and using an SV-98", "optional": false, "maps": [{ "id": "m2", "name": "Woods" }], "targetNames": ["PMC"], "count": 3, "bodyParts": ["Head"], "zoneNames": [], "usingWeapon": [{ "id": "w1", "name": "SV-98 bolt-action sniper rifle", "shortName": "SV-98" }], "wearing": [[{ "id": "a1", "name": "6B43 6A Zabralo-Sh body armor", "shortName": "6B43" }]], "notWearing": [] },
+        { "__typename": "TaskObjectiveItem", "id": "o6", "type": "giveItem", "description": "Hand over 3 Salewa", "optional": false, "maps": [], "items": [{ "id": "i-salewa", "name": "Salewa first aid kit", "shortName": "Salewa" }], "count": 3, "foundInRaid": false },
+        { "__typename": "TaskObjectiveMark", "id": "o7", "type": "mark", "description": "Mark the fuel tank with an MS2000 marker", "optional": true, "maps": [{ "id": "m2", "name": "Woods" }], "markerItem": { "id": "i-ms2000", "name": "MS2000 Marker", "shortName": "MS2000" } }
+      ] },
+    { "id": "t4", "name": "Bear Only", "minPlayerLevel": 1, "factionName": "BEAR", "trader": { "id": "s", "name": "Skier" }, "map": null, "taskRequirements": [], "objectives": [] }
+  ],
+  "hideout": [
+    { "id": "s-gen", "name": "Generator", "levels": [
+      { "id": "gen1", "level": 1, "constructionTime": 7200, "itemRequirements": [{ "id": "r1", "item": { "id": "i-salewa", "name": "Salewa first aid kit", "shortName": "Salewa" }, "count": 2, "attributes": [] }, { "id": "r2", "item": { "id": "i-spark", "name": "Spark plug", "shortName": "Plug" }, "count": 1, "attributes": [{ "type": "foundInRaid", "name": "found_in_raid", "value": "true" }] }], "stationLevelRequirements": [], "skillRequirements": [], "traderRequirements": [] },
+      { "id": "gen2", "level": 2, "constructionTime": 0, "itemRequirements": [{ "id": "r3", "item": { "id": "i-mp133", "name": "MP-133 12ga pump-action shotgun", "shortName": "MP-133" }, "count": 1 }], "stationLevelRequirements": [{ "station": { "id": "s-med", "name": "Medstation" }, "level": 1 }], "skillRequirements": [{ "name": "Endurance", "level": 2 }], "traderRequirements": [{ "trader": { "id": "p", "name": "Prapor" }, "level": 2 }] }
+    ] },
+    { "id": "s-med", "name": "Medstation", "levels": [
+      { "id": "med1", "level": 1, "constructionTime": 3600, "itemRequirements": [], "stationLevelRequirements": [], "skillRequirements": [], "traderRequirements": [] }
+    ] }
+  ],
+  "prestige": [
+    { "id": "pr1", "name": "Prestige 1", "prestigeLevel": 1, "conditions": [
+      { "__typename": "TaskObjectivePlayerLevel", "id": "c1", "type": "playerLevel", "description": "Reach level 55", "playerLevel": 55 },
+      { "__typename": "TaskObjectiveTaskStatus", "id": "c2", "type": "taskStatus", "description": "Complete Debut", "task": { "id": "5936d90786f7742b1420ba5b", "name": "Debut" }, "status": ["complete"] },
+      { "__typename": "TaskObjectiveSkill", "id": "c3", "type": "skill", "description": "Reach Strength level 20", "skillLevel": { "name": "Strength", "level": 20 } }
+    ] }
+  ]
+}

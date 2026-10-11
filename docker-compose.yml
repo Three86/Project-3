@@ -1,0 +1,15 @@
+services:
+  tarkov-tracker:
+    build: .
+    container_name: tarkov-tracker
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${TRACKER_PORT:-3000}:3000"
+    environment:
+      - GAME_MODE=${GAME_MODE:-regular}
+      - REFRESH_HOURS=${REFRESH_HOURS:-24}
+    volumes:
+      # Progress, cached game data and log read positions live here.
+      - ./data:/data
+      # Your Escape from Tarkov Logs folder (read-only). Set EFT_LOGS_PATH in .env.
+      - "${EFT_LOGS_PATH:-./data/no-logs}:/eft-logs:ro"
