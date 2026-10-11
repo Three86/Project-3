@@ -35,7 +35,7 @@ fs.mkdirSync(DATA_DIR, { recursive: true });
 // ---------- state ----------
 // Start of the current wipe (from tarkov.dev's wipe list). The game never clears its Logs folder,
 // so quest events from before this date belong to earlier wipes and are ignored.
-const DEFAULT_LOGS_SINCE = process.env.WIPE_START || '2025-11-15';
+const DEFAULT_LOGS_SINCE = process.env.WIPE_START || '2025-11-15T09:00:00Z';
 
 const emptyProgress = () => ({
   rev: 0,
@@ -240,6 +240,14 @@ async function handleApi(req, res, url) {
       const rev = progress.rev;
       progress = Object.assign(emptyProgress(), body, { rev });
       saveProgress();
+      return send(res, 200, { rev: progress.rev });
+    }
+    case 'POST /api/progress/fresh-start': {
+      // Wipe, profile reset or prestige: quests, hideout and level start over; only logs from now count.
+      const { rev, prestige, custom } = progress;
+      const settings = { ...progress.settings, playerLevel: 1, logsSince: new Date().toISOString() };
+      progress = Object.assign(emptyProgress(), { settings, rev, prestige, custom });
+      rebuildFromLogs();
       return send(res, 200, { rev: progress.rev });
     }
     case 'POST /api/progress/reset': {

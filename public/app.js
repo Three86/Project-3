@@ -663,8 +663,9 @@ function renderSettings() {
     </div>
     <div class="card"><h3>Game log detection</h3>
       <div class="kv">Folder: <code>${esc(logs.dir || '–')}</code> — ${logs.available ? `<span style="color:var(--good)">found</span>, ${logs.files} notification log files, ${logs.events} quest events read, last scan ${esc(logs.lastScan || '–')}` : '<span style="color:var(--warn)">not found</span>. Mount your EFT Logs folder (see README) to detect quest starts/completions automatically.'}</div>
-      <div class="row"><label>Current wipe started <input type="date" data-set="logsSince" value="${esc((s.logsSince || '').slice(0, 10))}"></label>
-        <span class="kv">Quest events in older logs belong to earlier wipes and are ignored. Changing this re-reads all logs.</span></div>
+      <div class="row"><label>Count game logs from <input type="datetime-local" data-set="logsSince" value="${esc(toLocalInput(s.logsSince))}"></label>
+        <button class="btn danger" data-act="fresh-start" title="After a wipe, profile reset or prestige">New start from now…</button></div>
+      <div class="kv">Quest events logged before this moment are ignored (the game keeps logs from every wipe, reset and prestige). Changing it re-reads all logs.</div>
       <div class="row"><label><input type="checkbox" data-set="autoLogs" ${s.autoLogs !== false ? 'checked' : ''}> Update quest status from game logs</label>
         <button class="btn" data-act="rescan">Re-read all logs</button></div>
       ${(logs.lastEvents || []).length ? `<div class="kv">Recent: ${logs.lastEvents.slice(0, 8).map((e) => `${esc(idx.tasks.get(e.taskId)?.name || e.taskId)} → ${esc(e.status)}`).join(' · ')}</div>` : ''}
@@ -675,6 +676,14 @@ function renderSettings() {
         <button class="btn danger" data-act="reset">Reset all progress</button></div>
     </div>
   </div>`;
+}
+
+// ISO timestamp -> value for <input type="datetime-local"> in local time.
+function toLocalInput(iso) {
+  const d = new Date(iso || '');
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 // ---------------------------------------------------------------- events
@@ -740,6 +749,12 @@ document.addEventListener('click', async (e) => {
       const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `tarkov-progress-${new Date().toISOString().slice(0, 10)}.json` });
       a.click(); URL.revokeObjectURL(a.href); break;
     }
+    case 'fresh-start':
+      if (confirm('Start fresh from now (after a wipe, profile reset or prestige)?\n\nThis clears quest, objective and hideout progress, sets your level to 1 and ignores all game logs from before now. Prestige checklists and settings are kept. Export first if unsure.')) {
+        await api('/api/progress/fresh-start', { method: 'POST' });
+        await poll(true);
+      }
+      break;
     case 'reset':
       if (confirm('Reset ALL quest, hideout and prestige progress? Export first if unsure.')) { await api('/api/progress/reset', { method: 'POST' }); await poll(true); }
       break;
@@ -757,7 +772,9 @@ document.addEventListener('change', async (e) => {
     setProgress({ section: 'custom', id: el.dataset.id, value: { ...S.progress.custom[el.dataset.id], done: el.checked } });
   } else if (el.dataset.set) {
     const key = el.dataset.set;
-    const value = el.type === 'checkbox' ? el.checked : key === 'playerLevel' ? Math.max(1, Number(el.value) || 1) : el.value;
+    let value = el.type === 'checkbox' ? el.checked : key === 'playerLevel' ? Math.max(1, Number(el.value) || 1) : el.value;
+    // datetime-local is in the viewer's local time; store an absolute timestamp.
+    if (key === 'logsSince') value = el.value ? new Date(el.value).toISOString() : '';
     await setProgress({ section: 'settings', id: key, value });
     if (key === 'gameMode') await refreshData();
   } else if (el.dataset.act === 'import-data' || el.dataset.act === 'import-progress') {
