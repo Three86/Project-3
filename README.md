@@ -17,7 +17,7 @@ Quest, hideout and prestige definitions are stored inside the game's binary asse
 
 Your progress is stored only on your PC, in `data/progress.json`.
 
-The game writes trader messages to `Logs/*/...notifications...log`, including quest started, failed and completed events. The tracker reads that folder read-only and applies the events. If you change a quest's status by hand after a logged event, your manual change wins. Completing a quest also marks its prerequisites as completed.
+The game writes trader messages to `Logs/*/...notifications...log`, including quest started, failed and completed events. The tracker reads that folder read-only and applies the events. If you change a quest's status by hand after a logged event, your manual change wins. The game never clears its Logs folder, so only events after the current wipe's start date count (default: 2025-11-15, the 1.0 wipe; change it under **Settings** after a new wipe). Completing a quest also marks its prerequisites as completed.
 
 ## Running it
 
@@ -50,6 +50,7 @@ EFT_LOGS_DIR="C:/Battlestate Games/EFT/Logs" npm start
 |---|---|---|
 | `EFT_LOGS_PATH` | – | Host path of the game's Logs folder (compose only) |
 | `GAME_MODE` | `regular` | `regular` (PvP) or `pve`. Can also be changed in Settings |
+| `WIPE_START` | `2025-11-15` | Default wipe start date; quest events in older game logs are ignored |
 | `REFRESH_HOURS` | `24` | Re-download game data when the cache is older than this. `0` disables refreshing |
 | `TRACKER_PORT` | `3000` | Port on localhost |
 | `TARKOV_JSON_URL` | `https://json.tarkov.dev/` | JSON data feed override |

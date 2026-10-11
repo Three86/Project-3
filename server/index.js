@@ -33,9 +33,13 @@ function writeJson(file, obj) {
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 // ---------- state ----------
+// Start of the current wipe (from tarkov.dev's wipe list). The game never clears its Logs folder,
+// so quest events from before this date belong to earlier wipes and are ignored.
+const DEFAULT_LOGS_SINCE = process.env.WIPE_START || '2025-11-15';
+
 const emptyProgress = () => ({
   rev: 0,
-  settings: { playerLevel: 1, faction: 'USEC', gameMode: process.env.GAME_MODE || 'regular', autoLogs: true },
+  settings: { playerLevel: 1, faction: 'USEC', gameMode: process.env.GAME_MODE || 'regular', autoLogs: true, logsSince: DEFAULT_LOGS_SINCE },
   tasks: {}, // taskId -> { status: active|completed|failed, updatedAt, source: manual|log }
   objectives: {}, // objectiveId -> true | number
   hideout: {}, // stationLevelId -> true (built)
@@ -43,7 +47,11 @@ const emptyProgress = () => ({
   prestige: {}, // condition key -> true | number
   custom: {}, // id -> { text, done, prestigeId }
 });
-let progress = Object.assign(emptyProgress(), readJson(PROGRESS_FILE, {}));
+const savedProgress = readJson(PROGRESS_FILE, {});
+let progress = Object.assign(emptyProgress(), savedProgress);
+progress.settings = { ...emptyProgress().settings, ...savedProgress.settings };
+// Progress saved before the wipe filter existed may hold quest states from older wipes.
+const needsLogRebuild = savedProgress.settings && !('logsSince' in savedProgress.settings);
 let gameData = readJson(GAME_FILE, null);
 const logState = readJson(LOGSTATE_FILE, { offsets: {}, events: 0, lastEvents: [] });
 let refreshing = null;
@@ -118,6 +126,7 @@ const watcher = new LogWatcher({
     let changed = 0;
     for (const ev of events) {
       if (progress.settings.autoLogs === false) break;
+      if (ev.at < logsSinceMs()) continue;
       const cur = progress.tasks[ev.taskId];
       // A manual change made after the logged event wins.
       if (cur && cur.updatedAt > ev.at) continue;
@@ -134,6 +143,24 @@ const watcher = new LogWatcher({
     }
   },
 });
+
+function logsSinceMs() {
+  const t = Date.parse(progress.settings.logsSince || '');
+  return Number.isNaN(t) ? 0 : t;
+}
+
+// Forget every quest status that came from the logs and read all logs again.
+function rebuildFromLogs() {
+  for (const [id, t] of Object.entries(progress.tasks)) if (t.source === 'log') delete progress.tasks[id];
+  logState.offsets = {};
+  logState.events = 0;
+  logState.lastEvents = [];
+  saveProgress();
+  const n = watcher.scan();
+  writeJson(LOGSTATE_FILE, logState);
+  log(`rebuilt quest statuses from game logs since ${progress.settings.logsSince || 'the beginning'} (${n} events read)`);
+  return n;
+}
 
 // ---------- http ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json', '.ico': 'image/x-icon' };
@@ -204,6 +231,7 @@ async function handleApi(req, res, url) {
       const ops = Array.isArray(body.ops) ? body.ops : [body];
       ops.forEach(applyOp);
       saveProgress();
+      if (ops.some((o) => o.section === 'settings' && (o.id === 'logsSince' || (o.id === 'autoLogs' && o.value)))) rebuildFromLogs();
       return send(res, 200, { rev: progress.rev });
     }
     case 'POST /api/progress/import': {
@@ -222,8 +250,7 @@ async function handleApi(req, res, url) {
       return send(res, 200, { rev: progress.rev });
     }
     case 'POST /api/logs/rescan': {
-      logState.offsets = {};
-      const n = watcher.scan();
+      const n = rebuildFromLogs();
       return send(res, 200, { events: n, ...status() });
     }
     default:
@@ -263,6 +290,7 @@ server.listen(PORT, () => {
     if (!gameData) refreshGameData('retry: no data yet');
     else if (ticks % 12 === 0 && dataIsStale()) refreshGameData('scheduled');
   }, 5 * 60 * 1000).unref();
+  if (needsLogRebuild && watcher.available) rebuildFromLogs();
   watcher.start();
 });
 

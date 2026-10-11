@@ -663,6 +663,8 @@ function renderSettings() {
     </div>
     <div class="card"><h3>Game log detection</h3>
       <div class="kv">Folder: <code>${esc(logs.dir || '–')}</code> — ${logs.available ? `<span style="color:var(--good)">found</span>, ${logs.files} notification log files, ${logs.events} quest events read, last scan ${esc(logs.lastScan || '–')}` : '<span style="color:var(--warn)">not found</span>. Mount your EFT Logs folder (see README) to detect quest starts/completions automatically.'}</div>
+      <div class="row"><label>Current wipe started <input type="date" data-set="logsSince" value="${esc((s.logsSince || '').slice(0, 10))}"></label>
+        <span class="kv">Quest events in older logs belong to earlier wipes and are ignored. Changing this re-reads all logs.</span></div>
       <div class="row"><label><input type="checkbox" data-set="autoLogs" ${s.autoLogs !== false ? 'checked' : ''}> Update quest status from game logs</label>
         <button class="btn" data-act="rescan">Re-read all logs</button></div>
       ${(logs.lastEvents || []).length ? `<div class="kv">Recent: ${logs.lastEvents.slice(0, 8).map((e) => `${esc(idx.tasks.get(e.taskId)?.name || e.taskId)} → ${esc(e.status)}`).join(' · ')}</div>` : ''}
