@@ -21,6 +21,7 @@ function loadUi() {
     searchCompleted: false,
     open: {},
     groups: {},
+    prestigeView: null,
   };
   try {
     const saved = JSON.parse(localStorage.getItem('tt-ui') || '{}');
@@ -203,8 +204,8 @@ function objTags(o) {
 }
 
 // Render one objective row with a checkbox or a counter.
-function objRow(section, key, o, { disabled = false } = {}) {
-  const v = objValue(section, key, o);
+function objRow(section, key, o, { disabled = false, forceDone = false } = {}) {
+  const v = forceDone ? { cur: objTarget(o), target: objTarget(o), done: true } : objValue(section, key, o);
   let control;
   if (v.auto) control = `<input type="checkbox" disabled ${v.done ? 'checked' : ''} title="Tracked automatically">`;
   else if (v.target > 1) {
@@ -475,9 +476,12 @@ function renderHideout() {
       if (text && !norm(st.name).includes(text) && !reqs.some((r) => norm(r.item?.name || r.label).includes(text))) return false;
       return true;
     });
-    if (levels.length) rows.push({ st, built, levels });
+    // Keep fully built stations visible in "next level" view so they can still be unmarked.
+    const fullyBuilt = f.show === 'next' && built > 0 && !st.levels.some((l) => l.level > built) && !f.need && !text;
+    if (levels.length || fullyBuilt) rows.push({ st, built, levels });
   }
   const readiness = (r) => {
+    if (!r.levels.length) return -1;
     const reqs = hideoutReqs(r.levels[0]);
     return reqs.length ? reqs.filter((x) => x.done).length / reqs.length : 1;
   };
@@ -495,9 +499,11 @@ function renderHideout() {
 
 function stationCard({ st, built, levels }) {
   const max = st.levels[st.levels.length - 1]?.level || 0;
+  const top = st.levels.find((l) => l.level === built);
+  const undo = top ? `<button class="btn small" data-act="build" data-id="${top.id}" data-v="0" title="Marked built by mistake? Sets the station back to level ${built - 1}">↶ Unmark level ${built}</button>` : '';
   return `<div class="card ${built >= max ? 'st-completed' : 'st-available'}">
-    <div class="card-head"><div class="title">${esc(st.name)}</div><span class="badge">Level ${built}/${max}</span></div>
-    ${levels.map((l) => levelBlock(st, l)).join('')}
+    <div class="card-head"><div class="title">${esc(st.name)}</div>${undo}<span class="badge">Level ${built}/${max}</span></div>
+    ${levels.length ? levels.map((l) => levelBlock(st, l)).join('') : '<div class="auto">Fully built.</div>'}
   </div>`;
 }
 
@@ -538,16 +544,27 @@ function renderPrestige() {
       <div class="card" style="margin-top:10px"><div class="card-head"><div class="title">My prestige checklist</div></div>${customBlock('general')}</div>`;
     return html;
   }
-  return html + `<div class="grid">${list.map((p) => {
-    const conds = p.conditions || [];
-    const done = conds.filter((o) => objValue('prestige', `${p.id}|${o.id}`, o).done).length;
-    return `<div class="card ${done === conds.length && conds.length ? 'st-completed' : 'st-active'}">
-      <div class="card-head"><div class="title">${esc(p.name || `Prestige ${p.prestigeLevel}`)}</div><span class="badge">${done}/${conds.length}</span></div>
+  const achieved = (p) => !!S.progress.prestige[`achieved|${p.id}`];
+  // Default to the first prestige not yet achieved; the buttons can pick any other.
+  const current = list.find((p) => p.id === S.ui.prestigeView) || list.find((p) => !achieved(p)) || list[list.length - 1];
+  const switcher = `<div class="chips prestige-switch">${list.map((p) => `<button class="chip ${p.id === current.id ? 'on' : ''}" data-act="prestige-view" data-id="${esc(p.id)}">${achieved(p) ? '✓ ' : ''}${esc(p.name || `Prestige ${p.prestigeLevel}`)}</button>`).join('')}
+    ${S.ui.prestigeView ? '<button class="chip" data-act="prestige-view" data-id="" title="Show the next prestige you have not achieved">Next unachieved</button>' : ''}</div>`;
+  const p = current;
+  const conds = p.conditions || [];
+  const isAchieved = achieved(p);
+  // Once achieved, the conditions were met at the time even if level etc. reset since.
+  const done = isAchieved ? conds.length : conds.filter((o) => objValue('prestige', `${p.id}|${o.id}`, o).done).length;
+  const all = conds.length && done === conds.length;
+  return html + switcher + `<div class="card prestige-card ${isAchieved || all ? 'st-completed' : 'st-active'}">
+      <div class="card-head"><div class="title">${esc(p.name || `Prestige ${p.prestigeLevel}`)}</div>
+        ${isAchieved ? '<span class="badge status-completed">Achieved</span>' : ''}<span class="badge">${done}/${conds.length}</span></div>
       <div class="progressbar"><div style="width:${conds.length ? Math.round((done / conds.length) * 100) : 0}%"></div></div>
-      <ul class="objs">${conds.map((o) => objRow('prestige', `${p.id}|${o.id}`, o)).join('')}</ul>
+      <ul class="objs">${conds.map((o) => objRow('prestige', `${p.id}|${o.id}`, o, { disabled: isAchieved, forceDone: isAchieved })).join('')}</ul>
       ${customBlock(p.id)}
+      <div class="actions">${isAchieved
+        ? `<button class="btn small" data-act="prestige-achieved" data-id="${esc(p.id)}" data-v="0">Undo: mark not achieved</button>`
+        : `<button class="btn small ${all ? 'primary' : ''}" data-act="prestige-achieved" data-id="${esc(p.id)}" data-v="1">Mark ${esc(p.name || `Prestige ${p.prestigeLevel}`)} achieved</button>`}</div>
     </div>`;
-  }).join('')}</div>`;
 }
 
 // ---------------------------------------------------------------- needed items aggregation
@@ -583,6 +600,7 @@ function itemRequirements({ includeEquipment = false } = {}) {
     }
   }
   for (const p of S.data.prestige || []) {
+    if (S.progress.prestige[`achieved|${p.id}`]) continue;
     for (const o of p.conditions || []) {
       const v = objValue('prestige', `${p.id}|${o.id}`, o);
       for (const it of objItems(o)) out.push({ item: it, count: Number(o.count || 1), have: Math.round((v.cur / v.target) * Number(o.count || 1)), fir: !!o.foundInRaid, alt: false, kind: 'prestige', status: 'prestige', label: p.name || `Prestige ${p.prestigeLevel}`, sub: o.description, done: v.done });
@@ -762,6 +780,12 @@ document.addEventListener('click', async (e) => {
       setProgress(ops); break;
     }
     case 'goto': gotoTask(id); break;
+    case 'prestige-view': S.ui.prestigeView = id || null; saveUi(); render(); break;
+    case 'prestige-achieved':
+      // Back to "next unachieved" so marking one achieved moves straight on to the next prestige.
+      S.ui.prestigeView = null; saveUi();
+      setProgress({ section: 'prestige', id: `achieved|${id}`, value: el.dataset.v === '1' || null });
+      break;
     case 'quests-open': {
       const v = el.dataset.v === '1';
       for (const t of filteredTasks()) S.ui.open[t.id] = v;

@@ -128,3 +128,6 @@ details.quest .meta { margin: 2px 0 4px; }
 details.quest .progressbar { margin: 4px 0 0; }
 details.quest[open] > summary { margin-bottom: 8px; }
 .collapse-tools { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 6px; }
+.prestige-switch { margin-bottom: 12px; }
+.prestige-card { max-width: 760px; }
+.card-head .btn.small { margin-top: 1px; }
