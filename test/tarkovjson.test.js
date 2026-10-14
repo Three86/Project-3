@@ -59,6 +59,8 @@ test('loads and normalises the json.tarkov.dev feed', async () => {
     assert.deepStrictEqual(l1.skillRequirements, [{ name: 'Endurance', level: 2 }]);
     assert.deepStrictEqual(l1.traderRequirements, [{ trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, level: 2 }]);
     assert.strictEqual(d.prestige[0].name, 'Prestige 1');
+    assert.ok(d.skills.some((sk) => sk.id === 'Strength' && sk.name === 'Strength'));
+    assert.ok(!d.skills.some((sk) => sk.id === 'Melee'));
     assert.strictEqual(d.prestige[0].conditions[1].items[0].shortName, 'MP-133');
   } finally {
     server.close();

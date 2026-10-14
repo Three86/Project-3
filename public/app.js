@@ -584,7 +584,7 @@ function renderPrestige() {
 const skillKey = (s) => norm(s).replace(/[^a-z]/g, '');
 function findSkill(name) {
   const k = skillKey(name);
-  return (S.skills?.skills || []).find((sk) => skillKey(sk.id) === k || skillKey(sk.name) === k);
+  return activeSkillConfig().skills.find((sk) => skillKey(sk.id) === k || skillKey(sk.name) === k);
 }
 function skillLevel(name) {
   const sk = findSkill(name);
@@ -596,8 +596,17 @@ function effectValue(sk, e, level) {
   return e.perLevel * Math.min(level, cap);
 }
 
-function renderSkills() {
+// Bundled skills, minus any that the downloaded game data says are no longer in the game.
+function activeSkillConfig() {
   const cfg = S.skills || { skills: [] };
+  const live = S.data?.skills;
+  if (!Array.isArray(live) || !live.length) return cfg;
+  const ids = new Set(live.map((sk) => skillKey(sk.id)));
+  return { ...cfg, skills: cfg.skills.filter((sk) => ids.has(skillKey(sk.id))) };
+}
+
+function renderSkills() {
+  const cfg = activeSkillConfig();
   const f = S.ui.sk;
   const maxLevel = cfg.maxLevel || 51;
   const elite = cfg.eliteLevel || 51;
@@ -839,7 +848,7 @@ function renderSearch() {
     byItem.get(r.item.id).sources.push(r);
   }
   const items = [...byItem.values()].sort((a, b) => byName(a.item.name, b.item.name));
-  const skillHits = (S.skills?.skills || []).filter((sk) => norm(sk.name).includes(q) || norm(sk.description).includes(q));
+  const skillHits = activeSkillConfig().skills.filter((sk) => norm(sk.name).includes(q) || norm(sk.description).includes(q));
   return head + `<div class="group-title">Quests (${quests.length})</div>
     ${quests.length ? `<div class="grid">${sortTasks(quests).slice(0, 60).map(taskCard).join('')}</div>` : '<div class="empty">No quests by that name.</div>'}
     ${skillHits.length ? `<div class="group-title">Skills (${skillHits.length})</div><div class="chips">${skillHits.map((sk) => `<button class="chip" data-act="goto-skill" data-id="${esc(sk.name)}">${esc(sk.name)} · lvl ${Number(S.progress.skills[sk.id] || 0)}</button>`).join('')}</div>` : ''}

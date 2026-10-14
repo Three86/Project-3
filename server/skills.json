@@ -1,5 +1,5 @@
 {
- "note": "Skill descriptions and per-level effects compiled from the Escape from Tarkov community wiki, except where marked 'source: game config' (taken from the game's globals/hideout settings as mirrored by the SPT project, Aug 2026). BSG changes skills between patches and does not publish the client-side effects, so treat the rest as approximate. To correct values, copy this file to data/skills.json and edit it; the tracker prefers that copy.",
+ "note": "Skill descriptions and per-level effects compiled from the Escape from Tarkov community wiki, except where marked 'source: game config' (taken from the game's globals/hideout settings as mirrored by the SPT project, Aug 2026). BSG changes skills between patches and does not publish the client-side effects, so treat the rest as approximate. When game data is loaded, only skills tarkov.dev lists as active in the game are shown. To correct values, copy this file to data/skills.json and edit it; the tracker prefers that copy.",
  "maxLevel": 51,
  "eliteLevel": 51,
  "effectCapLevel": 50,
@@ -336,28 +336,6 @@
    ]
   },
   {
-   "id": "ProneMovement",
-   "name": "Prone Movement",
-   "category": "Practical",
-   "description": "Makes moving while prone faster and quieter.",
-   "levelUp": "Moving while prone.",
-   "effects": [
-    {
-     "name": "Prone movement speed",
-     "perLevel": 1,
-     "unit": "%"
-    },
-    {
-     "name": "Prone movement noise",
-     "perLevel": -1,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Prone movement costs less stamina"
-   ]
-  },
-  {
    "id": "Search",
    "name": "Search",
    "category": "Practical",
@@ -429,7 +407,7 @@
    ]
   },
   {
-   "id": "Troubleshooting",
+   "id": "TroubleShooting",
    "name": "Troubleshooting",
    "category": "Practical",
    "description": "Speeds up fixing malfunctions.",
@@ -446,7 +424,7 @@
    ]
   },
   {
-   "id": "WeaponMaintenance",
+   "id": "WeaponTreatment",
    "name": "Weapon Maintenance",
    "category": "Practical",
    "description": "Reduces weapon wear and improves repairs with kits.",
@@ -541,28 +519,6 @@
    ],
    "elite": [
     "Surgery restores more HP"
-   ]
-  },
-  {
-   "id": "FirstAid",
-   "name": "First Aid",
-   "category": "Practical",
-   "description": "Speeds up healing with medkits and bandages.",
-   "levelUp": "Using medical items.",
-   "effects": [
-    {
-     "name": "Medical item use speed",
-     "perLevel": 0.7,
-     "unit": "%"
-    },
-    {
-     "name": "HP resource cost of treating effects",
-     "perLevel": -0.6,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Reduced medkit resource use"
    ]
   },
   {
@@ -692,38 +648,11 @@
    ]
   },
   {
-   "id": "AssaultRifle",
+   "id": "Assault",
    "name": "Assault Rifles",
    "category": "Combat",
    "description": "Improves handling of assault rifles.",
    "levelUp": "Shooting assault rifles.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Instant fire-mode switch and malfunction recovery"
-   ]
-  },
-  {
-   "id": "AssaultCarbine",
-   "name": "Assault Carbines",
-   "category": "Combat",
-   "description": "Improves handling of assault carbines (SKS, VSK and similar).",
-   "levelUp": "Shooting assault carbines.",
    "effects": [
     {
      "name": "Recoil",
@@ -827,6 +756,33 @@
    ]
   },
   {
+   "id": "HMG",
+   "name": "HMGs",
+   "category": "Combat",
+   "description": "Improves handling of heavy machine guns (mounted and stationary).",
+   "levelUp": "Shooting heavy machine guns.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Instant fire-mode switch and malfunction recovery"
+   ]
+  },
+  {
    "id": "Sniper",
    "name": "Bolt-action Rifles",
    "category": "Combat",
@@ -859,6 +815,28 @@
    "category": "Combat",
    "description": "Improves handling of grenade launchers.",
    "levelUp": "Firing grenade launchers.",
+   "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Faster reloads"
+   ]
+  },
+  {
+   "id": "AttachedLauncher",
+   "name": "Underbarrel Grenade Launchers",
+   "category": "Combat",
+   "description": "Improves handling of underbarrel grenade launchers.",
+   "levelUp": "Firing underbarrel grenade launchers.",
    "effects": [
     {
      "name": "Reload speed",

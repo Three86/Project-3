@@ -51,6 +51,15 @@ const emptyProgress = () => ({
 const savedProgress = readJson(PROGRESS_FILE, {});
 let progress = Object.assign(emptyProgress(), savedProgress);
 progress.settings = { ...emptyProgress().settings, ...savedProgress.settings };
+// Skill ids that were renamed to match the game's own keys.
+const SKILL_RENAMES = { AssaultRifle: 'Assault', Troubleshooting: 'TroubleShooting', WeaponMaintenance: 'WeaponTreatment' };
+progress.skills = progress.skills || {};
+for (const [from, to] of Object.entries(SKILL_RENAMES)) {
+  if (from in progress.skills) {
+    progress.skills[to] ??= progress.skills[from];
+    delete progress.skills[from];
+  }
+}
 // Progress saved before the wipe filter existed may hold quest states from older wipes.
 const needsLogRebuild = savedProgress.settings && !('logsSince' in savedProgress.settings);
 let gameData = readJson(GAME_FILE, null);

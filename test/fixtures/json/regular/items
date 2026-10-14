@@ -23,10 +23,149 @@
     "shortName": "a1 Short"
    }
   },
-  "fleaMarket": {}
+  "fleaMarket": {},
+  "skills": [
+   {
+    "id": "Endurance",
+    "name": "Endurance Name"
+   },
+   {
+    "id": "Strength",
+    "name": "Strength Name"
+   },
+   {
+    "id": "Vitality",
+    "name": "Vitality Name"
+   },
+   {
+    "id": "Health",
+    "name": "Health Name"
+   },
+   {
+    "id": "StressResistance",
+    "name": "StressResistance Name"
+   },
+   {
+    "id": "Metabolism",
+    "name": "Metabolism Name"
+   },
+   {
+    "id": "Immunity",
+    "name": "Immunity Name"
+   },
+   {
+    "id": "Perception",
+    "name": "Perception Name"
+   },
+   {
+    "id": "Intellect",
+    "name": "Intellect Name"
+   },
+   {
+    "id": "Attention",
+    "name": "Attention Name"
+   },
+   {
+    "id": "Charisma",
+    "name": "Charisma Name"
+   },
+   {
+    "id": "CovertMovement",
+    "name": "CovertMovement Name"
+   },
+   {
+    "id": "Search",
+    "name": "Search Name"
+   },
+   {
+    "id": "MagDrills",
+    "name": "MagDrills Name"
+   },
+   {
+    "id": "AimDrills",
+    "name": "AimDrills Name"
+   },
+   {
+    "id": "TroubleShooting",
+    "name": "TroubleShooting Name"
+   },
+   {
+    "id": "WeaponTreatment",
+    "name": "WeaponTreatment Name"
+   },
+   {
+    "id": "LightVests",
+    "name": "LightVests Name"
+   },
+   {
+    "id": "HeavyVests",
+    "name": "HeavyVests Name"
+   },
+   {
+    "id": "Surgery",
+    "name": "Surgery Name"
+   },
+   {
+    "id": "Crafting",
+    "name": "Crafting Name"
+   },
+   {
+    "id": "HideoutManagement",
+    "name": "HideoutManagement Name"
+   },
+   {
+    "id": "Pistol",
+    "name": "Pistol Name"
+   },
+   {
+    "id": "Revolver",
+    "name": "Revolver Name"
+   },
+   {
+    "id": "SMG",
+    "name": "SMG Name"
+   },
+   {
+    "id": "Assault",
+    "name": "Assault Name"
+   },
+   {
+    "id": "DMR",
+    "name": "DMR Name"
+   },
+   {
+    "id": "Shotgun",
+    "name": "Shotgun Name"
+   },
+   {
+    "id": "LMG",
+    "name": "LMG Name"
+   },
+   {
+    "id": "HMG",
+    "name": "HMG Name"
+   },
+   {
+    "id": "Sniper",
+    "name": "Sniper Name"
+   },
+   {
+    "id": "Launcher",
+    "name": "Launcher Name"
+   },
+   {
+    "id": "AttachedLauncher",
+    "name": "AttachedLauncher Name"
+   },
+   {
+    "id": "Throwing",
+    "name": "Throwing Name"
+   }
+  ]
  },
  "translations": [
   "$.data.items.*.name",
-  "$.data.items.*.shortName"
+  "$.data.items.*.shortName",
+  "$.data.skills.*.name"
  ]
 }

@@ -187,11 +187,15 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
     conditions: list(p.conditions).map((o) => normObjective(o, R)),
   }));
 
+  // Skills tarkov.dev considers active in the game (it filters out removed ones like Prone Movement).
+  const skills = Object.values(itemsFile.skills || {}).filter((sk) => sk?.id).map((sk) => ({ id: sk.id, name: sk.name }));
+
   return {
     meta: { source: JSON_URL, fetchedAt: new Date().toISOString(), gameMode, lang, prestigeError: null },
     tasks,
     hideout,
     prestige,
+    skills,
   };
 }
 
