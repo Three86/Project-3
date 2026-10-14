@@ -23,11 +23,12 @@ function loadUi() {
     open: {},
     groups: {},
     prestigeView: null,
+    hOpen: {},
     sk: { text: '', category: '', sortBy: 'category', onlyLeveled: false, view: 'skills' },
   };
   try {
     const saved = JSON.parse(localStorage.getItem('tt-ui') || '{}');
-    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, sk: { ...defaults.sk, ...saved.sk }, groups: { ...saved.groups } };
+    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, sk: { ...defaults.sk, ...saved.sk }, groups: { ...saved.groups }, hOpen: { ...saved.hOpen } };
   } catch {
     return defaults;
   }
@@ -290,6 +291,13 @@ function builtLevel(station) {
   return lvl;
 }
 const levelBuilt = (station, level) => builtLevel(station) >= level.level;
+// A level is locked until every other station it requires has been built to the required level.
+function levelUnlocked(level) {
+  return (level.stationLevelRequirements || []).every((r) => {
+    const st = r.station && idx.stations.get(r.station.id);
+    return !st || builtLevel(st) >= r.level;
+  });
+}
 
 function hideoutReqs(level) {
   const reqs = [];
@@ -476,10 +484,18 @@ function renderHideout() {
   const text = norm(f.text);
   let stations = (S.data.hideout || []).filter((st) => st.levels.length);
   const rows = [];
+  let locked = 0;
   for (const st of stations) {
     const built = builtLevel(st);
     let levels = st.levels;
-    if (f.show === 'next') levels = levels.filter((l) => l.level === built + 1);
+    if (f.show === 'next') {
+      levels = levels.filter((l) => l.level === built + 1);
+      if (levels.length && !levels.every(levelUnlocked)) {
+        levels = [];
+        // Nothing built yet and the first level is locked: hide the station entirely.
+        if (built === 0) { locked++; continue; }
+      }
+    } else if (f.show === 'nextAll') levels = levels.filter((l) => l.level === built + 1);
     else if (f.show === 'todo') levels = levels.filter((l) => l.level > built);
     else if (f.show === 'built') levels = levels.filter((l) => l.level <= built);
     levels = levels.filter((l) => {
@@ -490,8 +506,9 @@ function renderHideout() {
       return true;
     });
     // Keep fully built stations visible in "next level" view so they can still be unmarked.
-    const fullyBuilt = f.show === 'next' && built > 0 && !st.levels.some((l) => l.level > built) && !f.need && !text;
-    if (levels.length || fullyBuilt) rows.push({ st, built, levels });
+    // (also stations whose next level is locked, so their built levels can be unmarked)
+    const keepBuilt = f.show === 'next' && built > 0 && !levels.length && !f.need && !text;
+    if (levels.length || keepBuilt) rows.push({ st, built, levels });
   }
   const readiness = (r) => {
     if (!r.levels.length) return -1;
@@ -500,24 +517,37 @@ function renderHideout() {
   };
   rows.sort(f.sortBy === 'ready' ? (a, b) => readiness(b) - readiness(a) || byName(a.st.name, b.st.name) : (a, b) => byName(a.st.name, b.st.name));
   const toolbar = `<div class="toolbar">
-    ${select('h.show', f.show, [['next', 'Next level only'], ['todo', 'All unbuilt levels'], ['built', 'Built levels'], ['all', 'All levels']], 'Show')}
+    ${select('h.show', f.show, [['next', 'Available upgrades'], ['nextAll', 'Next level (incl. locked)'], ['todo', 'All unbuilt levels'], ['built', 'Built levels'], ['all', 'All levels']], 'Show')}
     ${select('h.need', f.need, [['', 'Anything'], ...Object.entries(REQ_NEEDS)], 'Needs')}
     ${select('h.sortBy', f.sortBy, [['name', 'Station name'], ['ready', 'Closest to buildable']], 'Sort')}
     <input type="search" data-ui="h.text" value="${esc(f.text)}" placeholder="Filter station or item…">
     <span class="count">${rows.length} stations</span>
   </div>`;
-  if (!rows.length) return toolbar + '<div class="empty">Nothing to show. Everything built? Show-off.</div>';
-  return toolbar + `<div class="grid">${rows.map(stationCard).join('')}</div>`;
+  const tools = `<div class="collapse-tools">
+    <button class="btn small" data-act="stations-open" data-v="1">Expand all</button><button class="btn small" data-act="stations-open" data-v="0">Collapse all</button>
+    ${locked ? `<span class="auto">${locked} station${locked === 1 ? '' : 's'} hidden until the stations they need are built · <a href="#" data-act="h-show" data-v="nextAll">show them</a></span>` : ''}</div>`;
+  if (!rows.length) return toolbar + tools + '<div class="empty">Nothing to show. Everything built? Show-off.</div>';
+  return toolbar + tools + `<div class="grid">${rows.map(stationCard).join('')}</div>`;
 }
 
 function stationCard({ st, built, levels }) {
   const max = st.levels[st.levels.length - 1]?.level || 0;
   const top = st.levels.find((l) => l.level === built);
   const undo = top ? `<button class="btn small" data-act="build" data-id="${top.id}" data-v="0" title="Marked built by mistake? Sets the station back to level ${built - 1}">↶ Unmark level ${built}</button>` : '';
-  return `<div class="card ${built >= max ? 'st-completed' : 'st-available'}">
-    <div class="card-head"><div class="title">${esc(st.name)}</div>${undo}<span class="badge">Level ${built}/${max}</span></div>
-    ${levels.length ? levels.map((l) => levelBlock(st, l)).join('') : '<div class="auto">Fully built.</div>'}
-  </div>`;
+  const next = st.levels.find((l) => l.level === built + 1);
+  let state = '';
+  if (built >= max) state = '<span class="badge status-completed">Fully built</span>';
+  else if (next && !levelUnlocked(next)) state = '<span class="badge">Locked</span>';
+  else if (next) {
+    const reqs = hideoutReqs(next);
+    const done = reqs.filter((r) => r.done).length;
+    state = done === reqs.length ? '<span class="badge status-available">Ready to build</span>' : `<span class="badge">${done}/${reqs.length} requirements</span>`;
+  }
+  const open = S.ui.hOpen[st.id] ?? (levels.length > 0 && built < max);
+  return `<details class="card station ${built >= max ? 'st-completed' : 'st-available'}" data-hopen="${esc(st.id)}" ${open ? 'open' : ''}>
+    <summary class="quest-sum"><div class="card-head"><span class="caret"></span><div class="title">${esc(st.name)}</div>${state}${undo}<span class="badge">Level ${built}/${max}</span></div></summary>
+    ${levels.length ? levels.map((l) => levelBlock(st, l)).join('') : `<div class="auto">${built >= max ? 'Fully built.' : 'Next level is locked until the stations it needs are built.'}</div>`}
+  </details>`;
 }
 
 function levelBlock(st, l) {
@@ -536,7 +566,7 @@ function levelBlock(st, l) {
   });
   const time = l.constructionTime ? `${Math.round(l.constructionTime / 360) / 10}h build` : '';
   return `<div class="station-level">
-    <div class="lvl-title">Level ${l.level} ${built ? '<span class="badge status-completed">Built</span>' : ready ? '<span class="badge status-available">Ready to build</span>' : ''}<span class="count">${time}</span>
+    <div class="lvl-title">Level ${l.level} ${built ? '<span class="badge status-completed">Built</span>' : !levelUnlocked(l) ? '<span class="badge">Locked</span>' : ready ? '<span class="badge status-available">Ready to build</span>' : ''}<span class="count">${time}</span>
       <button class="btn small" data-act="build" data-id="${l.id}" data-v="${built ? 0 : 1}">${built ? 'Unbuild' : 'Mark built'}</button></div>
     ${rows.length ? `<ul class="objs">${rows.join('')}</ul>` : '<div class="auto">No requirements</div>'}
   </div>`;
@@ -935,7 +965,7 @@ document.addEventListener('click', async (e) => {
   const el = e.target.closest('[data-act]');
   if (!el || el.tagName === 'INPUT' || el.tagName === 'FORM') return;
   const { act, id } = el.dataset;
-  if (el.tagName === 'A') e.preventDefault();
+  if (el.tagName === 'A' || el.closest('summary')) e.preventDefault();
   switch (act) {
     case 'tab': S.ui.tab = el.dataset.tab; saveUi(); render(); break;
     case 'qstatus': {
@@ -963,6 +993,11 @@ document.addEventListener('click', async (e) => {
       setProgress(ops); break;
     }
     case 'goto': gotoTask(id); break;
+    case 'stations-open': {
+      for (const st of S.data.hideout || []) S.ui.hOpen[st.id] = el.dataset.v === '1';
+      saveUi(); render(); break;
+    }
+    case 'h-show': S.ui.h.show = el.dataset.v; saveUi(); render(); break;
     case 'sk-cat': S.ui.sk.category = el.dataset.v; saveUi(); render(); break;
     case 'sk-view': S.ui.sk.view = el.dataset.v; saveUi(); render(); break;
     case 'goto-skill': S.ui.tab = 'skills'; S.ui.sk = { ...S.ui.sk, text: id, category: '', onlyLeveled: false, view: 'skills' }; saveUi(); render(); break;
@@ -1044,6 +1079,8 @@ document.addEventListener('toggle', (e) => {
   const id = e.target.dataset?.open;
   if (id) { S.ui.open[id] = e.target.open; saveUi(); }
   if (e.target.hasAttribute?.('data-skill-overview')) { S.ui.skillOverviewOpen = e.target.open; saveUi(); }
+  const h = e.target.dataset?.hopen;
+  if (h) { S.ui.hOpen[h] = e.target.open; saveUi(); }
   const g = e.target.dataset?.group;
   if (g) { S.ui.groups[g] = e.target.open; saveUi(); }
 }, true);
