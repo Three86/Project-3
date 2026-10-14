@@ -618,7 +618,9 @@ function renderSkills() {
     (!f.category || sk.category === f.category) &&
     (!f.onlyLeveled || lv(sk) > 0) &&
     (!text || [sk.name, sk.description, sk.levelUp, ...(sk.effects || []).map((e) => e.name), ...(sk.elite || [])].some((x) => norm(x).includes(text))));
-  const sorters = { category: (a, b) => cats.indexOf(a.category) - cats.indexOf(b.category) || byName(a.name, b.name), name: (a, b) => byName(a.name, b.name), level: (a, b) => lv(b) - lv(a) || byName(a.name, b.name) };
+  const order = new Map(cfg.skills.map((sk, i) => [sk.id, i]));
+  // 'category' keeps its saved-setting name but means the in-game order (which is grouped by category).
+  const sorters = { category: (a, b) => order.get(a.id) - order.get(b.id), name: (a, b) => byName(a.name, b.name), level: (a, b) => lv(b) - lv(a) || byName(a.name, b.name) };
   list = list.slice().sort(sorters[f.sortBy] || sorters.category);
 
   // Overview: every active buff, grouped by category, plus totals for effects that several skills share.
@@ -653,7 +655,7 @@ function renderSkills() {
   const toolbar = `<div class="toolbar">
     <input type="search" data-ui="sk.text" value="${esc(f.text)}" placeholder="Search skills, descriptions, effects…" style="flex:1;min-width:220px">
     <div class="chips">${[['', 'All'], ...cats.map((c) => [c, c])].map(([v, t]) => `<button class="chip ${f.category === v ? 'on' : ''}" data-act="sk-cat" data-v="${esc(v)}">${esc(t)}</button>`).join('')}</div>
-    ${select('sk.sortBy', f.sortBy, [['category', 'Category'], ['name', 'Name'], ['level', 'Your level']], 'Sort')}
+    ${select('sk.sortBy', f.sortBy, [['category', 'Game order'], ['name', 'Name'], ['level', 'Your level']], 'Sort')}
     <label><input type="checkbox" data-ui="sk.onlyLeveled" ${f.onlyLeveled ? 'checked' : ''}>Only leveled</label>
     <span class="count">${list.length} skills</span>
   </div>`;

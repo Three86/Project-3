@@ -314,6 +314,398 @@
    ]
   },
   {
+   "id": "Pistol",
+   "name": "Pistols",
+   "category": "Combat",
+   "description": "Improves handling of pistols.",
+   "levelUp": "Shooting pistols.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Instant fire-mode switch and malfunction recovery"
+   ]
+  },
+  {
+   "id": "Revolver",
+   "name": "Revolvers",
+   "category": "Combat",
+   "description": "Improves handling of revolvers.",
+   "levelUp": "Shooting revolvers.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Faster reloads"
+   ]
+  },
+  {
+   "id": "SMG",
+   "name": "Submachine Guns",
+   "category": "Combat",
+   "description": "Improves handling of submachine guns.",
+   "levelUp": "Shooting SMGs.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Instant fire-mode switch and malfunction recovery"
+   ]
+  },
+  {
+   "id": "Assault",
+   "name": "Assault Rifles",
+   "category": "Combat",
+   "description": "Improves handling of assault rifles.",
+   "levelUp": "Shooting assault rifles.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Instant fire-mode switch and malfunction recovery"
+   ]
+  },
+  {
+   "id": "Shotgun",
+   "name": "Shotguns",
+   "category": "Combat",
+   "description": "Improves handling of shotguns.",
+   "levelUp": "Shooting shotguns.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Faster shell loading"
+   ]
+  },
+  {
+   "id": "Sniper",
+   "name": "Bolt-action Rifles",
+   "category": "Combat",
+   "description": "Improves handling of bolt-action sniper rifles.",
+   "levelUp": "Shooting bolt-action rifles.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Faster bolt cycling"
+   ]
+  },
+  {
+   "id": "LMG",
+   "name": "Light Machine Guns",
+   "category": "Combat",
+   "description": "Improves handling of light machine guns.",
+   "levelUp": "Shooting LMGs.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Instant fire-mode switch and malfunction recovery"
+   ]
+  },
+  {
+   "id": "HMG",
+   "name": "Heavy Machine Guns",
+   "category": "Combat",
+   "description": "Improves handling of heavy machine guns (mounted and stationary).",
+   "levelUp": "Shooting heavy machine guns.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Instant fire-mode switch and malfunction recovery"
+   ]
+  },
+  {
+   "id": "Launcher",
+   "name": "Grenade Launchers",
+   "category": "Combat",
+   "description": "Improves handling of grenade launchers.",
+   "levelUp": "Firing grenade launchers.",
+   "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Faster reloads"
+   ]
+  },
+  {
+   "id": "AttachedLauncher",
+   "name": "Underbarrel Launchers",
+   "category": "Combat",
+   "description": "Improves handling of underbarrel grenade launchers.",
+   "levelUp": "Firing underbarrel grenade launchers.",
+   "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Faster reloads"
+   ]
+  },
+  {
+   "id": "Throwing",
+   "name": "Throwables",
+   "category": "Combat",
+   "description": "Improves grenade throw strength and reduces the stamina cost of throwing.",
+   "levelUp": "Throwing grenades.",
+   "effects": [
+    {
+     "name": "Throw strength",
+     "perLevel": 0.6,
+     "unit": "%"
+    },
+    {
+     "name": "Throw stamina cost",
+     "perLevel": -0.6,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Better throw handling"
+   ]
+  },
+  {
+   "id": "Melee",
+   "name": "Melee",
+   "category": "Combat",
+   "description": "Improves melee weapon handling.",
+   "levelUp": "Hitting with melee weapons.",
+   "effects": [
+    {
+     "name": "Melee stamina cost",
+     "perLevel": -0.5,
+     "unit": "%"
+    },
+    {
+     "name": "Melee damage",
+     "perLevel": 0.4,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Melee attacks cost no stamina"
+   ]
+  },
+  {
+   "id": "DMR",
+   "name": "DMRs",
+   "category": "Combat",
+   "description": "Improves handling of designated marksman rifles.",
+   "levelUp": "Shooting marksman rifles.",
+   "effects": [
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Reload speed",
+     "perLevel": 0.3,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon ergonomics",
+     "perLevel": 0.3,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Instant fire-mode switch and malfunction recovery"
+   ]
+  },
+  {
+   "id": "AimDrills",
+   "name": "Aim Drills",
+   "category": "Combat",
+   "description": "Speeds up aiming down sights and reduces sway.",
+   "levelUp": "Hitting targets while aiming.",
+   "effects": [
+    {
+     "name": "Aim speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Aim stamina drain",
+     "perLevel": -0.5,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Less sway when aiming while moving"
+   ]
+  },
+  {
+   "id": "TroubleShooting",
+   "name": "Troubleshooting",
+   "category": "Combat",
+   "description": "Speeds up fixing malfunctions.",
+   "levelUp": "Fixing weapon malfunctions.",
+   "effects": [
+    {
+     "name": "Malfunction fix speed",
+     "perLevel": 1,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Malfunction cause is recognised immediately"
+   ]
+  },
+  {
+   "id": "Surgery",
+   "name": "Surgery",
+   "category": "Practical",
+   "description": "Speeds up surgery kits and reduces their HP penalty.",
+   "levelUp": "Using surgery kits (CMS, Surv12).",
+   "effects": [
+    {
+     "name": "Surgery speed",
+     "perLevel": 1,
+     "unit": "%"
+    },
+    {
+     "name": "HP penalty after surgery",
+     "perLevel": -1,
+     "unit": "%"
+    }
+   ],
+   "elite": [
+    "Surgery restores more HP"
+   ]
+  },
+  {
    "id": "CovertMovement",
    "name": "Covert Movement",
    "category": "Practical",
@@ -385,67 +777,6 @@
    ]
   },
   {
-   "id": "AimDrills",
-   "name": "Aim Drills",
-   "category": "Practical",
-   "description": "Speeds up aiming down sights and reduces sway.",
-   "levelUp": "Hitting targets while aiming.",
-   "effects": [
-    {
-     "name": "Aim speed",
-     "perLevel": 0.4,
-     "unit": "%"
-    },
-    {
-     "name": "Aim stamina drain",
-     "perLevel": -0.5,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Less sway when aiming while moving"
-   ]
-  },
-  {
-   "id": "TroubleShooting",
-   "name": "Troubleshooting",
-   "category": "Practical",
-   "description": "Speeds up fixing malfunctions.",
-   "levelUp": "Fixing weapon malfunctions.",
-   "effects": [
-    {
-     "name": "Malfunction fix speed",
-     "perLevel": 1,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Malfunction cause is recognised immediately"
-   ]
-  },
-  {
-   "id": "WeaponTreatment",
-   "name": "Weapon Maintenance",
-   "category": "Practical",
-   "description": "Reduces weapon wear and improves repairs with kits.",
-   "levelUp": "Repairing weapons with repair kits.",
-   "effects": [
-    {
-     "name": "Weapon wear",
-     "perLevel": -1,
-     "unit": "%"
-    },
-    {
-     "name": "Repair kit efficiency",
-     "perLevel": 1,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Chance of weapon buff when repairing with a kit"
-   ]
-  },
-  {
    "id": "LightVests",
    "name": "Light Vests",
    "category": "Practical",
@@ -500,25 +831,25 @@
    ]
   },
   {
-   "id": "Surgery",
-   "name": "Surgery",
+   "id": "WeaponTreatment",
+   "name": "Weapon Maintenance",
    "category": "Practical",
-   "description": "Speeds up surgery kits and reduces their HP penalty.",
-   "levelUp": "Using surgery kits (CMS, Surv12).",
+   "description": "Reduces weapon wear and improves repairs with kits.",
+   "levelUp": "Repairing weapons with repair kits.",
    "effects": [
     {
-     "name": "Surgery speed",
-     "perLevel": 1,
+     "name": "Weapon wear",
+     "perLevel": -1,
      "unit": "%"
     },
     {
-     "name": "HP penalty after surgery",
-     "perLevel": -1,
+     "name": "Repair kit efficiency",
+     "perLevel": 1,
      "unit": "%"
     }
    ],
    "elite": [
-    "Surgery restores more HP"
+    "Chance of weapon buff when repairing with a kit"
    ]
   },
   {
@@ -564,337 +895,6 @@
     "+2 filter slots in the Air Filtering Unit",
     "+2 filter slots in the Water Collector",
     "+2 bitcoin storage in the Bitcoin Farm"
-   ]
-  },
-  {
-   "id": "Pistol",
-   "name": "Pistols",
-   "category": "Combat",
-   "description": "Improves handling of pistols.",
-   "levelUp": "Shooting pistols.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Instant fire-mode switch and malfunction recovery"
-   ]
-  },
-  {
-   "id": "Revolver",
-   "name": "Revolvers",
-   "category": "Combat",
-   "description": "Improves handling of revolvers.",
-   "levelUp": "Shooting revolvers.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Faster reloads"
-   ]
-  },
-  {
-   "id": "SMG",
-   "name": "SMGs",
-   "category": "Combat",
-   "description": "Improves handling of submachine guns.",
-   "levelUp": "Shooting SMGs.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Instant fire-mode switch and malfunction recovery"
-   ]
-  },
-  {
-   "id": "Assault",
-   "name": "Assault Rifles",
-   "category": "Combat",
-   "description": "Improves handling of assault rifles.",
-   "levelUp": "Shooting assault rifles.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Instant fire-mode switch and malfunction recovery"
-   ]
-  },
-  {
-   "id": "DMR",
-   "name": "Marksman Rifles",
-   "category": "Combat",
-   "description": "Improves handling of designated marksman rifles.",
-   "levelUp": "Shooting marksman rifles.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Instant fire-mode switch and malfunction recovery"
-   ]
-  },
-  {
-   "id": "Shotgun",
-   "name": "Shotguns",
-   "category": "Combat",
-   "description": "Improves handling of shotguns.",
-   "levelUp": "Shooting shotguns.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Faster shell loading"
-   ]
-  },
-  {
-   "id": "LMG",
-   "name": "LMGs",
-   "category": "Combat",
-   "description": "Improves handling of light machine guns.",
-   "levelUp": "Shooting LMGs.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Instant fire-mode switch and malfunction recovery"
-   ]
-  },
-  {
-   "id": "HMG",
-   "name": "HMGs",
-   "category": "Combat",
-   "description": "Improves handling of heavy machine guns (mounted and stationary).",
-   "levelUp": "Shooting heavy machine guns.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Instant fire-mode switch and malfunction recovery"
-   ]
-  },
-  {
-   "id": "Sniper",
-   "name": "Bolt-action Rifles",
-   "category": "Combat",
-   "description": "Improves handling of bolt-action sniper rifles.",
-   "levelUp": "Shooting bolt-action rifles.",
-   "effects": [
-    {
-     "name": "Recoil",
-     "perLevel": -0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Faster bolt cycling"
-   ]
-  },
-  {
-   "id": "Launcher",
-   "name": "Grenade Launchers",
-   "category": "Combat",
-   "description": "Improves handling of grenade launchers.",
-   "levelUp": "Firing grenade launchers.",
-   "effects": [
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Faster reloads"
-   ]
-  },
-  {
-   "id": "AttachedLauncher",
-   "name": "Underbarrel Grenade Launchers",
-   "category": "Combat",
-   "description": "Improves handling of underbarrel grenade launchers.",
-   "levelUp": "Firing underbarrel grenade launchers.",
-   "effects": [
-    {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
-     "name": "Weapon ergonomics",
-     "perLevel": 0.3,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Faster reloads"
-   ]
-  },
-  {
-   "id": "Throwing",
-   "name": "Throwables",
-   "category": "Combat",
-   "description": "Improves grenade throw strength and reduces the stamina cost of throwing.",
-   "levelUp": "Throwing grenades.",
-   "effects": [
-    {
-     "name": "Throw strength",
-     "perLevel": 0.6,
-     "unit": "%"
-    },
-    {
-     "name": "Throw stamina cost",
-     "perLevel": -0.6,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Better throw handling"
-   ]
-  },
-  {
-   "id": "Melee",
-   "name": "Melee",
-   "category": "Combat",
-   "description": "Improves melee weapon handling.",
-   "levelUp": "Hitting with melee weapons.",
-   "effects": [
-    {
-     "name": "Melee stamina cost",
-     "perLevel": -0.5,
-     "unit": "%"
-    },
-    {
-     "name": "Melee damage",
-     "perLevel": 0.4,
-     "unit": "%"
-    }
-   ],
-   "elite": [
-    "Melee attacks cost no stamina"
    ]
   }
  ],
