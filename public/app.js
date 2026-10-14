@@ -23,7 +23,7 @@ function loadUi() {
     open: {},
     groups: {},
     prestigeView: null,
-    sk: { text: '', category: '', sortBy: 'category', onlyLeveled: false },
+    sk: { text: '', category: '', sortBy: 'category', onlyLeveled: false, view: 'skills' },
   };
   try {
     const saved = JSON.parse(localStorage.getItem('tt-ui') || '{}');
@@ -590,7 +590,7 @@ function skillLevel(name) {
   const sk = findSkill(name);
   return sk ? Number(S.progress.skills?.[sk.id] || 0) : 0;
 }
-const fmtNum = (n) => `${n > 0 ? '+' : ''}${Math.round(n * 10) / 10}`;
+const fmtNum = (n) => `${n > 0 ? '+' : ''}${Math.round(n * 100) / 100}`;
 function effectValue(sk, e, level) {
   const cap = S.skills.effectCapLevel || 50;
   return e.perLevel * Math.min(level, cap);
@@ -635,11 +635,15 @@ function renderSkills() {
           ${lv(sk) >= elite ? (sk.elite || []).map((x) => `<div class="ov-row elite"><span>★ ${esc(x)}</span></div>`).join('') : ''}</div>`).join('')}</div>`;
       }).join('')}</div>
       ${shared.length ? `<div class="ov-cat" style="margin-top:10px">Combined (same effect from several skills)</div>${shared.map(([name, c]) => `<div class="ov-row"><span>${esc(name)} <span class="auto">(${esc(c.from.join(' + '))})</span></span><span class="num">${fmtNum(c.total)}${esc(c.unit || '')}</span></div>`).join('')}` : ''}
-    </details>` : '<div class="empty" style="padding:14px">Enter your skill levels below to see the total buffs on your PMC.</div>';
+    </details>` : '<div class="empty" style="padding:14px">Enter your skill levels to see the total buffs on your PMC.</div>';
 
+  const viewTabs = `<div class="chips sk-views">
+    <button class="chip ${f.view !== 'info' ? 'on' : ''}" data-act="sk-view" data-v="skills">Skills</button>
+    <button class="chip ${f.view === 'info' ? 'on' : ''}" data-act="sk-view" data-v="info">What it means in game</button></div>`;
+  if (f.view === 'info') return viewTabs + renderSkillInfo(cfg, lv);
   const toolbar = `<div class="toolbar">
     <input type="search" data-ui="sk.text" value="${esc(f.text)}" placeholder="Search skills, descriptions, effects…" style="flex:1;min-width:220px">
-    ${select('sk.category', f.category, [['', 'All categories'], ...cats.map((c) => [c, c])], 'Category')}
+    <div class="chips">${[['', 'All'], ...cats.map((c) => [c, c])].map(([v, t]) => `<button class="chip ${f.category === v ? 'on' : ''}" data-act="sk-cat" data-v="${esc(v)}">${esc(t)}</button>`).join('')}</div>
     ${select('sk.sortBy', f.sortBy, [['category', 'Category'], ['name', 'Name'], ['level', 'Your level']], 'Sort')}
     <label><input type="checkbox" data-ui="sk.onlyLeveled" ${f.onlyLeveled ? 'checked' : ''}>Only leveled</label>
     <span class="count">${list.length} skills</span>
@@ -658,8 +662,79 @@ function renderSkills() {
         ${(sk.elite || []).map((x) => `<li class="${l >= elite ? '' : 'locked'}"><span>★ Elite: ${esc(x)}</span></li>`).join('')}</ul>
     </div>`;
   }).join('');
-  return toolbar + overview + `<div class="grid" style="margin-top:10px">${cards || '<div class="empty">No skills match.</div>'}</div>
+  // Wide screens: skill cards on the left, buff totals in a sticky sidebar. Narrow: totals on top.
+  return viewTabs + toolbar + `<div class="skills-layout">
+      <div class="skills-main"><div class="grid skills-grid">${cards || '<div class="empty">No skills match.</div>'}</div></div>
+      <aside class="skills-side">${overview}</aside>
+    </div>
     <p class="kv">${esc(cfg.note || '')}</p>`;
+}
+
+// Practical, plain-language consequences of a few skills at your current level.
+function renderSkillInfo(cfg, lv) {
+  const base = cfg.baseValues || {};
+  const get = (id) => cfg.skills.find((sk) => sk.id === id);
+  const eff = (sk, pattern) => (sk?.effects || []).find((e) => pattern.test(e.name));
+  const pct = (sk, pattern) => { const e = eff(sk, pattern); return e ? effectValue(sk, e, lv(sk)) : 0; };
+  const kg = (n) => `${(Math.round(n * 10) / 10).toLocaleString()} kg`;
+  const hrs = (h) => { const m = Math.round(h * 60); return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`; };
+  const x = (n) => `×${(Math.round(n * 1000) / 1000).toFixed(3).replace(/0+$/, '').replace(/\.$/, '')}`;
+  const levelBadge = (sk) => `<span class="badge">your level ${lv(sk)}${lv(sk) >= (cfg.eliteLevel || 51) ? ' · Elite' : ''}</span>`;
+  const row = (label, now, was) => `<div class="ov-row"><span>${label}</span><span class="num"><b>${now}</b>${was != null ? ` <span class="auto">(base ${was})</span>` : ''}</span></div>`;
+  const elite = (sk) => lv(sk) >= (cfg.eliteLevel || 51) ? (sk.elite || []).map((t) => `<div class="ov-row elite"><span>★ ${esc(t)}</span></div>`).join('') : '';
+  const cards = [];
+
+  const str = get('Strength');
+  if (str) {
+    const b = pct(str, /carry weight/i);
+    const m = 1 + b / 100;
+    cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Strength</div>${levelBadge(str)}</div>
+      <p class="auto">Carry weight bonus ${fmtNum(b)}% raises the weight limits below.</p>
+      ${row('You become overweight at', kg(base.overweightStartKg * m), kg(base.overweightStartKg))}
+      ${row('You can no longer sprint at', kg(base.sprintLimitKg * m), kg(base.sprintLimitKg))}
+      ${row('Critically overweight at', kg(base.criticalOverweightKg * m), kg(base.criticalOverweightKg))}
+      ${row('Sprint speed', `${fmtNum(pct(str, /sprint/i))}%`)}${row('Jump height', `${fmtNum(pct(str, /jump/i))}%`)}${row('Throw distance', `${fmtNum(pct(str, /throw/i))}%`)}
+      ${elite(str)}</div>`);
+  }
+
+  const met = get('Metabolism');
+  if (met) {
+    const food = 1 + pct(met, /from food/i) / 100;
+    const drainMet = pct(met, /drain/i);
+    const drainHealth = pct(get('Health'), /drain/i);
+    const drain = 1 + (drainMet + drainHealth) / 100;
+    cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Metabolism</div>${levelBadge(met)}</div>
+      ${row('Food and drinks restore', x(food), '×1')}
+      ${row('Example: a 60-energy MRE gives', `${Math.round(60 * food)} energy`, '60')}
+      ${row('Energy and hydration drain', x(drain), '×1')}
+      <p class="auto">Drain includes Health (${fmtNum(drainHealth)}%) and Metabolism (${fmtNum(drainMet)}%).${drain < 1 ? ` Your energy lasts about ${Math.round((1 / drain - 1) * 100)}% longer.` : ''}</p>
+      ${elite(met)}</div>`);
+  }
+
+  const hm = get('HideoutManagement');
+  if (hm) {
+    const cons = 1 + pct(hm, /consumption/i) / 100;
+    const bonus = 1 + pct(hm, /zone bonus/i) / 100;
+    const perHour = (base.generatorFuelPerHour || 4.75) * cons;
+    cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Hideout Management</div>${levelBadge(hm)}</div>
+      ${row('Fuel and filter use', x(cons), '×1')}
+      ${row('Generator burns', `${(Math.round(perHour * 100) / 100)} fuel/h`, `${base.generatorFuelPerHour || 4.75}/h`)}
+      ${(base.fuelTanks || []).map((t) => row(`${esc(t.name)} (${t.resource}) lasts`, hrs(t.resource / perHour), hrs(t.resource / (base.generatorFuelPerHour || 4.75)))).join('')}
+      ${row('Hideout zone bonuses', x(bonus), '×1')}
+      <p class="auto">Example: a zone bonus of +10% becomes +${Math.round(10 * bonus * 10) / 10}%.</p>
+      ${elite(hm)}</div>`);
+  }
+
+  const cr = get('Crafting');
+  if (cr) {
+    const t = 1 + pct(cr, /production time/i) / 100;
+    cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Crafting</div>${levelBadge(cr)}</div>
+      ${row('Craft time', x(t), '×1')}
+      ${(base.craftExampleHours || [1, 8, 24]).map((h) => row(`A ${h} h craft takes`, hrs(h * t), hrs(h))).join('')}
+      ${elite(cr)}</div>`);
+  }
+  return `<div class="grid info-grid">${cards.join('')}</div>
+    <p class="kv">Base values: ${esc(base.source || 'n/a')}${base.fuelTanksSource ? `; fuel tank sizes: ${esc(base.fuelTanksSource)}` : ''}. Per-level percentages come from the Skills data (marked "game config" where taken from the game; otherwise community wiki and approximate). Change your levels on the Skills view.</p>`;
 }
 
 // ---------------------------------------------------------------- needed items aggregation
@@ -877,7 +952,9 @@ document.addEventListener('click', async (e) => {
       setProgress(ops); break;
     }
     case 'goto': gotoTask(id); break;
-    case 'goto-skill': S.ui.tab = 'skills'; S.ui.sk = { ...S.ui.sk, text: id, category: '', onlyLeveled: false }; saveUi(); render(); break;
+    case 'sk-cat': S.ui.sk.category = el.dataset.v; saveUi(); render(); break;
+    case 'sk-view': S.ui.sk.view = el.dataset.v; saveUi(); render(); break;
+    case 'goto-skill': S.ui.tab = 'skills'; S.ui.sk = { ...S.ui.sk, text: id, category: '', onlyLeveled: false, view: 'skills' }; saveUi(); render(); break;
     case 'skill-step': {
       const max = S.skills?.maxLevel || 51;
       const v = Math.max(0, Math.min(max, Number(S.progress.skills[id] || 0) + Number(el.dataset.d)));

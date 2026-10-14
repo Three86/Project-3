@@ -117,7 +117,8 @@ table.items .num { text-align: right; font-variant-numeric: tabular-nums; }
 .custom-add input { flex: 1; }
 
 /* collapsible quests and groups */
-details.group > summary::-webkit-details-marker, details.quest > summary::-webkit-details-marker { display: none; }
+details.group > summary::-webkit-details-marker, details.quest > summary::-webkit-details-marker, details.skill-overview > summary::-webkit-details-marker { display: none; }
+details.skill-overview > summary { list-style: none; }
 .group-title .count { margin-left: 4px; text-transform: none; letter-spacing: 0; }
 .caret { display: inline-block; width: 0; height: 0; border-left: 5px solid var(--muted); border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform .15s; flex: none; margin-top: 2px; }
 details[open] > summary .caret { transform: rotate(90deg); }
@@ -146,3 +147,17 @@ ul.effects .num, .ov-row .num { font-variant-numeric: tabular-nums; white-space:
 .ov-skill { margin-bottom: 8px; }
 .ov-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 1px 0 1px 10px; }
 .ov-row.elite { color: var(--accent); }
+
+/* skills layout: totals beside the cards on wide screens, above them on narrow ones */
+.sk-views { margin-bottom: 10px; }
+.skills-layout { display: flex; flex-direction: column; gap: 10px; }
+.skills-side { order: -1; }
+.skills-grid { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+@media (min-width: 1150px) {
+  .skills-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; align-items: start; }
+  .skills-side { order: 0; position: sticky; top: 64px; max-height: calc(100vh - 80px); overflow-y: auto; }
+  .skills-side .overview-grid { grid-template-columns: 1fr; }
+}
+.info-grid { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+.info-card .ov-row { padding-left: 0; font-size: 14px; padding: 3px 0; border-top: 1px dashed var(--line); }
+.info-card p { margin: 4px 0 6px; }

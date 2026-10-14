@@ -1,5 +1,5 @@
 {
- "note": "Skill descriptions and per-level effects compiled from the Escape from Tarkov community wiki. BSG changes these between patches and does not publish them, so treat the numbers as approximate. To correct them, copy this file to data/skills.json and edit it; the tracker prefers that copy.",
+ "note": "Skill descriptions and per-level effects compiled from the Escape from Tarkov community wiki, except where marked 'source: game config' (taken from the game's globals/hideout settings as mirrored by the SPT project, Aug 2026). BSG changes skills between patches and does not publish the client-side effects, so treat the rest as approximate. To correct values, copy this file to data/skills.json and edit it; the tracker prefers that copy.",
  "maxLevel": 51,
  "eliteLevel": 51,
  "effectCapLevel": 50,
@@ -569,22 +569,18 @@
    "id": "Crafting",
    "name": "Crafting",
    "category": "Practical",
-   "description": "Speeds up hideout production and reduces fuel/resource use.",
+   "description": "Speeds up hideout production (crafting).",
    "levelUp": "Collecting crafts from the hideout.",
    "effects": [
     {
-     "name": "Production speed",
-     "perLevel": 1.5,
-     "unit": "%"
-    },
-    {
-     "name": "Hideout fuel/filter use during crafting",
-     "perLevel": -0.5,
-     "unit": "%"
+     "name": "Production time",
+     "perLevel": -0.75,
+     "unit": "%",
+     "source": "game config (ProductionTimeReductionPerLevel)"
     }
    ],
    "elite": [
-    "Two crafts can run in the same station at once"
+    "One extra production can run in each hideout station at the same time"
    ]
   },
   {
@@ -592,21 +588,26 @@
    "name": "Hideout Management",
    "category": "Practical",
    "description": "Reduces hideout resource consumption and improves zone bonuses.",
-   "levelUp": "Hideout running with generator and other resources.",
+   "levelUp": "Hideout zones consuming fuel and filters, upgrading zones and collecting crafts.",
    "effects": [
     {
-     "name": "Hideout resource consumption",
+     "name": "Hideout resource consumption (fuel, filters)",
      "perLevel": -0.5,
-     "unit": "%"
+     "unit": "%",
+     "source": "game config (ConsumptionReductionPerLevel)"
     },
     {
      "name": "Hideout zone bonuses",
      "perLevel": 1,
-     "unit": "%"
+     "unit": "%",
+     "source": "game config (SkillBoostPercent)"
     }
    ],
    "elite": [
-    "Extra slots in the water collector, bitcoin farm and other zones"
+    "+2 fuel slots in the Generator",
+    "+2 filter slots in the Air Filtering Unit",
+    "+2 filter slots in the Water Collector",
+    "+2 bitcoin storage in the Bitcoin Farm"
    ]
   },
   {
@@ -918,5 +919,29 @@
     "Melee attacks cost no stamina"
    ]
   }
- ]
+ ],
+ "baseValues": {
+  "source": "game config (globals.json Stamina and hideout/settings.json, as mirrored by the SPT project, Aug 2026)",
+  "overweightStartKg": 26,
+  "sprintLimitKg": 72,
+  "criticalOverweightKg": 77,
+  "generatorFuelPerHour": 4.75,
+  "fuelTanks": [
+   {
+    "name": "Metal fuel tank",
+    "resource": 100
+   },
+   {
+    "name": "Expeditionary fuel tank",
+    "resource": 60
+   }
+  ],
+  "craftExampleHours": [
+   1,
+   3,
+   8,
+   24
+  ],
+  "fuelTanksSource": "community wiki"
+ }
 }
