@@ -37,7 +37,21 @@
        "value": 2
       }
      ],
-     "bonuses": []
+     "bonuses": [
+      {
+       "type": "FuelConsumption",
+       "name": "fuelKey",
+       "value": -0.1,
+       "passive": true,
+       "production": false
+      },
+      {
+       "type": "SkillGroupLevelingBoost",
+       "name": "slKey",
+       "value": 0.05,
+       "skill": "physKey"
+      }
+     ]
     }
    ]
   },
@@ -61,6 +75,8 @@
  "translations": [
   "$.data.*.name",
   "$.data.*.levels[*].description",
-  "$.data.*.levels[*].skillRequirements[*].skill"
+  "$.data.*.levels[*].skillRequirements[*].skill",
+  "$.data.*.levels[*].bonuses[*].name",
+  "$.data.*.levels[*].bonuses[*].skill"
  ]
 }

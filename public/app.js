@@ -334,8 +334,9 @@ function render() {
   const view = $('#view');
   if (S.ui.tab === 'settings') { view.innerHTML = renderSettings(); return; }
   if (S.ui.tab === 'skills') { view.innerHTML = renderSkills(); return; }
+  if (S.ui.tab === 'buffs') { view.innerHTML = renderBuffs(); return; }
   if (!S.data) { view.innerHTML = renderNoData(); return; }
-  const fn = { quests: renderQuests, hideout: renderHideout, prestige: renderPrestige, skills: renderSkills, items: renderItems, search: renderSearch }[S.ui.tab] || renderQuests;
+  const fn = { quests: renderQuests, hideout: renderHideout, prestige: renderPrestige, skills: renderSkills, buffs: renderBuffs, items: renderItems, search: renderSearch }[S.ui.tab] || renderQuests;
   view.innerHTML = fn();
 }
 
@@ -635,6 +636,35 @@ function activeSkillConfig() {
   return { ...cfg, skills: cfg.skills.filter((sk) => ids.has(skillKey(sk.id))) };
 }
 
+function skillOverview(cfg, lv) {
+  const cats = uniq(cfg.skills.map((sk) => sk.category));
+  const elite = cfg.eliteLevel || 51;
+  // Overview: every active buff, grouped by category, plus totals for effects that several skills share.
+  const leveled = cfg.skills.filter((sk) => lv(sk) > 0);
+  const combined = new Map();
+  for (const sk of leveled) {
+    if (sk.category === 'Combat') continue; // weapon-class effects only apply to their own weapon class
+    for (const e of sk.effects || []) {
+      const c = combined.get(e.name) || { total: 0, unit: e.unit, from: [] };
+      c.total += effectValue(sk, e, lv(sk));
+      c.from.push(sk.name);
+      combined.set(e.name, c);
+    }
+  }
+  const shared = [...combined.entries()].filter(([, c]) => c.from.length > 1);
+  return leveled.length ? `<details class="card skill-overview" data-skill-overview ${S.ui.skillOverviewOpen === false ? '' : 'open'}>
+      <summary class="quest-sum"><div class="card-head"><span class="caret"></span><div class="title">Total buffs on your PMC</div><span class="badge">${leveled.length} skills leveled · ${leveled.filter((sk) => lv(sk) >= elite).length} elite</span></div></summary>
+      <div class="overview-grid">${cats.map((cat) => {
+        const sks = leveled.filter((sk) => sk.category === cat);
+        if (!sks.length) return '';
+        return `<div><div class="ov-cat">${esc(cat)}</div>${sks.map((sk) => `<div class="ov-skill"><b>${esc(sk.name)}</b> <span class="auto">lvl ${lv(sk)}</span>${lv(sk) >= elite ? ' <span class="badge kappa">Elite</span>' : ''}
+          ${(sk.effects || []).map((e) => `<div class="ov-row"><span>${esc(e.name)}</span><span class="num">${fmtNum(effectValue(sk, e, lv(sk)))}${esc(e.unit || '')}</span></div>`).join('')}
+          ${lv(sk) >= elite ? (sk.elite || []).map((x) => `<div class="ov-row elite"><span>★ ${esc(x)}</span></div>`).join('') : ''}</div>`).join('')}</div>`;
+      }).join('')}</div>
+      ${shared.length ? `<div class="ov-cat" style="margin-top:10px">Combined (same effect from several skills)</div>${shared.map(([name, c]) => `<div class="ov-row"><span>${esc(name)} <span class="auto">(${esc(c.from.join(' + '))})</span></span><span class="num">${fmtNum(c.total)}${esc(c.unit || '')}</span></div>`).join('')}` : ''}
+    </details>` : '<div class="empty" style="padding:14px">Enter your skill levels to see the total buffs on your PMC.</div>';
+}
+
 function renderSkills() {
   const cfg = activeSkillConfig();
   const f = S.ui.sk;
@@ -653,35 +683,8 @@ function renderSkills() {
   const sorters = { category: (a, b) => order.get(a.id) - order.get(b.id), name: (a, b) => byName(a.name, b.name), level: (a, b) => lv(b) - lv(a) || byName(a.name, b.name) };
   list = list.slice().sort(sorters[f.sortBy] || sorters.category);
 
-  // Overview: every active buff, grouped by category, plus totals for effects that several skills share.
-  const leveled = cfg.skills.filter((sk) => lv(sk) > 0);
-  const combined = new Map();
-  for (const sk of leveled) {
-    if (sk.category === 'Combat') continue; // weapon-class effects only apply to their own weapon class
-    for (const e of sk.effects || []) {
-      const c = combined.get(e.name) || { total: 0, unit: e.unit, from: [] };
-      c.total += effectValue(sk, e, lv(sk));
-      c.from.push(sk.name);
-      combined.set(e.name, c);
-    }
-  }
-  const shared = [...combined.entries()].filter(([, c]) => c.from.length > 1);
-  const overview = leveled.length ? `<details class="card skill-overview" data-skill-overview ${S.ui.skillOverviewOpen === false ? '' : 'open'}>
-      <summary class="quest-sum"><div class="card-head"><span class="caret"></span><div class="title">Total buffs on your PMC</div><span class="badge">${leveled.length} skills leveled · ${leveled.filter((sk) => lv(sk) >= elite).length} elite</span></div></summary>
-      <div class="overview-grid">${cats.map((cat) => {
-        const sks = leveled.filter((sk) => sk.category === cat);
-        if (!sks.length) return '';
-        return `<div><div class="ov-cat">${esc(cat)}</div>${sks.map((sk) => `<div class="ov-skill"><b>${esc(sk.name)}</b> <span class="auto">lvl ${lv(sk)}</span>${lv(sk) >= elite ? ' <span class="badge kappa">Elite</span>' : ''}
-          ${(sk.effects || []).map((e) => `<div class="ov-row"><span>${esc(e.name)}</span><span class="num">${fmtNum(effectValue(sk, e, lv(sk)))}${esc(e.unit || '')}</span></div>`).join('')}
-          ${lv(sk) >= elite ? (sk.elite || []).map((x) => `<div class="ov-row elite"><span>★ ${esc(x)}</span></div>`).join('') : ''}</div>`).join('')}</div>`;
-      }).join('')}</div>
-      ${shared.length ? `<div class="ov-cat" style="margin-top:10px">Combined (same effect from several skills)</div>${shared.map(([name, c]) => `<div class="ov-row"><span>${esc(name)} <span class="auto">(${esc(c.from.join(' + '))})</span></span><span class="num">${fmtNum(c.total)}${esc(c.unit || '')}</span></div>`).join('')}` : ''}
-    </details>` : '<div class="empty" style="padding:14px">Enter your skill levels to see the total buffs on your PMC.</div>';
+  const overview = skillOverview(cfg, lv);
 
-  const viewTabs = `<div class="chips sk-views">
-    <button class="chip ${f.view !== 'info' ? 'on' : ''}" data-act="sk-view" data-v="skills">Skills</button>
-    <button class="chip ${f.view === 'info' ? 'on' : ''}" data-act="sk-view" data-v="info">What it means in game</button></div>`;
-  if (f.view === 'info') return viewTabs + renderSkillInfo(cfg, lv);
   const toolbar = `<div class="toolbar">
     <input type="search" data-ui="sk.text" value="${esc(f.text)}" placeholder="Search skills, descriptions, effects…" style="flex:1;min-width:220px">
     <div class="chips">${[['', 'All'], ...cats.map((c) => [c, c])].map(([v, t]) => `<button class="chip ${f.category === v ? 'on' : ''}" data-act="sk-cat" data-v="${esc(v)}">${esc(t)}</button>`).join('')}</div>
@@ -704,7 +707,7 @@ function renderSkills() {
     </div>`;
   }).join('');
   // Wide screens: skill cards on the left, buff totals in a sticky sidebar. Narrow: totals on top.
-  return viewTabs + toolbar + `<div class="skills-layout">
+  return toolbar + `<div class="skills-layout">
       <div class="skills-main"><div class="grid skills-grid">${cards || '<div class="empty">No skills match.</div>'}</div></div>
       <aside class="skills-side">${overview}</aside>
     </div>
@@ -712,7 +715,7 @@ function renderSkills() {
 }
 
 // Practical, plain-language consequences of a few skills at your current level.
-function renderSkillInfo(cfg, lv) {
+function renderSkillPractical(cfg, lv) {
   const base = cfg.baseValues || {};
   const get = (id) => cfg.skills.find((sk) => sk.id === id);
   const eff = (sk, pattern) => (sk?.effects || []).find((e) => pattern.test(e.name));
@@ -756,9 +759,12 @@ function renderSkillInfo(cfg, lv) {
   if (hm) {
     const cons = 1 + pct(hm, /consumption/i) / 100;
     const bonus = 1 + pct(hm, /zone bonus/i) / 100;
-    const perHour = (base.generatorFuelPerHour || 4.75) * cons;
+    const fuelBonus = hideoutBonusTotals().find((b) => b.type === 'FuelConsumption');
+    const zoneFuel = fuelBonus ? 1 + fuelBonus.boosted / 100 : 1;
+    const perHour = (base.generatorFuelPerHour || 4.75) * cons * zoneFuel;
     cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Hideout Management</div>${levelBadge(hm)}</div>
       ${row('Fuel and filter use', x(cons), '×1')}
+      ${fuelBonus ? row(`Hideout fuel bonus (${esc(fuelBonus.from.join(', '))})`, `${fmtNum(fuelBonus.boosted)}%`) : ''}
       ${row('Generator burns', `${(Math.round(perHour * 100) / 100)} fuel/h`, `${base.generatorFuelPerHour || 4.75}/h`)}
       ${(base.fuelTanks || []).map((t) => row(`${esc(t.name)} (${t.resource}) lasts`, hrs(t.resource / perHour), hrs(t.resource / (base.generatorFuelPerHour || 4.75)))).join('')}
       ${row('Hideout zone bonuses', x(bonus), '×1')}
@@ -775,7 +781,77 @@ function renderSkillInfo(cfg, lv) {
       ${elite(cr)}</div>`);
   }
   return `<div class="grid info-grid">${cards.join('')}</div>
-    <p class="kv">Base values: ${esc(base.source || 'n/a')}${base.fuelTanksSource ? `; fuel tank sizes: ${esc(base.fuelTanksSource)}` : ''}. Per-level percentages come from the Skills data (marked "game config" where taken from the game; otherwise community wiki and approximate). Change your levels on the Skills view.</p>`;
+    <p class="kv">Base values: ${esc(base.source || 'n/a')}${base.fuelTanksSource ? `; fuel tank sizes: ${esc(base.fuelTanksSource)}` : ''}. Per-level percentages come from the Skills data (marked "game config" where taken from the game; otherwise community wiki and approximate). Change your levels on the Skills tab.</p>`;
+}
+
+// ---------------------------------------------------------------- buffs (skills + hideout)
+const ABSOLUTE_BONUS = new Set(['AdditionalSlots', 'MaximumEnergyReserve', 'StashSize', 'UnlockArmorRepair', 'UnlockWeaponModification', 'UnlockWeaponRepair']);
+
+// Hideout Management's per-level boost to hideout zone bonuses, in percent.
+function hideoutBoostPercent() {
+  const cfg = activeSkillConfig();
+  const hm = cfg.skills.find((sk) => sk.id === 'HideoutManagement');
+  const e = (hm?.effects || []).find((x) => /zone bonus/i.test(x.name));
+  return e ? effectValue(hm, e, Number(S.progress.skills?.HideoutManagement || 0)) : 0;
+}
+
+// Sum the bonuses of every built hideout level. Percent bonuses add up across levels;
+// stash size takes the largest; extra slots are counted per station.
+function hideoutBonusTotals() {
+  const boost = hideoutBoostPercent();
+  const map = new Map();
+  for (const st of S.data?.hideout || []) {
+    const built = builtLevel(st);
+    for (const l of st.levels) {
+      if (l.level > built) continue;
+      for (const b of l.bonuses || []) {
+        if (b.value == null || !b.type) continue;
+        const abs = ABSOLUTE_BONUS.has(b.type);
+        const key = `${b.type}|${b.skillName || ''}|${b.type === 'AdditionalSlots' ? st.id : ''}`;
+        const e = map.get(key) || { type: b.type, name: b.name || b.type, skillName: b.skillName, station: st.name, abs, total: 0, from: [] };
+        e.total = b.type === 'StashSize' ? Math.max(e.total, b.value) : e.total + b.value;
+        if (!e.from.includes(st.name)) e.from.push(st.name);
+        map.set(key, e);
+      }
+    }
+  }
+  return [...map.values()].map((e) => {
+    const pct = e.abs ? 0 : e.total * 100;
+    return { ...e, pct, boosted: pct * (1 + boost / 100) };
+  });
+}
+
+function renderBuffs() {
+  const cfg = activeSkillConfig();
+  const lv = (sk) => Number(S.progress.skills[sk.id] || 0);
+  const boost = hideoutBoostPercent();
+  const totals = hideoutBonusTotals();
+  const fmtPct = (n) => `${n > 0 ? '+' : ''}${Math.round(n * 100) / 100}%`;
+  const absValue = (b) => b.type === 'StashSize' ? `${b.total} cells` : b.type.startsWith('Unlock') ? 'Unlocked' : `+${b.total}`;
+  const groups = [
+    ['Health, energy & hydration', (b) => /health|energy|hydration|regenerat|debuff|metabol/i.test(`${b.type} ${b.name}`) && !b.abs],
+    ['Skills & experience', (b) => !b.abs && (b.skillName || /skill|experience/i.test(`${b.type} ${b.name}`))],
+    ['Other hideout bonuses', (b) => !b.abs],
+    ['Slots, stash & unlocks', (b) => b.abs],
+  ];
+  const used = new Set();
+  const sections = groups.map(([title, test]) => {
+    const rows = totals.filter((b) => !used.has(b) && test(b));
+    rows.forEach((b) => used.add(b));
+    if (!rows.length) return '';
+    return `<div class="ov-cat">${esc(title)}</div>${rows.map((b) => `<div class="ov-row"><span>${esc(b.name)}${b.skillName ? ` <span class="auto">(${esc(b.skillName)})</span>` : ''}${b.type === 'AdditionalSlots' ? ` <span class="auto">(${esc(b.station)})</span>` : ''}
+      <span class="auto">· ${esc(b.from.join(', '))}</span></span><span class="num"><b>${b.abs ? absValue(b) : fmtPct(b.boosted)}</b>${!b.abs && boost ? ` <span class="auto">(base ${fmtPct(b.pct)})</span>` : ''}</span></div>`).join('')}`;
+  }).join('');
+  const hideoutCard = `<div class="card buffs-hideout"><div class="card-head"><div class="title">Hideout bonuses</div>
+      <span class="badge">${(S.data?.hideout || []).filter((st) => builtLevel(st) > 0).length} stations built</span></div>
+      ${boost ? `<p class="auto">Includes your Hideout Management bonus: zone bonuses ×${Math.round((1 + boost / 100) * 1000) / 1000}.</p>` : ''}
+      ${sections || `<p class="auto">${S.data ? 'No hideout bonuses yet. Mark stations built on the Hideout tab.' : 'Game data not loaded yet.'}</p>`}
+      <p class="kv">Bonuses of all built levels are added up; Hideout Management boosts percentage bonuses. Values come from tarkov.dev's hideout data.</p></div>`;
+  return `<div class="buffs-layout">
+      <section><h3 class="section-title">Hideout</h3>${hideoutCard}</section>
+      <section><h3 class="section-title">Skills in game</h3>${renderSkillPractical(cfg, lv)}</section>
+      <section><h3 class="section-title">All skill buffs</h3>${skillOverview(cfg, lv)}</section>
+    </div>`;
 }
 
 // ---------------------------------------------------------------- needed items aggregation

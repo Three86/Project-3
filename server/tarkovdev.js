@@ -44,6 +44,7 @@ const hideoutQuery = (args, full) => `{
       stationLevelRequirements { station { id name } level }
       skillRequirements { name level }
       traderRequirements { trader { id name } level }
+      ${full ? 'bonuses { type name value passive production skillName }' : ''}
     }
   }
 }`;

@@ -3,6 +3,9 @@
   "genKey": "Generator",
   "medKey": "Medstation",
   "enduranceKey": "Endurance",
-  "d": "desc"
+  "d": "desc",
+  "fuelKey": "Fuel consumption",
+  "slKey": "Skill leveling",
+  "physKey": "Physical"
  }
 }

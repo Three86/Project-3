@@ -164,3 +164,9 @@ ul.effects .num, .ov-row .num { font-variant-numeric: tabular-nums; white-space:
 details.station > summary { list-style: none; }
 details.station[open] > summary { margin-bottom: 6px; }
 .collapse-tools .auto a { color: var(--accent); }
+
+/* buffs tab */
+.buffs-layout { display: grid; gap: 18px; }
+.section-title { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.buffs-hideout { max-width: 900px; }
+.buffs-hideout .ov-row { padding: 3px 0; border-top: 1px dashed var(--line); font-size: 14px; }
