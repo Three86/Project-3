@@ -4,6 +4,7 @@
 // ---------------------------------------------------------------- state
 const S = {
   data: null,
+  skills: null,
   progress: null,
   status: null,
   ui: loadUi(),
@@ -22,10 +23,11 @@ function loadUi() {
     open: {},
     groups: {},
     prestigeView: null,
+    sk: { text: '', category: '', sortBy: 'category', onlyLeveled: false },
   };
   try {
     const saved = JSON.parse(localStorage.getItem('tt-ui') || '{}');
-    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, groups: { ...saved.groups } };
+    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, sk: { ...defaults.sk, ...saved.sk }, groups: { ...saved.groups } };
   } catch {
     return defaults;
   }
@@ -156,6 +158,11 @@ function objTarget(o) {
 
 // Some objectives can be evaluated from other progress (player level, other quests, hideout).
 function autoValue(o) {
+  if (o.type === 'skill' && o.skillLevel?.level && findSkill(o.skillLevel.name)) {
+    const lvl = skillLevel(o.skillLevel.name);
+    if (lvl >= o.skillLevel.level) return { done: true, why: `your ${o.skillLevel.name}: ${lvl}` };
+    if (lvl > 0) return { done: false, why: `your ${o.skillLevel.name}: ${lvl}` };
+  }
   if (o.type === 'playerLevel' && o.playerLevel) return { done: S.progress.settings.playerLevel >= o.playerLevel, why: `your level: ${S.progress.settings.playerLevel}` };
   if (o.type === 'taskStatus' && o.task) {
     const st = taskStatus(o.task.id);
@@ -296,7 +303,12 @@ function hideoutReqs(level) {
     reqs.push({ kind: 'station', key: `${level.id}|station|${r.station?.id}`, label: `${r.station?.name} level ${r.level}`, auto: true, done: st ? builtLevel(st) >= r.level : false });
   });
   (level.traderRequirements || []).forEach((r, i) => reqs.push({ kind: 'trader', key: `${level.id}|trader|${i}`, label: `${r.trader?.name} loyalty level ${r.level ?? r.value}` }));
-  (level.skillRequirements || []).forEach((r, i) => reqs.push({ kind: 'skill', key: `${level.id}|skill|${i}`, label: `${r.name} level ${r.level}` }));
+  (level.skillRequirements || []).forEach((r, i) => {
+    const lvl = skillLevel(r.name);
+    // Tracked automatically once you enter that skill on the Skills tab; otherwise a manual checkbox.
+    if (lvl > 0) reqs.push({ kind: 'skill', key: `${level.id}|skill|${i}`, label: `${r.name} level ${r.level} (yours: ${lvl})`, auto: true, done: lvl >= r.level });
+    else reqs.push({ kind: 'skill', key: `${level.id}|skill|${i}`, label: `${r.name} level ${r.level}` });
+  });
   for (const r of reqs) {
     if (r.auto) continue;
     const v = S.progress.hideoutReqs[r.key];
@@ -313,8 +325,9 @@ function render() {
   document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === S.ui.tab));
   const view = $('#view');
   if (S.ui.tab === 'settings') { view.innerHTML = renderSettings(); return; }
+  if (S.ui.tab === 'skills') { view.innerHTML = renderSkills(); return; }
   if (!S.data) { view.innerHTML = renderNoData(); return; }
-  const fn = { quests: renderQuests, hideout: renderHideout, prestige: renderPrestige, items: renderItems, search: renderSearch }[S.ui.tab] || renderQuests;
+  const fn = { quests: renderQuests, hideout: renderHideout, prestige: renderPrestige, skills: renderSkills, items: renderItems, search: renderSearch }[S.ui.tab] || renderQuests;
   view.innerHTML = fn();
 }
 
@@ -567,6 +580,88 @@ function renderPrestige() {
     </div>`;
 }
 
+// ---------------------------------------------------------------- skills
+const skillKey = (s) => norm(s).replace(/[^a-z]/g, '');
+function findSkill(name) {
+  const k = skillKey(name);
+  return (S.skills?.skills || []).find((sk) => skillKey(sk.id) === k || skillKey(sk.name) === k);
+}
+function skillLevel(name) {
+  const sk = findSkill(name);
+  return sk ? Number(S.progress.skills?.[sk.id] || 0) : 0;
+}
+const fmtNum = (n) => `${n > 0 ? '+' : ''}${Math.round(n * 10) / 10}`;
+function effectValue(sk, e, level) {
+  const cap = S.skills.effectCapLevel || 50;
+  return e.perLevel * Math.min(level, cap);
+}
+
+function renderSkills() {
+  const cfg = S.skills || { skills: [] };
+  const f = S.ui.sk;
+  const maxLevel = cfg.maxLevel || 51;
+  const elite = cfg.eliteLevel || 51;
+  const lv = (sk) => Number(S.progress.skills[sk.id] || 0);
+  if (!cfg.skills.length) return '<div class="empty">No skill data available.</div>';
+  const cats = uniq(cfg.skills.map((sk) => sk.category));
+  const text = norm(f.text);
+  let list = cfg.skills.filter((sk) =>
+    (!f.category || sk.category === f.category) &&
+    (!f.onlyLeveled || lv(sk) > 0) &&
+    (!text || [sk.name, sk.description, sk.levelUp, ...(sk.effects || []).map((e) => e.name), ...(sk.elite || [])].some((x) => norm(x).includes(text))));
+  const sorters = { category: (a, b) => cats.indexOf(a.category) - cats.indexOf(b.category) || byName(a.name, b.name), name: (a, b) => byName(a.name, b.name), level: (a, b) => lv(b) - lv(a) || byName(a.name, b.name) };
+  list = list.slice().sort(sorters[f.sortBy] || sorters.category);
+
+  // Overview: every active buff, grouped by category, plus totals for effects that several skills share.
+  const leveled = cfg.skills.filter((sk) => lv(sk) > 0);
+  const combined = new Map();
+  for (const sk of leveled) {
+    if (sk.category === 'Combat') continue; // weapon-class effects only apply to their own weapon class
+    for (const e of sk.effects || []) {
+      const c = combined.get(e.name) || { total: 0, unit: e.unit, from: [] };
+      c.total += effectValue(sk, e, lv(sk));
+      c.from.push(sk.name);
+      combined.set(e.name, c);
+    }
+  }
+  const shared = [...combined.entries()].filter(([, c]) => c.from.length > 1);
+  const overview = leveled.length ? `<details class="card skill-overview" data-skill-overview ${S.ui.skillOverviewOpen === false ? '' : 'open'}>
+      <summary class="quest-sum"><div class="card-head"><span class="caret"></span><div class="title">Total buffs on your PMC</div><span class="badge">${leveled.length} skills leveled · ${leveled.filter((sk) => lv(sk) >= elite).length} elite</span></div></summary>
+      <div class="overview-grid">${cats.map((cat) => {
+        const sks = leveled.filter((sk) => sk.category === cat);
+        if (!sks.length) return '';
+        return `<div><div class="ov-cat">${esc(cat)}</div>${sks.map((sk) => `<div class="ov-skill"><b>${esc(sk.name)}</b> <span class="auto">lvl ${lv(sk)}</span>${lv(sk) >= elite ? ' <span class="badge kappa">Elite</span>' : ''}
+          ${(sk.effects || []).map((e) => `<div class="ov-row"><span>${esc(e.name)}</span><span class="num">${fmtNum(effectValue(sk, e, lv(sk)))}${esc(e.unit || '')}</span></div>`).join('')}
+          ${lv(sk) >= elite ? (sk.elite || []).map((x) => `<div class="ov-row elite"><span>★ ${esc(x)}</span></div>`).join('') : ''}</div>`).join('')}</div>`;
+      }).join('')}</div>
+      ${shared.length ? `<div class="ov-cat" style="margin-top:10px">Combined (same effect from several skills)</div>${shared.map(([name, c]) => `<div class="ov-row"><span>${esc(name)} <span class="auto">(${esc(c.from.join(' + '))})</span></span><span class="num">${fmtNum(c.total)}${esc(c.unit || '')}</span></div>`).join('')}` : ''}
+    </details>` : '<div class="empty" style="padding:14px">Enter your skill levels below to see the total buffs on your PMC.</div>';
+
+  const toolbar = `<div class="toolbar">
+    <input type="search" data-ui="sk.text" value="${esc(f.text)}" placeholder="Search skills, descriptions, effects…" style="flex:1;min-width:220px">
+    ${select('sk.category', f.category, [['', 'All categories'], ...cats.map((c) => [c, c])], 'Category')}
+    ${select('sk.sortBy', f.sortBy, [['category', 'Category'], ['name', 'Name'], ['level', 'Your level']], 'Sort')}
+    <label><input type="checkbox" data-ui="sk.onlyLeveled" ${f.onlyLeveled ? 'checked' : ''}>Only leveled</label>
+    <span class="count">${list.length} skills</span>
+  </div>`;
+  const cards = list.map((sk) => {
+    const l = lv(sk);
+    return `<div class="card skill ${l >= elite ? 'st-completed' : l > 0 ? 'st-active' : ''}">
+      <div class="card-head"><div class="title">${esc(sk.name)}</div>${l >= elite ? '<span class="badge kappa">Elite</span>' : ''}<span class="badge">${esc(sk.category)}</span></div>
+      <div class="skill-level"><span class="stepper"><button data-act="skill-step" data-id="${esc(sk.id)}" data-d="-1">−</button>
+        <input type="number" min="0" max="${maxLevel}" value="${l}" data-act="skill-level" data-id="${esc(sk.id)}" aria-label="${esc(sk.name)} level">
+        <button data-act="skill-step" data-id="${esc(sk.id)}" data-d="1">+</button></span><span class="auto">level ${l}/${maxLevel}</span></div>
+      <div class="progressbar"><div style="width:${Math.round((l / maxLevel) * 100)}%"></div></div>
+      <div class="desc">${esc(sk.description)}</div>
+      ${sk.levelUp ? `<div class="auto">Levels up by: ${esc(sk.levelUp)}</div>` : ''}
+      <ul class="effects">${(sk.effects || []).map((e) => `<li><span>${esc(e.name)}</span><span class="num">${fmtNum(effectValue(sk, e, l))}${esc(e.unit || '')} <span class="auto">(${fmtNum(e.perLevel)}${esc(e.unit || '')}/lvl, max ${fmtNum(effectValue(sk, e, maxLevel))}${esc(e.unit || '')})</span></span></li>`).join('')}
+        ${(sk.elite || []).map((x) => `<li class="${l >= elite ? '' : 'locked'}"><span>★ Elite: ${esc(x)}</span></li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+  return toolbar + overview + `<div class="grid" style="margin-top:10px">${cards || '<div class="empty">No skills match.</div>'}</div>
+    <p class="kv">${esc(cfg.note || '')}</p>`;
+}
+
 // ---------------------------------------------------------------- needed items aggregation
 const AGG_TYPES = new Set(['giveItem', 'plantItem', 'mark', 'buildWeapon', 'useItem', 'findItem']);
 
@@ -669,8 +764,10 @@ function renderSearch() {
     byItem.get(r.item.id).sources.push(r);
   }
   const items = [...byItem.values()].sort((a, b) => byName(a.item.name, b.item.name));
+  const skillHits = (S.skills?.skills || []).filter((sk) => norm(sk.name).includes(q) || norm(sk.description).includes(q));
   return head + `<div class="group-title">Quests (${quests.length})</div>
     ${quests.length ? `<div class="grid">${sortTasks(quests).slice(0, 60).map(taskCard).join('')}</div>` : '<div class="empty">No quests by that name.</div>'}
+    ${skillHits.length ? `<div class="group-title">Skills (${skillHits.length})</div><div class="chips">${skillHits.map((sk) => `<button class="chip" data-act="goto-skill" data-id="${esc(sk.name)}">${esc(sk.name)} · lvl ${Number(S.progress.skills[sk.id] || 0)}</button>`).join('')}</div>` : ''}
     <div class="group-title">Items (${items.length})</div>
     ${items.length ? `<table class="items"><thead><tr><th>Item</th><th>Needed for (current &amp; future)</th></tr></thead><tbody>${items.map((a) => `<tr><td>${itemTag(a.item)}<div class="auto">${esc(a.item.name)}</div></td><td class="sources">${a.sources.map(sourceLine).join('')}</td></tr>`).join('')}</tbody></table>`
       : '<div class="empty">No current or future quest, hideout level or prestige needs an item matching that. Sell it.</div>'}`;
@@ -780,6 +877,13 @@ document.addEventListener('click', async (e) => {
       setProgress(ops); break;
     }
     case 'goto': gotoTask(id); break;
+    case 'goto-skill': S.ui.tab = 'skills'; S.ui.sk = { ...S.ui.sk, text: id, category: '', onlyLeveled: false }; saveUi(); render(); break;
+    case 'skill-step': {
+      const max = S.skills?.maxLevel || 51;
+      const v = Math.max(0, Math.min(max, Number(S.progress.skills[id] || 0) + Number(el.dataset.d)));
+      setProgress({ section: 'skills', id, value: v || null });
+      break;
+    }
     case 'prestige-view': S.ui.prestigeView = id || null; saveUi(); render(); break;
     case 'prestige-achieved':
       // Back to "next unachieved" so marking one achieved moves straight on to the next prestige.
@@ -821,6 +925,10 @@ document.addEventListener('change', async (e) => {
   if (el.dataset.ui) {
     setUi(el.dataset.ui, el.type === 'checkbox' ? el.checked : el.value);
     render();
+  } else if (el.dataset.act === 'skill-level') {
+    const max = S.skills?.maxLevel || 51;
+    const v = Math.max(0, Math.min(max, Math.round(Number(el.value) || 0)));
+    setProgress({ section: 'skills', id: el.dataset.id, value: v || null });
   } else if (el.dataset.act === 'check') {
     setProgress({ section: el.dataset.sec, id: el.dataset.key, value: el.checked || null });
   } else if (el.dataset.act === 'custom-toggle') {
@@ -847,6 +955,7 @@ document.addEventListener('change', async (e) => {
 document.addEventListener('toggle', (e) => {
   const id = e.target.dataset?.open;
   if (id) { S.ui.open[id] = e.target.open; saveUi(); }
+  if (e.target.hasAttribute?.('data-skill-overview')) { S.ui.skillOverviewOpen = e.target.open; saveUi(); }
   const g = e.target.dataset?.group;
   if (g) { S.ui.groups[g] = e.target.open; saveUi(); }
 }, true);
@@ -926,9 +1035,11 @@ async function browserDownload() {
 }
 
 async function loadAll() {
-  const [st, prog, data] = await Promise.all([api('/api/status'), api('/api/progress'), api('/api/data')]);
+  const [st, prog, data, skills] = await Promise.all([api('/api/status'), api('/api/progress'), api('/api/data'), api('/api/skills').catch(() => ({ body: { skills: [] } }))]);
+  S.skills = skills.body;
   S.status = st.body;
   S.progress = prog.body;
+  S.progress.skills ||= {};
   if (data.ok) { S.data = data.body; buildIndex(); }
   memo = {};
   if (!S.data && S.status.refreshError && !S.status.refreshing && !browserTried) {

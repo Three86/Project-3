@@ -131,3 +131,18 @@ details.quest[open] > summary { margin-bottom: 8px; }
 .prestige-switch { margin-bottom: 12px; }
 .prestige-card { max-width: 760px; }
 .card-head .btn.small { margin-top: 1px; }
+
+/* skills */
+.skill .desc { margin: 6px 0 2px; }
+.skill-level { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+.skill-level input[type=number] { width: 56px; text-align: center; padding: 3px 4px; }
+ul.effects { list-style: none; padding: 0; margin: 8px 0 0; font-size: 13px; }
+ul.effects li { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-top: 1px dashed var(--line); }
+ul.effects li.locked { color: var(--muted); }
+ul.effects .num, .ov-row .num { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.skill-overview { margin-bottom: 4px; }
+.overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 6px 24px; }
+.ov-cat { color: var(--accent); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; margin: 6px 0 4px; }
+.ov-skill { margin-bottom: 8px; }
+.ov-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 1px 0 1px 10px; }
+.ov-row.elite { color: var(--accent); }

@@ -46,6 +46,7 @@ const emptyProgress = () => ({
   hideoutReqs: {}, // requirement key -> true | number
   prestige: {}, // condition key -> true | number
   custom: {}, // id -> { text, done, prestigeId }
+  skills: {}, // skill id -> level
 });
 const savedProgress = readJson(PROGRESS_FILE, {});
 let progress = Object.assign(emptyProgress(), savedProgress);
@@ -62,7 +63,7 @@ function saveProgress() {
   writeJson(PROGRESS_FILE, progress);
 }
 
-const SECTIONS = ['tasks', 'objectives', 'hideout', 'hideoutReqs', 'prestige', 'custom', 'settings'];
+const SECTIONS = ['tasks', 'objectives', 'hideout', 'hideoutReqs', 'prestige', 'custom', 'settings', 'skills'];
 function applyOp({ section, id, value }) {
   if (!SECTIONS.includes(section) || typeof id !== 'string' || !id) throw new Error(`bad op ${section}/${id}`);
   const target = progress[section];
@@ -209,6 +210,9 @@ async function handleApi(req, res, url) {
   switch (route) {
     case 'GET /api/status':
       return send(res, 200, status());
+    case 'GET /api/skills':
+      // data/skills.json lets the user correct the bundled values without rebuilding the image.
+      return send(res, 200, readJson(path.join(DATA_DIR, 'skills.json'), null) || readJson(path.join(__dirname, 'skills.json'), { skills: [] }));
     case 'GET /api/data':
       return gameData ? send(res, 200, gameData) : send(res, 404, { error: 'no game data yet', ...status() });
     case 'GET /api/data/queries':
