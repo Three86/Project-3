@@ -68,6 +68,11 @@ test('loads and normalises the json.tarkov.dev feed', async () => {
     assert.strictEqual(p2.conditions[3].items[0].name, 'Roubles');
     assert.strictEqual(p2.conditions[3].count, 1000000);
     assert.ok(d.skills.some((sk) => sk.id === 'Strength' && sk.name === 'Strength'));
+    const [c1, c2] = d.crafts;
+    assert.deepStrictEqual(c1.station, { id: 's-med', name: 'Medstation' });
+    assert.deepStrictEqual(c1.requiredItems.map((r) => [r.item.shortName, r.count, r.tool]), [['MP-133', 2, false], ['MS2000', 1, true]]);
+    assert.deepStrictEqual(c1.rewardItems.map((r) => [r.item.shortName, r.count]), [['Salewa', 1]]);
+    assert.deepStrictEqual(c2.taskUnlock, { id: '5936d90786f7742b1420ba5b', name: 'Debut' });
     assert.ok(!d.skills.some((sk) => sk.id === 'Melee'));
     assert.strictEqual(d.prestige[0].conditions[1].items[0].shortName, 'MP-133');
   } finally {

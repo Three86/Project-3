@@ -121,6 +121,8 @@ function queryVariants({ gameMode = 'regular', lang = 'en' } = {}) {
   };
 }
 
+const withModeArgs = (gameMode, lang) => `lang: ${lang}, gameMode: ${gameMode}`;
+
 async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.log } = {}) {
   const q = queryVariants({ gameMode, lang });
   const tasks = await firstWorking(q.tasks, 'tasks', log);
@@ -130,6 +132,17 @@ async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.
     // GraphQL has no per-game-mode XP table; this is the PvP one (the JSON feed has both).
     playerLevels = await firstWorking(['{ playerLevels { level exp } }'], 'playerLevels', log);
   } catch { /* optional: only used to cross-check the PMC level read from screenshots */ }
+  let crafts = [];
+  try {
+    const q = (args) => `{ crafts(${args}) { id station { id name } level duration taskUnlock { id name }
+      requiredItems { item { ${ITEM} } count attributes { type name value } } requiredQuestItems { id name }
+      rewardItems { item { ${ITEM} } count } } }`;
+    const raw = await firstWorking([q(withModeArgs(gameMode, lang)), q(`lang: ${lang}`)], 'crafts', log);
+    crafts = raw.map((c) => ({
+      ...c,
+      requiredItems: (c.requiredItems || []).map((r) => ({ item: r.item, count: r.count, tool: (r.attributes || []).some((a) => a.type === 'tool' && String(a.value) === 'true') })),
+    }));
+  } catch { /* optional: only the Recipes tab needs it */ }
   let prestige = [];
   let prestigeError = null;
   try {
@@ -143,6 +156,7 @@ async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.
     hideout,
     prestige,
     playerLevels,
+    crafts,
   };
 }
 

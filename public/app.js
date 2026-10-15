@@ -25,12 +25,14 @@ function loadUi() {
     groups: {},
     prestigeView: null,
     hOpen: {},
+    recOpen: {},
+    rec: { text: '', showLocked: false },
     buffOpen: {},
     sk: { text: '', category: '', sortBy: 'category', onlyLeveled: false, view: 'skills' },
   };
   try {
     const saved = JSON.parse(localStorage.getItem('tt-ui') || '{}');
-    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, sk: { ...defaults.sk, ...saved.sk }, groups: { ...saved.groups }, hOpen: { ...saved.hOpen }, buffOpen: { ...saved.buffOpen } };
+    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, sk: { ...defaults.sk, ...saved.sk }, groups: { ...saved.groups }, hOpen: { ...saved.hOpen }, recOpen: { ...saved.recOpen }, rec: { ...defaults.rec, ...saved.rec }, buffOpen: { ...saved.buffOpen } };
   } catch {
     return defaults;
   }
@@ -398,7 +400,7 @@ function render() {
   if (S.ui.tab === 'skills') { view.innerHTML = renderSkills(); return; }
   if (S.ui.tab === 'buffs') { view.innerHTML = renderBuffs(); return; }
   if (!S.data) { view.innerHTML = renderNoData(); return; }
-  const fn = { quests: renderQuests, hideout: renderHideout, prestige: renderPrestige, skills: renderSkills, buffs: renderBuffs, items: renderItems, search: renderSearch }[S.ui.tab] || renderQuests;
+  const fn = { quests: renderQuests, hideout: renderHideout, recipes: renderRecipes, prestige: renderPrestige, skills: renderSkills, buffs: renderBuffs, items: renderItems, search: renderSearch }[S.ui.tab] || renderQuests;
   view.innerHTML = fn();
 }
 
@@ -902,6 +904,134 @@ function renderSkillPractical(cfg, lv) {
     <p class="kv">Base values: ${esc(base.source || 'n/a')}${base.fuelTanksSource ? `; fuel tank sizes: ${esc(base.fuelTanksSource)}` : ''}. Per-level percentages come from the Skills data (marked "game config" where taken from the game; otherwise community wiki and approximate). Change your levels on the Skills tab.</p>`;
 }
 
+// ---------------------------------------------------------------- recipes (hideout crafts)
+const MAX_PINS = 4;
+const fmtDuration = (sec) => {
+  const m = Math.round(sec / 60);
+  const d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
+  return d ? `${d}d ${h}h ${String(mm).padStart(2, '0')}m` : `${h}h ${String(mm).padStart(2, '0')}m`;
+};
+
+// Fuel the generator burns per hour after Hideout Management and hideout fuel bonuses.
+function generatorFuelPerHour() {
+  const cfg = activeSkillConfig();
+  const base = cfg.baseValues || {};
+  const hm = cfg.skills.find((sk) => sk.id === 'HideoutManagement');
+  const e = (hm?.effects || []).find((x) => /consumption/i.test(x.name));
+  const cons = 1 + (e ? effectValue(hm, e, Number(S.progress.skills?.HideoutManagement || 0)) : 0) / 100;
+  const fuelBonus = hideoutBonusTotals().find((b) => b.type === 'FuelConsumption');
+  return (base.generatorFuelPerHour || 4.75) * cons * (fuelBonus ? 1 + fuelBonus.boosted / 100 : 1);
+}
+
+// Crafting skill: production time multiplier (e.g. 0.85 at level 20).
+function craftTimeFactor() {
+  const cfg = activeSkillConfig();
+  const cr = cfg.skills.find((sk) => sk.id === 'Crafting');
+  const e = (cr?.effects || []).find((x) => /production time/i.test(x.name));
+  return 1 + (e ? effectValue(cr, e, Number(S.progress.skills?.Crafting || 0)) : 0) / 100;
+}
+
+const isBitcoinCraft = (c) => /bitcoin/i.test(c.station?.name || '') || (c.rewardItems || []).some((r) => /bitcoin/i.test(r.item?.name || ''));
+
+// Seconds per bitcoin with N graphics cards (each card after the first adds gpuBoostRate).
+function bitcoinSeconds(c, gpus) {
+  const b = activeSkillConfig().baseValues?.bitcoin || {};
+  const base = c?.duration || b.baseSeconds || 145000;
+  return base / (1 + Math.max(0, gpus - 1) * (b.gpuBoostRate ?? 0.041225));
+}
+
+// Why a recipe can't be made yet, or null when it can.
+function craftLock(c) {
+  const st = c.station && idx.stations.get(c.station.id);
+  if (!st || builtLevel(st) < c.level) return `needs ${c.station?.name || 'station'} level ${c.level}`;
+  if (c.taskUnlock && taskStatus(c.taskUnlock.id) !== 'completed') return `complete quest: ${c.taskUnlock.name}`;
+  return null;
+}
+
+function craftCard(c, pins) {
+  const lock = craftLock(c);
+  const pinned = pins.includes(c.id);
+  const full = !pinned && pins.length >= MAX_PINS;
+  const btc = isBitcoinCraft(c);
+  const gpus = Math.max(1, Number(S.progress.settings.gpuCount || 1));
+  const secs = btc ? bitcoinSeconds(c, gpus) : c.duration * craftTimeFactor();
+  const timeNote = btc ? `${gpus} GPU${gpus === 1 ? '' : 's'}` : secs !== c.duration ? `base ${fmtDuration(c.duration)}` : '';
+  // Product: full item name (ingredients keep the short name, full name on hover).
+  const out = (c.rewardItems || []).map((r) => {
+    const img = r.item?.iconLink ? `<img class="req-icon" src="${esc(r.item.iconLink)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+    return `<span class="product">${img}${esc(r.item?.name || '?')}${r.count > 1 ? ` <span class="auto">×${r.count}</span>` : ''}</span>`;
+  }).join(' ');
+  const ins = (c.requiredItems || []).map((r) => `<li>${itemTag(r.item)} <span class="num">×${Number(r.count).toLocaleString('en-US')}</span>${r.tool ? ' <span class="badge" title="Tools are returned when the craft finishes">tool</span>' : ''}</li>`)
+    .concat((c.requiredQuestItems || []).map((q) => `<li>${esc(q.name)} <span class="badge">quest item</span></li>`)).join('');
+  return `<div class="card recipe ${lock ? 'locked' : ''} ${pinned ? 'pinned' : ''}">
+    <div class="card-head"><div class="title">${out}</div>
+      <button class="btn small pin ${pinned ? 'on' : ''}" data-act="craft-pin" data-station="${esc(c.station.id)}" data-id="${esc(c.id)}" ${full ? 'disabled title="4 recipes pinned for this module; unpin one first"' : `title="${pinned ? 'Unpin' : 'Pin to the top of this module'}"`}>${pinned ? '★ Pinned' : '☆ Pin'}</button></div>
+    <div class="meta"><span>Level ${c.level}</span>·<span class="craft-time"><b>${fmtDuration(secs)}</b>${timeNote ? ` <span class="auto">(${esc(timeNote)})</span>` : ''}</span>
+      ${c.taskUnlock ? `<span class="badge ${lock && /quest/.test(lock) ? '' : 'status-completed'}">quest: ${esc(c.taskUnlock.name)}</span>` : ''}
+      ${lock ? `<span class="badge">🔒 ${esc(lock)}</span>` : ''}</div>
+    <ul class="ingredients">${ins || '<li class="auto">No ingredients</li>'}</ul>
+  </div>`;
+}
+
+function bitcoinPanel(c) {
+  const b = activeSkillConfig().baseValues || {};
+  const btc = b.bitcoin || {};
+  const gpus = Math.max(1, Number(S.progress.settings.gpuCount || 1));
+  const secs = bitcoinSeconds(c, gpus);
+  const perHour = generatorFuelPerHour();
+  const tanks = (b.fuelTanks || [{ name: 'Metal fuel tank', resource: 100 }]).map((t) => {
+    const hours = t.resource / perHour;
+    return `<div class="ov-row"><span>${esc(t.name)} (${t.resource}) lasts ${fmtDuration(hours * 3600)}</span><span class="num"><b>${(hours / (secs / 3600)).toFixed(2)}</b> bitcoins per tank</span></div>`;
+  }).join('');
+  return `<div class="card btc-panel">
+    <div class="row"><label>Graphics cards installed <input type="number" min="1" max="${btc.maxGpus || 50}" value="${gpus}" data-set="gpuCount"></label>
+      <span class="auto">1 bitcoin every <b>${fmtDuration(secs)}</b> · ${(86400 / secs).toFixed(2)} per day · farm holds ${btc.storage || 3}${Number(S.progress.skills?.HideoutManagement || 0) >= 51 ? ' (+2 with elite Hideout Management)' : ''}</span></div>
+    <div class="auto">Generator burns ${perHour.toFixed(2)} fuel/h (Hideout Management and hideout bonuses included):</div>
+    ${tanks}
+  </div>`;
+}
+
+function renderRecipes() {
+  const crafts = S.data.crafts;
+  if (!Array.isArray(crafts)) return '<div class="empty">No recipe data yet. Refresh game data under Settings (the tracker does this automatically after an update).</div>';
+  const f = S.ui.rec;
+  const text = norm(f.text);
+  const pinsAll = S.progress.craftPins || {};
+  const stations = (S.data.hideout || []).filter((st) => crafts.some((c) => c.station?.id === st.id)).sort((a, b) => byName(a.name, b.name));
+  let shownTotal = 0, hiddenLocked = 0;
+  const sections = stations.map((st) => {
+    const pins = (pinsAll[st.id] || []).filter((id) => crafts.some((c) => c.id === id));
+    let list = crafts.filter((c) => c.station?.id === st.id);
+    const matches = (c) => !text || [...(c.rewardItems || []), ...(c.requiredItems || [])].some((r) => norm(r.item?.name).includes(text) || norm(r.item?.shortName).includes(text));
+    list = list.filter(matches);
+    const unlocked = list.filter((c) => !craftLock(c));
+    hiddenLocked += list.length - unlocked.length;
+    const visible = (f.showLocked ? list : unlocked).sort((a, b) => a.level - b.level || byName(a.rewardItems?.[0]?.item?.name, b.rewardItems?.[0]?.item?.name));
+    const pinned = pins.map((id) => crafts.find((c) => c.id === id)).filter((c) => c && matches(c));
+    const rest = visible.filter((c) => !pins.includes(c.id));
+    if (!pinned.length && !rest.length) return '';
+    shownTotal += pinned.length + rest.length;
+    const key = st.id;
+    const open = S.ui.recOpen[key] ?? !!pinned.length;
+    const btcCraft = list.find(isBitcoinCraft);
+    return `<details class="group recipes-station" data-recopen="${esc(key)}" ${open || text ? 'open' : ''}>
+      <summary class="group-title"><span class="caret"></span>${esc(st.name)} <span class="count">level ${builtLevel(st)} · ${unlocked.length} available${pins.length ? ` · ★ ${pins.length}/${MAX_PINS} pinned` : ''}</span></summary>
+      ${btcCraft && !craftLock(btcCraft) ? bitcoinPanel(btcCraft) : ''}
+      ${pinned.length ? `<div class="pinned-row"><div class="grid">${pinned.map((c) => craftCard(c, pins)).join('')}</div></div>` : ''}
+      ${rest.length ? `<div class="grid">${rest.map((c) => craftCard(c, pins)).join('')}</div>` : ''}
+    </details>`;
+  }).join('');
+  const factor = craftTimeFactor();
+  const toolbar = `<div class="toolbar">
+    <input type="search" data-ui="rec.text" value="${esc(f.text)}" placeholder="Find recipes by item…" style="flex:1;min-width:220px">
+    <label><input type="checkbox" data-ui="rec.showLocked" ${f.showLocked ? 'checked' : ''}>Show locked${hiddenLocked && !f.showLocked ? ` (${hiddenLocked} hidden)` : ''}</label>
+    <span class="auto">Times include your Crafting skill (×${factor.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')})</span>
+    <button class="btn small" data-act="rec-open" data-v="1">Expand all</button><button class="btn small" data-act="rec-open" data-v="0">Collapse all</button>
+  </div>`;
+  return toolbar + (sections || `<div class="empty">${text ? 'No recipe uses or makes that item.' : 'No recipes available yet. Build hideout stations to unlock them.'}</div>`)
+    + '<p class="kv">Recipes appear when their station level is built and their unlocking quest is completed. Crafts run at 7% speed while the generator has no fuel.</p>';
+}
+
 // ---------------------------------------------------------------- buffs (skills + hideout)
 const ABSOLUTE_BONUS = new Set(['AdditionalSlots', 'MaximumEnergyReserve', 'StashSize', 'UnlockArmorRepair', 'UnlockWeaponModification', 'UnlockWeaponRepair']);
 
@@ -1216,6 +1346,19 @@ document.addEventListener('click', async (e) => {
       render(); break;
     }
     case 'ocr-dismiss': S.ocr.result = null; render(); break;
+    case 'craft-pin': {
+      const st = el.dataset.station;
+      const pins = (S.progress.craftPins?.[st] || []).slice();
+      const at = pins.indexOf(id);
+      if (at >= 0) pins.splice(at, 1);
+      else if (pins.length < MAX_PINS) pins.push(id);
+      S.ui.recOpen[st] = true; saveUi();
+      setProgress({ section: 'craftPins', id: st, value: pins.length ? pins : null });
+      break;
+    }
+    case 'rec-open':
+      for (const st of S.data.hideout || []) S.ui.recOpen[st.id] = el.dataset.v === '1';
+      saveUi(); render(); break;
     case 'h-show': S.ui.h.show = el.dataset.v; saveUi(); render(); break;
     case 'sk-cat': S.ui.sk.category = el.dataset.v; saveUi(); render(); break;
     case 'sk-view': S.ui.sk.view = el.dataset.v; saveUi(); render(); break;
@@ -1277,7 +1420,7 @@ document.addEventListener('change', async (e) => {
     setProgress({ section: 'custom', id: el.dataset.id, value: { ...S.progress.custom[el.dataset.id], done: el.checked } });
   } else if (el.dataset.set) {
     const key = el.dataset.set;
-    let value = el.type === 'checkbox' ? el.checked : key === 'playerLevel' ? Math.max(1, Number(el.value) || 1) : el.value;
+    let value = el.type === 'checkbox' ? el.checked : key === 'playerLevel' ? Math.max(1, Number(el.value) || 1) : key === 'gpuCount' ? Math.min(50, Math.max(1, Math.round(Number(el.value) || 1))) : el.value;
     // datetime-local is in the viewer's local time; store an absolute timestamp.
     if (key === 'logsSince') value = el.value ? new Date(el.value).toISOString() : '';
     await setProgress({ section: 'settings', id: key, value });
@@ -1301,6 +1444,8 @@ document.addEventListener('toggle', (e) => {
   if (e.target.hasAttribute?.('data-skill-overview')) { S.ui.skillOverviewOpen = e.target.open; saveUi(); }
   const bo = e.target.dataset?.buffopen;
   if (bo) { S.ui.buffOpen[bo] = e.target.open; saveUi(); }
+  const ro = e.target.dataset?.recopen;
+  if (ro) { S.ui.recOpen[ro] = e.target.open; saveUi(); }
   const h = e.target.dataset?.hopen;
   if (h) { S.ui.hOpen[h] = e.target.open; saveUi(); }
   const g = e.target.dataset?.group;

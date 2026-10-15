@@ -186,3 +186,15 @@ details.buffs-hideout .collapse-tools { margin: 4px 0 6px; }
 .ocr-changes { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
 .ocr-changes .badge.changed { color: var(--good); border-color: var(--good); }
 .req-icon { width: 20px; height: 20px; object-fit: contain; vertical-align: -5px; margin-right: 6px; background: #0006; border-radius: 2px; }
+
+/* recipes */
+.recipes-station .grid { margin-bottom: 10px; }
+.pinned-row { border-left: 3px solid var(--accent); padding-left: 8px; margin-bottom: 12px; }
+.card.recipe.locked { opacity: .6; }
+.card.recipe.pinned { border-color: var(--accent); }
+.card.recipe .title { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.btn.pin.on { color: var(--accent); border-color: var(--accent); }
+ul.ingredients { list-style: none; margin: 6px 0 0; padding: 0; font-size: 13px; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 2px 12px; }
+ul.ingredients .num { color: var(--muted); }
+.btc-panel { margin-bottom: 12px; max-width: 760px; }
+.btc-panel .ov-row { padding-left: 0; font-size: 14px; border-top: 1px dashed var(--line); padding: 3px 0; }

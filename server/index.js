@@ -49,6 +49,7 @@ const emptyProgress = () => ({
   prestige: {}, // condition key -> true | number
   custom: {}, // id -> { text, done, prestigeId }
   skills: {}, // skill id -> level
+  craftPins: {}, // station id -> [craft id] (max 4)
 });
 const savedProgress = readJson(PROGRESS_FILE, {});
 let progress = Object.assign(emptyProgress(), savedProgress);
@@ -74,7 +75,7 @@ function saveProgress() {
   writeJson(PROGRESS_FILE, progress);
 }
 
-const SECTIONS = ['tasks', 'objectives', 'hideout', 'hideoutReqs', 'prestige', 'custom', 'settings', 'skills'];
+const SECTIONS = ['tasks', 'objectives', 'hideout', 'hideoutReqs', 'prestige', 'custom', 'settings', 'skills', 'craftPins'];
 function applyOp({ section, id, value }) {
   if (!SECTIONS.includes(section) || typeof id !== 'string' || !id) throw new Error(`bad op ${section}/${id}`);
   const target = progress[section];
@@ -126,7 +127,7 @@ async function refreshGameData(reason) {
 
 // Bump when the tracker starts using fields older cached game data doesn't have
 // (2: hideout bonuses, active skill list; 3: XP table). Older caches are re-downloaded automatically.
-const DATA_VERSION = 3; // 3: XP table (playerLevels)
+const DATA_VERSION = 4; // 3: XP table (playerLevels); 4: hideout crafts
 const dataOutdated = () => !!gameData && (gameData.meta?.dataVersion || 1) < DATA_VERSION && gameData.meta?.source !== 'import';
 
 function dataIsStale() {

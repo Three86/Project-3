@@ -920,6 +920,14 @@
    8,
    24
   ],
-  "fuelTanksSource": "community wiki"
+  "fuelTanksSource": "community wiki",
+  "bitcoin": {
+   "baseSeconds": 145000,
+   "gpuBoostRate": 0.041225,
+   "storage": 3,
+   "maxGpus": 50,
+   "source": "game config (hideout/production.json + hideout/settings.json, as mirrored by the SPT project, Aug 2026)"
+  },
+  "craftSpeedWithoutFuel": 0.07
  }
 }

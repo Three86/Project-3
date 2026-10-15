@@ -1,0 +1,52 @@
+{
+ "data": [
+  {
+   "id": "cr1",
+   "station": "s-med",
+   "level": 1,
+   "duration": 3600,
+   "taskUnlock": null,
+   "requiredItems": [
+    {
+     "item": "i-mp133",
+     "count": 2,
+     "attributes": {}
+    },
+    {
+     "item": "i-ms2000",
+     "count": 1,
+     "attributes": {
+      "tool": "true"
+     }
+    }
+   ],
+   "requiredQuestItems": [],
+   "productItem": {
+    "item": "i-salewa",
+    "count": 1,
+    "attributes": {}
+   }
+  },
+  {
+   "id": "cr2",
+   "station": "s-gen",
+   "level": 1,
+   "duration": 7200,
+   "taskUnlock": "5936d90786f7742b1420ba5b",
+   "requiredItems": [
+    {
+     "item": "i-salewa",
+     "count": 3,
+     "attributes": {}
+    }
+   ],
+   "requiredQuestItems": [],
+   "productItem": {
+    "item": "i-mp133",
+    "count": 2,
+    "attributes": {}
+   }
+  }
+ ],
+ "translations": []
+}

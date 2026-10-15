@@ -129,12 +129,13 @@ function normObjective(o, R) {
 }
 
 async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = console.log } = {}) {
-  const [tasksFile, hideoutFile, itemsFile, tradersFile, mapsFile] = await Promise.all([
+  const [tasksFile, hideoutFile, itemsFile, tradersFile, mapsFile, craftsFile] = await Promise.all([
     loadFile(`${gameMode}/tasks`, lang),
     loadFile(`${gameMode}/hideout`, lang),
     loadFile(`${gameMode}/items`, lang),
     loadFile(`${gameMode}/traders`, lang),
     loadFile(`${gameMode}/maps`, lang).catch((err) => { log(`json.tarkov.dev maps unavailable: ${err.message}`); return { maps: {} }; }),
+    loadFile(`${gameMode}/crafts`, lang).catch((err) => { log(`json.tarkov.dev crafts unavailable: ${err.message}`); return []; }),
   ]);
   const rawTasks = Object.values(tasksFile.tasks || {});
   if (!rawTasks.length) throw new Error('json.tarkov.dev returned no quests');
@@ -193,6 +194,18 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
   // Skills tarkov.dev considers active in the game (it filters out removed ones like Prone Movement).
   const skills = Object.values(itemsFile.skills || {}).filter((sk) => sk?.id).map((sk) => ({ id: sk.id, name: sk.name }));
   // XP table for this game mode: exp = experience needed to reach that level from the one before.
+  // Hideout crafts. Required items flagged as tools are returned when the craft finishes.
+  const attr = (a) => (Array.isArray(a) ? Object.fromEntries(a.map((x) => [x.type || x.name, x.value])) : a || {});
+  const crafts = list(Array.isArray(craftsFile) ? craftsFile : Object.values(craftsFile || {})).filter((c) => c && c.station).map((c) => ({
+    id: c.id,
+    station: R.station(c.station),
+    level: c.level,
+    duration: c.duration,
+    taskUnlock: c.taskUnlock ? R.task(c.taskUnlock) : null,
+    requiredItems: list(c.requiredItems).map((r) => ({ item: R.item(r.item), count: r.count, tool: String(attr(r.attributes).tool) === 'true' })).filter((r) => r.item),
+    requiredQuestItems: list(c.requiredQuestItems).map((r) => R.questItem(r.item || r)).filter(Boolean),
+    rewardItems: list(c.rewardItems || c.productItem).map((r) => ({ item: R.item(r.item), count: r.count })).filter((r) => r.item),
+  }));
   const playerLevels = list(itemsFile.playerLevels).filter((l) => l && Number.isFinite(l.level)).map((l) => ({ level: l.level, exp: l.exp }));
 
   return {
@@ -202,6 +215,7 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
     prestige,
     skills,
     playerLevels,
+    crafts,
   };
 }
 
