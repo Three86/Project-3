@@ -117,7 +117,7 @@ table.items .num { text-align: right; font-variant-numeric: tabular-nums; }
 .custom-add input { flex: 1; }
 
 /* collapsible quests and groups */
-details.group > summary::-webkit-details-marker, details.quest > summary::-webkit-details-marker, details.skill-overview > summary::-webkit-details-marker, details.station > summary::-webkit-details-marker { display: none; }
+details.group > summary::-webkit-details-marker, details.quest > summary::-webkit-details-marker, details.skill-overview > summary::-webkit-details-marker, details.station > summary::-webkit-details-marker, details.buffs-hideout > summary::-webkit-details-marker, details.buff-group > summary::-webkit-details-marker { display: none; }
 details.skill-overview > summary { list-style: none; }
 .group-title .count { margin-left: 4px; text-transform: none; letter-spacing: 0; }
 .caret { display: inline-block; width: 0; height: 0; border-left: 5px solid var(--muted); border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform .15s; flex: none; margin-top: 2px; }
@@ -170,3 +170,9 @@ details.station[open] > summary { margin-bottom: 6px; }
 .section-title { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
 .buffs-hideout { max-width: 900px; }
 .buffs-hideout .ov-row { padding: 3px 0; border-top: 1px dashed var(--line); font-size: 14px; }
+details.buffs-hideout > summary, details.buff-group > summary { list-style: none; }
+details.buff-group { border-top: 1px solid var(--line); }
+details.buff-group > summary { cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 7px 0; }
+details.buff-group > summary .ov-cat { margin: 0; flex: 1; }
+details.buff-group[open] > summary { padding-bottom: 2px; }
+details.buffs-hideout .collapse-tools { margin: 4px 0 6px; }

@@ -24,11 +24,12 @@ function loadUi() {
     groups: {},
     prestigeView: null,
     hOpen: {},
+    buffOpen: {},
     sk: { text: '', category: '', sortBy: 'category', onlyLeveled: false, view: 'skills' },
   };
   try {
     const saved = JSON.parse(localStorage.getItem('tt-ui') || '{}');
-    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, sk: { ...defaults.sk, ...saved.sk }, groups: { ...saved.groups }, hOpen: { ...saved.hOpen } };
+    return { ...defaults, ...saved, q: { ...defaults.q, ...saved.q }, h: { ...defaults.h, ...saved.h }, items: { ...defaults.items, ...saved.items }, sk: { ...defaults.sk, ...saved.sk }, groups: { ...saved.groups }, hOpen: { ...saved.hOpen }, buffOpen: { ...saved.buffOpen } };
   } catch {
     return defaults;
   }
@@ -839,18 +840,21 @@ function renderBuffs() {
     const rows = totals.filter((b) => !used.has(b) && test(b));
     rows.forEach((b) => used.add(b));
     if (!rows.length) return '';
-    return `<div class="ov-cat">${esc(title)}</div>${rows.map((b) => `<div class="ov-row"><span>${esc(b.name)}${b.skillName ? ` <span class="auto">(${esc(b.skillName)})</span>` : ''}${b.type === 'AdditionalSlots' ? ` <span class="auto">(${esc(b.station)})</span>` : ''}
-      <span class="auto">· ${esc(b.from.join(', '))}</span></span><span class="num"><b>${b.abs ? absValue(b) : fmtPct(b.boosted)}</b>${!b.abs && boost ? ` <span class="auto">(base ${fmtPct(b.pct)})</span>` : ''}</span></div>`).join('')}`;
+    const key = `hb:${title}`;
+    return `<details class="buff-group" data-buffopen="${esc(key)}" ${S.ui.buffOpen[key] ? 'open' : ''}><summary><span class="caret"></span><span class="ov-cat">${esc(title)}</span><span class="auto">${rows.length} bonus${rows.length === 1 ? '' : 'es'}</span></summary>${rows.map((b) => `<div class="ov-row"><span>${esc(b.name)}${b.skillName ? ` <span class="auto">(${esc(b.skillName)})</span>` : ''}${b.type === 'AdditionalSlots' ? ` <span class="auto">(${esc(b.station)})</span>` : ''}
+      <span class="auto">· ${esc(b.from.join(', '))}</span></span><span class="num"><b>${b.abs ? absValue(b) : fmtPct(b.boosted)}</b>${!b.abs && boost ? ` <span class="auto">(base ${fmtPct(b.pct)})</span>` : ''}</span></div>`).join('')}</details>`;
   }).join('');
   // Game data cached by an older version has no 'bonuses' field on any hideout level.
   const noBonusData = !!S.data?.hideout?.length && !S.data.hideout.some((st) => st.levels.some((l) => Array.isArray(l.bonuses)));
-  const hideoutCard = `<div class="card buffs-hideout"><div class="card-head"><div class="title">Hideout bonuses</div>
-      <span class="badge">${(S.data?.hideout || []).filter((st) => builtLevel(st) > 0).length} stations built</span></div>
+  const hideoutCard = `<details class="card buffs-hideout" data-buffopen="hb" ${S.ui.buffOpen.hb === false ? '' : 'open'}>
+      <summary class="quest-sum"><div class="card-head"><span class="caret"></span><div class="title">Hideout bonuses</div>
+      <span class="badge">${totals.length} bonuses</span><span class="badge">${(S.data?.hideout || []).filter((st) => builtLevel(st) > 0).length} stations built</span></div></summary>
+      ${totals.length ? '<div class="collapse-tools"><button class="btn small" data-act="buff-groups" data-v="1">Expand all</button><button class="btn small" data-act="buff-groups" data-v="0">Collapse all</button></div>' : ''}
       ${boost ? `<p class="auto">Includes your Hideout Management bonus: zone bonuses ×${Math.round((1 + boost / 100) * 1000) / 1000}.</p>` : ''}
       ${sections || (noBonusData
         ? `<p class="auto">Your saved game data was downloaded before the tracker read hideout bonuses${S.status?.refreshing ? ' and is being refreshed now…' : '.'}</p><button class="btn primary" data-act="refresh">Refresh game data now</button>`
         : `<p class="auto">${S.data ? 'No hideout bonuses yet. Mark stations built on the Hideout tab.' : 'Game data not loaded yet.'}</p>`)}
-      <p class="kv">Bonuses of all built levels are added up; Hideout Management boosts percentage bonuses. Values come from tarkov.dev's hideout data.</p></div>`;
+      <p class="kv">Bonuses of all built levels are added up; Hideout Management boosts percentage bonuses. Values come from tarkov.dev's hideout data.</p></details>`;
   return `<div class="buffs-layout">
       <section><h3 class="section-title">Hideout</h3>${hideoutCard}</section>
       <section><h3 class="section-title">Skills in game</h3>${renderSkillPractical(cfg, lv)}</section>
@@ -1077,6 +1081,9 @@ document.addEventListener('click', async (e) => {
       for (const st of S.data.hideout || []) S.ui.hOpen[st.id] = el.dataset.v === '1';
       saveUi(); render(); break;
     }
+    case 'buff-groups':
+      document.querySelectorAll('details.buff-group').forEach((d) => { S.ui.buffOpen[d.dataset.buffopen] = el.dataset.v === '1'; });
+      saveUi(); render(); break;
     case 'h-show': S.ui.h.show = el.dataset.v; saveUi(); render(); break;
     case 'sk-cat': S.ui.sk.category = el.dataset.v; saveUi(); render(); break;
     case 'sk-view': S.ui.sk.view = el.dataset.v; saveUi(); render(); break;
@@ -1159,6 +1166,8 @@ document.addEventListener('toggle', (e) => {
   const id = e.target.dataset?.open;
   if (id) { S.ui.open[id] = e.target.open; saveUi(); }
   if (e.target.hasAttribute?.('data-skill-overview')) { S.ui.skillOverviewOpen = e.target.open; saveUi(); }
+  const bo = e.target.dataset?.buffopen;
+  if (bo) { S.ui.buffOpen[bo] = e.target.open; saveUi(); }
   const h = e.target.dataset?.hopen;
   if (h) { S.ui.hOpen[h] = e.target.open; saveUi(); }
   const g = e.target.dataset?.group;
