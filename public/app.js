@@ -331,7 +331,25 @@ function hideoutReqs(level) {
 }
 
 // ---------------------------------------------------------------- render: shell
+// Redrawing while a mouse button is held down replaces the element being clicked, and the browser
+// then drops the click (e.g. typing a skill level and clicking a button straight away: the input's
+// change event redraws the page between mousedown and mouseup). Defer redraws until release.
+let pointerDown = false;
+let renderPending = false;
+document.addEventListener('pointerdown', () => { pointerDown = true; }, true);
+const releasePointer = () => {
+  if (!pointerDown) return;
+  pointerDown = false;
+  // After the click event has been delivered to the unchanged page.
+  if (renderPending) setTimeout(() => { if (renderPending) render(); }, 0);
+};
+document.addEventListener('pointerup', releasePointer, true);
+document.addEventListener('pointercancel', releasePointer, true);
+window.addEventListener('blur', releasePointer); // mouse released outside the window
+
 function render() {
+  if (pointerDown) { renderPending = true; return; }
+  renderPending = false;
   document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === S.ui.tab));
   const view = $('#view');
   if (S.ui.tab === 'settings') { view.innerHTML = renderSettings(); return; }
@@ -730,7 +748,12 @@ function ocrPanel() {
   let result = '';
   if (r?.error) result = `<div class="ocr-result bad">${esc(r.error)}</div>`;
   else if (r) {
-    const changes = r.changes.length ? r.changes.map((c) => `<span class="badge">${esc(c.name)} ${c.from} → <b>${c.to}</b></span>`).join(' ') : '<span class="auto">No skill levels changed.</span>';
+    const changed = new Map(r.changes.map((c) => [c.id, c]));
+    const read = r.read || r.changes.map((c) => ({ id: c.id, name: c.name, level: c.to }));
+    const changes = read.length
+      ? read.map((x) => { const c = changed.get(x.id); return c ? `<span class="badge changed">${esc(x.name)} ${c.from} → <b>${c.to}</b></span>` : `<span class="badge">${esc(x.name)} ${x.level} ✓</span>`; }).join(' ')
+        + `<div class="auto">${r.changes.length ? `${r.changes.length} changed` : 'All already matched the tracker'} · ✓ = already the same.</div>`
+      : '<span class="auto">No skill levels could be read from these screenshots. Are they of the skills page?</span>';
     const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span style="color:var(--bad)">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
     result = `<div class="ocr-result"><div><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}
       <button class="btn small" data-act="ocr-dismiss">✕</button></div><div class="ocr-changes">${changes}</div><details><summary>Screenshots</summary><div class="sources">${files}</div></details></div>`;

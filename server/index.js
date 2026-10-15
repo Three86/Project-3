@@ -221,7 +221,8 @@ async function runOcr() {
   }
   if (changes.length || playerLevel) saveProgress();
   log(`OCR: read ${files.length} screenshot(s) from ${sel.day}; ${Object.keys(levels).length} skills found, ${changes.length} changed`);
-  return { day: sel.day, files, found: Object.keys(levels).length, changes, playerLevel, skippedInRaid: sel.all.length - sel.usable.length, skippedOlder: sel.usable.length - sel.selected.length, rev: progress.rev };
+  const read = Object.entries(levels).map(([id, level]) => ({ id, name: nameOf[id] || id, level }));
+  return { day: sel.day, files, found: read.length, read, changes, playerLevel, skippedInRaid: sel.all.length - sel.usable.length, skippedOlder: sel.usable.length - sel.selected.length, rev: progress.rev };
 }
 
 // ---------- http ----------

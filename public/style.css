@@ -184,3 +184,4 @@ details.buffs-hideout .collapse-tools { margin: 4px 0 6px; }
 .ocr-result.bad { border-left-color: var(--bad); }
 .ocr-result > div:first-child { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
 .ocr-changes { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.ocr-changes .badge.changed { color: var(--good); border-color: var(--good); }
