@@ -842,10 +842,14 @@ function renderBuffs() {
     return `<div class="ov-cat">${esc(title)}</div>${rows.map((b) => `<div class="ov-row"><span>${esc(b.name)}${b.skillName ? ` <span class="auto">(${esc(b.skillName)})</span>` : ''}${b.type === 'AdditionalSlots' ? ` <span class="auto">(${esc(b.station)})</span>` : ''}
       <span class="auto">· ${esc(b.from.join(', '))}</span></span><span class="num"><b>${b.abs ? absValue(b) : fmtPct(b.boosted)}</b>${!b.abs && boost ? ` <span class="auto">(base ${fmtPct(b.pct)})</span>` : ''}</span></div>`).join('')}`;
   }).join('');
+  // Game data cached by an older version has no 'bonuses' field on any hideout level.
+  const noBonusData = !!S.data?.hideout?.length && !S.data.hideout.some((st) => st.levels.some((l) => Array.isArray(l.bonuses)));
   const hideoutCard = `<div class="card buffs-hideout"><div class="card-head"><div class="title">Hideout bonuses</div>
       <span class="badge">${(S.data?.hideout || []).filter((st) => builtLevel(st) > 0).length} stations built</span></div>
       ${boost ? `<p class="auto">Includes your Hideout Management bonus: zone bonuses ×${Math.round((1 + boost / 100) * 1000) / 1000}.</p>` : ''}
-      ${sections || `<p class="auto">${S.data ? 'No hideout bonuses yet. Mark stations built on the Hideout tab.' : 'Game data not loaded yet.'}</p>`}
+      ${sections || (noBonusData
+        ? `<p class="auto">Your saved game data was downloaded before the tracker read hideout bonuses${S.status?.refreshing ? ' and is being refreshed now…' : '.'}</p><button class="btn primary" data-act="refresh">Refresh game data now</button>`
+        : `<p class="auto">${S.data ? 'No hideout bonuses yet. Mark stations built on the Hideout tab.' : 'Game data not loaded yet.'}</p>`)}
       <p class="kv">Bonuses of all built levels are added up; Hideout Management boosts percentage bonuses. Values come from tarkov.dev's hideout data.</p></div>`;
   return `<div class="buffs-layout">
       <section><h3 class="section-title">Hideout</h3>${hideoutCard}</section>

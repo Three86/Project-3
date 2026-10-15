@@ -107,6 +107,7 @@ async function refreshGameData(reason) {
           throw new Error(`json.tarkov.dev: ${err.message} | GraphQL: ${gqlErr.message}`);
         }
       }
+      data.meta.dataVersion = DATA_VERSION;
       gameData = data;
       writeJson(GAME_FILE, data);
       lastRefreshError = null;
@@ -121,8 +122,14 @@ async function refreshGameData(reason) {
   return refreshing;
 }
 
+// Bump when the tracker starts using fields older cached game data doesn't have
+// (2: hideout bonuses, active skill list). Older caches are re-downloaded automatically.
+const DATA_VERSION = 2;
+const dataOutdated = () => !!gameData && (gameData.meta?.dataVersion || 1) < DATA_VERSION && gameData.meta?.source !== 'import';
+
 function dataIsStale() {
   if (!gameData) return true;
+  if (dataOutdated()) return true;
   const age = Date.now() - new Date(gameData.meta?.fetchedAt || 0).getTime();
   return REFRESH_HOURS > 0 && age > REFRESH_HOURS * 3600 * 1000;
 }
@@ -208,6 +215,7 @@ function status() {
     rev: progress.rev,
     hasData: !!gameData,
     dataMeta: gameData?.meta || null,
+    dataOutdated: dataOutdated(),
     refreshing: !!refreshing,
     refreshError: lastRefreshError,
     logs: { dir: LOGS_DIR, available: watcher.available, files: watcher.filesSeen, lastScan: watcher.lastScan, events: logState.events, lastEvents: logState.lastEvents },
@@ -233,7 +241,8 @@ async function handleApi(req, res, url) {
       const body = await readBody(req);
       if (!Array.isArray(body.tasks) || !Array.isArray(body.hideout)) return send(res, 400, { error: 'expected { tasks: [], hideout: [], prestige: [] }' });
       lastRefreshError = null;
-      gameData = { meta: { source: 'import', fetchedAt: new Date().toISOString(), ...(body.meta || {}) }, tasks: body.tasks, hideout: body.hideout, prestige: body.prestige || [] };
+      const viaBrowser = /via browser/.test(body.meta?.source || '');
+      gameData = { meta: { source: 'import', fetchedAt: new Date().toISOString(), ...(body.meta || {}), dataVersion: body.meta?.dataVersion || (viaBrowser ? DATA_VERSION : 1) }, tasks: body.tasks, hideout: body.hideout, prestige: body.prestige || [] };
       writeJson(GAME_FILE, gameData);
       return send(res, 200, status());
     }
@@ -303,7 +312,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   log(`Tarkov tracker listening on http://localhost:${PORT}`);
   log(`data dir: ${DATA_DIR}; game logs: ${LOGS_DIR} (${watcher.available ? 'found' : 'not found – auto quest detection disabled'})`);
-  if (dataIsStale()) refreshGameData(gameData ? 'cache older than REFRESH_HOURS' : 'no cached data');
+  if (dataIsStale()) refreshGameData(!gameData ? 'no cached data' : dataOutdated() ? 'cached data is from an older tracker version' : 'cache older than REFRESH_HOURS');
   // Without any data, keep retrying every 5 minutes (tarkov.dev outages are usually short).
   let ticks = 0;
   setInterval(() => {
