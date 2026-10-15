@@ -147,6 +147,42 @@
       "foundInRaid": false
      }
     ]
+   },
+   {
+    "id": "p2",
+    "name": "p2 name",
+    "prestigeLevel": 2,
+    "conditions": [
+     {
+      "id": "c21",
+      "type": "playerLevel",
+      "description": "",
+      "playerLevel": 25
+     },
+     {
+      "id": "c22",
+      "type": "skill",
+      "description": "",
+      "skill": "Strength",
+      "level": 10
+     },
+     {
+      "id": "c23",
+      "type": "hideoutStation",
+      "description": "",
+      "station": "s-med",
+      "stationLevel": 1
+     },
+     {
+      "id": "c24",
+      "type": "haveItem",
+      "description": "",
+      "items": [
+       "i-rub"
+      ],
+      "count": 1000000
+     }
+    ]
    }
   ]
  },

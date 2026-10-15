@@ -160,7 +160,38 @@ function objTarget(o) {
 }
 
 // Some objectives can be evaluated from other progress (player level, other quests, hideout).
+// Hideout station a requirement refers to (normalised data has hideoutStation; older caches the raw id).
+function stationOf(o) {
+  const id = o.hideoutStation?.id || o.station;
+  if (!id) return null;
+  return idx.stations.get(id) || { id, name: o.hideoutStation?.name || 'Hideout station', levels: [] };
+}
+
+// Title for requirements the game ships without description text (mostly prestige conditions):
+// "Level: 25", "Strength level 10", "Medstation level 3", "Have 1,000,000 Roubles".
+function objTitle(o) {
+  switch (o.type) {
+    case 'playerLevel': return o.playerLevel ? `Level: ${o.playerLevel}` : null;
+    case 'skill': return o.skillLevel ? `${o.skillLevel.name} level ${o.skillLevel.level}` : null;
+    case 'hideoutStation': return `${stationOf(o)?.name || 'Hideout station'} level ${o.stationLevel ?? '?'}`;
+    case 'haveItem': {
+      const it = objItems(o)[0];
+      return `Have ${Number(o.count || 1).toLocaleString('en-US')} ${it?.name || 'items'}`;
+    }
+    case 'taskStatus': return o.task ? `Complete ${o.task.name}` : null;
+    default: return null;
+  }
+}
+const readableType = (t) => String(t || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
+
 function autoValue(o) {
+  if (o.type === 'hideoutStation' && o.stationLevel) {
+    const st = stationOf(o);
+    if (st?.levels?.length) {
+      const built = builtLevel(st);
+      return { done: built >= o.stationLevel, why: `your ${st.name}: level ${built}` };
+    }
+  }
   if (o.type === 'skill' && o.skillLevel?.level && findSkill(o.skillLevel.name)) {
     const lvl = skillLevel(o.skillLevel.name);
     if (lvl >= o.skillLevel.level) return { done: true, why: `your ${o.skillLevel.name}: ${lvl}` };
@@ -221,10 +252,21 @@ function objRow(section, key, o, { disabled = false, forceDone = false } = {}) {
   else if (v.target > 1) {
     control = `<span class="stepper"><button data-act="step" data-sec="${section}" data-key="${esc(key)}" data-d="-1" data-max="${v.target}" ${disabled ? 'disabled' : ''}>−</button><span>${v.cur}/${v.target}</span><button data-act="step" data-sec="${section}" data-key="${esc(key)}" data-d="1" data-max="${v.target}" ${disabled ? 'disabled' : ''}>+</button></span>`;
   } else control = `<input type="checkbox" data-act="check" data-sec="${section}" data-key="${esc(key)}" ${v.done ? 'checked' : ''} ${disabled ? 'disabled' : ''}>`;
+  const auto = v.auto ? `<span class="auto">auto – ${esc(v.auto.why)}</span>` : '';
+  // No description from the game: build the title from the data and skip the (now redundant) tags.
+  const generated = !o.description || o.description === o.type;
+  if (generated) {
+    const title = objTitle(o) || readableType(o.type);
+    const icon = o.type === 'haveItem' && objItems(o)[0]?.iconLink ? `<img class="req-icon" src="${esc(objItems(o)[0].iconLink)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+    return `<li class="${v.done ? 'done' : ''}">${control}<div class="body">
+      <div class="desc">${icon}${esc(title)} ${o.optional ? '<span class="optional">(optional)</span>' : ''}</div>
+      ${auto ? `<div class="tags">${auto}</div>` : ''}
+    </div></li>`;
+  }
   const kind = [...objNeeds(o)].map((n) => NEEDS[n]).join(' · ');
   return `<li class="${v.done ? 'done' : ''}">${control}<div class="body">
-    <div class="desc">${esc(o.description || o.type)} ${o.optional ? '<span class="optional">(optional)</span>' : ''}</div>
-    <div class="tags"><span class="type-icon">${esc(kind)}</span> ${objTags(o)} ${v.auto ? `<span class="auto">auto – ${esc(v.auto.why)}</span>` : ''}</div>
+    <div class="desc">${esc(o.description)} ${o.optional ? '<span class="optional">(optional)</span>' : ''}</div>
+    <div class="tags"><span class="type-icon">${esc(kind)}</span> ${objTags(o)} ${auto}</div>
   </div></li>`;
 }
 

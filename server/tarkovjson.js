@@ -120,6 +120,7 @@ function normObjective(o, R) {
   if (o.questItem) out.questItem = R.questItem(o.questItem);
   if (o.trader) out.trader = R.trader(o.trader);
   if (o.task) out.task = R.task(o.task);
+  if (o.station) out.hideoutStation = R.station(o.station); // hideout station level requirement
   if (o.skill || o.skillLevel) out.skillLevel = o.skillLevel || { name: o.skill?.name || o.skill, level: o.level };
   if (o.zones && !o.zoneNames) out.zoneNames = list(o.zones).map((z) => z?.name).filter(Boolean);
   delete out.zones;

@@ -60,6 +60,13 @@ test('loads and normalises the json.tarkov.dev feed', async () => {
     assert.deepStrictEqual(l1.bonuses.map((b) => [b.type, b.name, b.value, b.skillName]), [['FuelConsumption', 'Fuel consumption', -0.1, undefined], ['SkillGroupLevelingBoost', 'Skill leveling', 0.05, 'Physical']]);
     assert.deepStrictEqual(l1.traderRequirements, [{ trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, level: 2 }]);
     assert.strictEqual(d.prestige[0].name, 'Prestige 1');
+    const p2 = d.prestige.find((x) => x.name === 'Prestige 2');
+    assert.deepStrictEqual(p2.conditions.map((c) => c.type), ['playerLevel', 'skill', 'hideoutStation', 'haveItem']);
+    assert.deepStrictEqual(p2.conditions[1].skillLevel, { name: 'Strength', level: 10 });
+    assert.deepStrictEqual(p2.conditions[2].hideoutStation, { id: 's-med', name: 'Medstation' });
+    assert.strictEqual(p2.conditions[2].stationLevel, 1);
+    assert.strictEqual(p2.conditions[3].items[0].name, 'Roubles');
+    assert.strictEqual(p2.conditions[3].count, 1000000);
     assert.ok(d.skills.some((sk) => sk.id === 'Strength' && sk.name === 'Strength'));
     assert.ok(!d.skills.some((sk) => sk.id === 'Melee'));
     assert.strictEqual(d.prestige[0].conditions[1].items[0].shortName, 'MP-133');

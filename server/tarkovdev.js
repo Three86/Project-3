@@ -23,6 +23,7 @@ const OBJECTIVE_FULL = `
   ... on TaskObjectiveTraderLevel { trader { id name } level }
   ... on TaskObjectiveTaskStatus { task { id name } status }
   ... on TaskObjectiveUseItem { useAny { ${ITEM} } count }
+  ... on TaskObjectiveHideoutStation { hideoutStation { id name } stationLevel }
 `;
 const OBJECTIVE_MIN = `__typename id type description optional maps { id name }`;
 

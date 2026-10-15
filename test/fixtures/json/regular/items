@@ -21,6 +21,11 @@
     "id": "a1",
     "name": "a1 Name",
     "shortName": "a1 Short"
+   },
+   "i-rub": {
+    "id": "i-rub",
+    "name": "rub Name",
+    "shortName": "rub Short"
    }
   },
   "fleaMarket": {},
