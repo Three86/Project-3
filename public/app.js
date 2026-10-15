@@ -5,6 +5,7 @@
 const S = {
   data: null,
   skills: null,
+  ocr: { status: null, result: null, running: false },
   progress: null,
   status: null,
   ui: loadUi(),
@@ -708,11 +709,43 @@ function renderSkills() {
     </div>`;
   }).join('');
   // Wide screens: skill cards on the left, buff totals in a sticky sidebar. Narrow: totals on top.
-  return toolbar + `<div class="skills-layout">
+  return ocrPanel() + toolbar + `<div class="skills-layout">
       <div class="skills-main"><div class="grid skills-grid">${cards || '<div class="empty">No skills match.</div>'}</div></div>
       <aside class="skills-side">${overview}</aside>
     </div>
     <p class="kv">${esc(cfg.note || '')}</p>`;
+}
+
+// Screenshot OCR: button, folder status and the result of the last run.
+function ocrPanel() {
+  const { status: st, result: r, running } = S.ocr;
+  if (!st) loadOcrStatus();
+  let info = 'Checking screenshot folder…';
+  if (st) {
+    if (!st.tesseract) info = 'OCR engine (Tesseract) not installed. It comes with the Docker image.';
+    else if (!st.available) info = `Screenshot folder not found (<code>${esc(st.dir)}</code>). Mount your Tarkov Screenshots folder, see README.`;
+    else if (!st.selected.length) info = st.total ? 'Only in-raid screenshots found (those are skipped).' : 'No screenshots in the folder yet.';
+    else info = `Will read ${st.selected.length} screenshot${st.selected.length === 1 ? '' : 's'} from <b>${esc(st.day)}</b>${st.inRaid ? ` · ${st.inRaid} in-raid skipped` : ''}`;
+  }
+  let result = '';
+  if (r?.error) result = `<div class="ocr-result bad">${esc(r.error)}</div>`;
+  else if (r) {
+    const changes = r.changes.length ? r.changes.map((c) => `<span class="badge">${esc(c.name)} ${c.from} → <b>${c.to}</b></span>`).join(' ') : '<span class="auto">No skill levels changed.</span>';
+    const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span style="color:var(--bad)">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
+    result = `<div class="ocr-result"><div><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}
+      <button class="btn small" data-act="ocr-dismiss">✕</button></div><div class="ocr-changes">${changes}</div><details><summary>Screenshots</summary><div class="sources">${files}</div></details></div>`;
+  }
+  return `<div class="toolbar ocr-bar"><button class="btn primary" data-act="ocr-run" ${running || !st?.selected?.length || !st?.tesseract ? 'disabled' : ''}>${running ? 'Reading screenshots…' : '📷 Read levels from screenshots'}</button>
+    <span class="auto">${info}</span></div>${result}`;
+}
+
+let ocrStatusLoading = false;
+async function loadOcrStatus() {
+  if (ocrStatusLoading) return;
+  ocrStatusLoading = true;
+  try { S.ocr.status = (await api('/api/ocr/status')).body; } catch { S.ocr.status = { tesseract: false, available: false, selected: [] }; }
+  ocrStatusLoading = false;
+  if (S.ui.tab === 'skills') render();
 }
 
 // Practical, plain-language consequences of a few skills at your current level.
@@ -1084,6 +1117,17 @@ document.addEventListener('click', async (e) => {
     case 'buff-groups':
       document.querySelectorAll('details.buff-group').forEach((d) => { S.ui.buffOpen[d.dataset.buffopen] = el.dataset.v === '1'; });
       saveUi(); render(); break;
+    case 'ocr-run': {
+      S.ocr.running = true; render();
+      try {
+        const res = await fetch('/api/ocr/run', { method: 'POST' });
+        S.ocr.result = await res.json();
+      } catch (err) { S.ocr.result = { error: err.message }; }
+      S.ocr.running = false; S.ocr.status = null;
+      await poll(true);
+      render(); break;
+    }
+    case 'ocr-dismiss': S.ocr.result = null; render(); break;
     case 'h-show': S.ui.h.show = el.dataset.v; saveUi(); render(); break;
     case 'sk-cat': S.ui.sk.category = el.dataset.v; saveUi(); render(); break;
     case 'sk-view': S.ui.sk.view = el.dataset.v; saveUi(); render(); break;

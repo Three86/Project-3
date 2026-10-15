@@ -1,6 +1,8 @@
 FROM node:22-alpine
+# Tesseract OCR reads skill levels from in-game screenshots
+RUN apk add --no-cache tesseract-ocr tesseract-ocr-data-eng
 WORKDIR /app
-ENV NODE_ENV=production PORT=3000 DATA_DIR=/data EFT_LOGS_DIR=/eft-logs
+ENV NODE_ENV=production PORT=3000 DATA_DIR=/data EFT_LOGS_DIR=/eft-logs EFT_SCREENSHOTS_DIR=/eft-screenshots
 COPY package.json ./
 COPY server ./server
 COPY public ./public

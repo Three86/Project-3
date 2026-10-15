@@ -13,3 +13,5 @@ services:
       - ./data:/data
       # Your Escape from Tarkov Logs folder (read-only). Set EFT_LOGS_PATH in .env.
       - "${EFT_LOGS_PATH:-./data/no-logs}:/eft-logs:ro"
+      # Your Escape from Tarkov Screenshots folder (read-only), for reading skill levels by OCR.
+      - "${EFT_SCREENSHOTS_PATH:-./data/no-screenshots}:/eft-screenshots:ro"

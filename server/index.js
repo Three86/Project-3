@@ -5,10 +5,12 @@ const path = require('path');
 const { fetchGameData, queryVariants, API_URL } = require('./tarkovdev');
 const { fetchGameDataJson } = require('./tarkovjson');
 const { LogWatcher } = require('./logwatcher');
+const ocr = require('./ocr');
 
 const PORT = Number(process.env.PORT || 3000);
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
 const LOGS_DIR = process.env.EFT_LOGS_DIR || '/eft-logs';
+const SHOTS_DIR = process.env.EFT_SCREENSHOTS_DIR || '/eft-screenshots';
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const GAME_FILE = path.join(DATA_DIR, 'gamedata.json');
 const PROGRESS_FILE = path.join(DATA_DIR, 'progress.json');
@@ -179,6 +181,49 @@ function rebuildFromLogs() {
   return n;
 }
 
+// data/skills.json lets the user correct the bundled values without rebuilding the image.
+function skillsConfig() {
+  return readJson(path.join(DATA_DIR, 'skills.json'), null) || readJson(path.join(__dirname, 'skills.json'), { skills: [] });
+}
+
+// Read skill / PMC levels from the newest day's out-of-raid screenshots and apply them.
+let ocrRunning = null;
+async function runOcr() {
+  if (!(await ocr.tesseractAvailable())) return { error: 'Tesseract OCR is not installed (it is included in the Docker image).' };
+  const sel = ocr.selectScreenshots(SHOTS_DIR);
+  if (!sel.available) return { error: `Screenshot folder ${SHOTS_DIR} not found. Mount your Escape from Tarkov Screenshots folder (see README).` };
+  if (!sel.selected.length) return { error: sel.all.length ? 'All screenshots were taken in raid (they have coordinates in the file name); nothing to read.' : 'No screenshots found.' };
+  const skills = skillsConfig().skills.map((sk) => ({ id: sk.id, name: sk.name, aliases: sk.aliases }));
+  const files = [];
+  const levels = {};
+  let characterLevel = null;
+  for (const shot of sel.selected) { // oldest first, so later screenshots win
+    try {
+      const r = await ocr.readScreenshot(shot.file, skills);
+      Object.assign(levels, r.skills);
+      if (r.characterLevel) characterLevel = r.characterLevel;
+      files.push({ name: shot.name, skills: r.skills, characterLevel: r.characterLevel, unreadLevels: r.unpairedLevels.length });
+    } catch (err) {
+      files.push({ name: shot.name, error: err.message });
+    }
+  }
+  const nameOf = Object.fromEntries(skills.map((sk) => [sk.id, sk.name]));
+  const changes = [];
+  for (const [id, level] of Object.entries(levels)) {
+    const from = Number(progress.skills[id] || 0);
+    if (from !== level) changes.push({ id, name: nameOf[id] || id, from, to: level });
+    applyOp({ section: 'skills', id, value: level || null });
+  }
+  let playerLevel = null;
+  if (characterLevel && characterLevel !== progress.settings.playerLevel) {
+    playerLevel = { from: progress.settings.playerLevel, to: characterLevel };
+    applyOp({ section: 'settings', id: 'playerLevel', value: characterLevel });
+  }
+  if (changes.length || playerLevel) saveProgress();
+  log(`OCR: read ${files.length} screenshot(s) from ${sel.day}; ${Object.keys(levels).length} skills found, ${changes.length} changed`);
+  return { day: sel.day, files, found: Object.keys(levels).length, changes, playerLevel, skippedInRaid: sel.all.length - sel.usable.length, skippedOlder: sel.usable.length - sel.selected.length, rev: progress.rev };
+}
+
 // ---------- http ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json', '.ico': 'image/x-icon' };
 
@@ -228,8 +273,20 @@ async function handleApi(req, res, url) {
     case 'GET /api/status':
       return send(res, 200, status());
     case 'GET /api/skills':
-      // data/skills.json lets the user correct the bundled values without rebuilding the image.
-      return send(res, 200, readJson(path.join(DATA_DIR, 'skills.json'), null) || readJson(path.join(__dirname, 'skills.json'), { skills: [] }));
+      return send(res, 200, skillsConfig());
+    case 'GET /api/ocr/status': {
+      const sel = ocr.selectScreenshots(SHOTS_DIR);
+      return send(res, 200, {
+        dir: SHOTS_DIR, available: sel.available, tesseract: await ocr.tesseractAvailable(), running: !!ocrRunning,
+        total: sel.all.length, inRaid: sel.all.length - sel.usable.length, day: sel.day, selected: sel.selected.map((x) => x.name),
+      });
+    }
+    case 'POST /api/ocr/run': {
+      if (ocrRunning) return send(res, 409, { error: 'already reading screenshots' });
+      ocrRunning = runOcr().finally(() => { ocrRunning = null; });
+      const result = await ocrRunning;
+      return send(res, result.error ? 400 : 200, result);
+    }
     case 'GET /api/data':
       return gameData ? send(res, 200, gameData) : send(res, 404, { error: 'no game data yet', ...status() });
     case 'GET /api/data/queries':

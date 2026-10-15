@@ -8,6 +8,7 @@ A self-hosted quest, hideout and prestige tracker for Escape from Tarkov. It run
 - **Hideout**: shows each station with its next level, or all levels. Requirements cover items (with FIR flag and a counter), trader loyalty, skills and other stations. Other-station requirements tick automatically once you mark that level built.
 - **Prestige**: lists the prestige requirements. Level and quest conditions are tracked automatically and the rest have checkboxes. You can add your own requirements as checklist items.
 - **Skills**: enter your level for each skill and see its description, how it levels up, what each level gives and the elite bonus. An overview adds up the buffs on your PMC. Hideout and quest skill requirements tick automatically from these levels. Skill data is bundled in `server/skills.json` and is approximate, because tarkov.dev only publishes skill names. Copy it to `data/skills.json` and edit it to correct values.
+- **Read levels from screenshots (OCR)**: press the button on the Skills tab to read skill levels from screenshots of the in-game skills page. In-raid screenshots, which have coordinates in their file name, are skipped. Only the newest day's screenshots are used, and all of that day's screenshots are read. Tesseract OCR is bundled in the Docker image.
 - **Buffs**: adds up the bonuses of every hideout level you've built (boosted by your Hideout Management level). It also shows what your skills mean in the game: weight limits, food multiplier, fuel duration (including hideout fuel bonuses) and craft times, plus the totals of all skill buffs.
 - **Needed items**: a combined shopping list of everything your unfinished quests, hideout levels and prestige still need, split into FIR and non-FIR.
 - **Search**: search by quest name or item name. An item search shows every current or future quest, hideout level or prestige requirement that needs that item, including gear you have to wear or use.
@@ -51,6 +52,7 @@ EFT_LOGS_DIR="C:/Battlestate Games/EFT/Logs" npm start
 | Variable | Default | Meaning |
 |---|---|---|
 | `EFT_LOGS_PATH` | – | Host path of the game's Logs folder (compose only) |
+| `EFT_SCREENSHOTS_PATH` | – | Host path of the game's Screenshots folder (compose only), for OCR |
 | `GAME_MODE` | `regular` | `regular` (PvP) or `pve`. Can also be changed in Settings |
 | `WIPE_START` | `2025-11-15T09:00:00Z` | Default wipe start date; quest events in older game logs are ignored |
 | `REFRESH_HOURS` | `24` | Re-download game data when the cache is older than this. `0` disables refreshing |
