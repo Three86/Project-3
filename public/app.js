@@ -751,8 +751,8 @@ function ocrPanel() {
     const changed = new Map(r.changes.map((c) => [c.id, c]));
     const read = r.read || r.changes.map((c) => ({ id: c.id, name: c.name, level: c.to }));
     const changes = read.length
-      ? read.map((x) => { const c = changed.get(x.id); return c ? `<span class="badge changed">${esc(x.name)} ${c.from} → <b>${c.to}</b></span>` : `<span class="badge">${esc(x.name)} ${x.level} ✓</span>`; }).join(' ')
-        + `<div class="auto">${r.changes.length ? `${r.changes.length} changed` : 'All already matched the tracker'} · ✓ = already the same.</div>`
+      ? read.map((x) => { const c = changed.get(x.id); const inf = x.inferred ? ' <span title="Name unreadable; worked out from its position on the page">≈</span>' : ''; return c ? `<span class="badge changed">${esc(x.name)}${inf} ${c.from} → <b>${c.to}</b></span>` : `<span class="badge">${esc(x.name)}${inf} ${x.level} ✓</span>`; }).join(' ')
+        + `<div class="auto">${r.changes.length ? `${r.changes.length} changed` : 'All already matched the tracker'} · ✓ = already the same${read.some((x) => x.inferred) ? ' · ≈ = name unreadable, worked out from its position on the page' : ''}.</div>`
       : '<span class="auto">No skill levels could be read from these screenshots. Are they of the skills page?</span>';
     const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span style="color:var(--bad)">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
     result = `<div class="ocr-result"><div><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}

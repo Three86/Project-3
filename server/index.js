@@ -196,11 +196,13 @@ async function runOcr() {
   const skills = skillsConfig().skills.map((sk) => ({ id: sk.id, name: sk.name, aliases: sk.aliases }));
   const files = [];
   const levels = {};
+  const inferredIds = new Set(); // skills whose name was worked out from the page layout
   let characterLevel = null;
   for (const shot of sel.selected) { // oldest first, so later screenshots win
     try {
       const r = await ocr.readScreenshot(shot.file, skills, { playerLevels: gameData?.playerLevels });
       Object.assign(levels, r.skills);
+      for (const id of Object.keys(r.skills)) { if ((r.inferred || []).includes(id)) inferredIds.add(id); else inferredIds.delete(id); }
       if (r.characterLevel) characterLevel = r.characterLevel;
       files.push({ name: shot.name, skills: r.skills, characterLevel: r.characterLevel, levelCheck: r.levelCheck, unreadLevels: r.unpairedLevels.length });
     } catch (err) {
@@ -221,7 +223,7 @@ async function runOcr() {
   }
   if (changes.length || playerLevel) saveProgress();
   log(`OCR: read ${files.length} screenshot(s) from ${sel.day}; ${Object.keys(levels).length} skills found, ${changes.length} changed`);
-  const read = Object.entries(levels).map(([id, level]) => ({ id, name: nameOf[id] || id, level }));
+  const read = Object.entries(levels).map(([id, level]) => ({ id, name: nameOf[id] || id, level, inferred: inferredIds.has(id) }));
   return { day: sel.day, files, found: read.length, read, changes, playerLevel, skippedInRaid: sel.all.length - sel.usable.length, skippedOlder: sel.usable.length - sel.selected.length, rev: progress.rev };
 }
 

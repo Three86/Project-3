@@ -55,3 +55,25 @@ test('reads space-separated numbers after a label', () => {
   assert.strictEqual(numberAfter([label, w('312', 575), w('146', 618), w('remain', 1460)], label), 312146);
   assert.strictEqual(numberAfter([label, w('4', 575), w('705', 600)], label), 4705);
 });
+
+test('accepts OCR misreads of "Level" and infers names from the two-column layout', () => {
+  const line = (text, left, top) => ({ text, left, top, right: left + 200, bottom: top + 20, height: 20 });
+  const skills = ['Endurance', 'Strength', 'Vitality', 'Health', 'Stress Resistance', 'Metabolism'].map((n) => ({ id: n.replace(' ', ''), name: n }));
+  const lines = [
+    line('Ph Endurance', 150, 20), line('ee Bseeren', 1000, 20), // Strength unreadable
+    line('Level: 3', 150, 90), line('Lever 6', 1000, 90),
+    line('Ph Vitality', 150, 220), line('@reaith', 1000, 220),
+    line('Level: 2', 150, 290), line('Levek 4', 1000, 290),
+    line('Ph Stress Resistance', 150, 420), line('xx', 1000, 420), // Metabolism unreadable
+    line('Level: 3', 150, 490), line('Lever 9', 1000, 490),
+  ];
+  const r = extractLevels(lines, skills);
+  assert.deepStrictEqual(r.skills, { Endurance: 3, Strength: 6, Vitality: 2, Health: 4, StressResistance: 3, Metabolism: 9 });
+  assert.deepStrictEqual(r.inferred.sort(), ['Metabolism', 'Strength']);
+});
+
+test('drops phantom skills far outside the run of skills on the screenshot', () => {
+  const { dropOutliers } = require('../server/ocr');
+  const skills = Array.from({ length: 30 }, (_, i) => ({ id: `s${i}` }));
+  assert.deepStrictEqual(dropOutliers({ s0: 1, s1: 2, s2: 3, s3: 4, s22: 1 }, skills), { s0: 1, s1: 2, s2: 3, s3: 4 });
+});

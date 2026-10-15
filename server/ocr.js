@@ -8,6 +8,10 @@ const path = require('path');
 const { execFile } = require('child_process');
 const os = require('os');
 
+// Optional: enlarge small screenshots before OCR (Tesseract misreads text under ~20 px tall).
+let sharp = null;
+try { sharp = require('sharp'); } catch { /* not installed: read at native size only */ }
+
 const IMAGE_RE = /\.(png|jpe?g|bmp|webp|tiff?)$/i;
 // In-raid screenshots: "2024-06-08[19-02]_-283.66, 0.85, 103.09_0.01, 0.83, -0.02, 0.55_17.62 (0).png"
 const COORDS_RE = /-?\d+\.\d+\s*,\s*-?\d+\.\d+\s*,\s*-?\d+\.\d+/;
@@ -93,7 +97,46 @@ function tsvLines(tsv) {
   return [...lines.values()].map((l) => ({ ...l, text: l.words.join(' '), height: l.bottom - l.top }));
 }
 
-// skills: [{ id, name, aliases? }]. Returns { skills: { id: level }, unpairedLevels }.
+// The skills page lists skills in a fixed order, two per row (left, right). When a "Level: N" is
+// readable but its skill name is not, work the skill out from a known skill in the same row
+// (left = index - 1 of the right one) and check it against the nearest known skill in the same
+// column (two indexes per row). Skipped when the checks disagree or the page might be filtered.
+function inferFromLayout(unpaired, placed, skills, found, maxSkillLevel) {
+  const inferred = [];
+  if (!placed.length) return inferred;
+  const h = Math.max(10, ...placed.map((p) => p.height));
+  const sameRow = (a, b) => Math.abs(a.top - b.top) < 1.5 * h;
+  const sameCol = (a, b) => Math.abs(a.left - b.left) < 6 * h;
+  // Row height, from two known levels in the same column (each row holds two skills).
+  const pitches = [];
+  for (const a of placed) for (const b of placed) {
+    const rows = (b.index - a.index) / 2;
+    if (sameCol(a, b) && rows >= 1 && Number.isInteger(rows)) pitches.push((b.top - a.top) / rows);
+  }
+  const pitch = pitches.length ? pitches.sort((x, y) => x - y)[Math.floor(pitches.length / 2)] : null;
+  // A known pair in one row must be (i, i+1), i.e. the layout really is the unfiltered list.
+  for (const a of placed) for (const b of placed) {
+    if (a !== b && sameRow(a, b) && a.left < b.left && b.index !== a.index + 1) return inferred;
+  }
+  for (const lv of unpaired) {
+    if (lv.level > maxSkillLevel) continue;
+    const partner = placed.find((p) => sameRow(p, lv) && !sameCol(p, lv));
+    let idx = partner ? partner.index + (partner.left < lv.left ? 1 : -1) : null;
+    const vertical = pitch ? placed.filter((p) => sameCol(p, lv)).sort((a, b) => Math.abs(a.top - lv.top) - Math.abs(b.top - lv.top))[0] : null;
+    const fromVertical = vertical ? vertical.index + 2 * Math.round((lv.top - vertical.top) / pitch) : null;
+    if (idx == null) idx = fromVertical;
+    else if (fromVertical != null && fromVertical !== idx) continue; // disagreement: don't guess
+    const sk = idx != null ? skills[idx] : null;
+    if (!sk || sk.id in found) continue;
+    found[sk.id] = lv.level;
+    lv.inferred = true;
+    placed.push({ ...lv, index: idx });
+    inferred.push(sk.id);
+  }
+  return inferred;
+}
+
+// skills: [{ id, name, aliases? }] in in-game order. Returns { skills: { id: level }, inferred, unpairedLevels }.
 function extractLevels(lines, skills, { maxSkillLevel = 51 } = {}) {
   const names = skills
     .flatMap((sk) => [sk.name, ...(sk.aliases || [])].map((n) => ({ id: sk.id, key: norm(n) })))
@@ -102,7 +145,8 @@ function extractLevels(lines, skills, { maxSkillLevel = 51 } = {}) {
   const nameLines = [];
   const levelLines = [];
   for (const l of lines) {
-    const lv = l.text.match(/\blev[e3]l\b\s*[:;.]?\s*(\d{1,3})\b/i);
+    // "Level: 6", also as misread by OCR: "Lever 6", "Levek 8", "Levei: 6", "Leve1 6", "LeveI: 6".
+    const lv = l.text.match(/\b[l1i|]ev[e3c][a-z1|!]?\b\s*[:;.,]?\s*(\d{1,3})\b/i);
     if (lv) { levelLines.push({ ...l, level: Number(lv[1]) }); continue; }
     const k = norm(l.text);
     if (k.length < 3) continue;
@@ -122,6 +166,8 @@ function extractLevels(lines, skills, { maxSkillLevel = 51 } = {}) {
   const used = new Set();
   const found = {};
   const unpaired = [];
+  const placed = []; // level lines whose skill is known, with the skill's index in game order
+  const order = new Map(skills.map((sk, i) => [sk.id, i]));
   for (const lv of levelLines.sort((a, b) => a.top - b.top)) {
     // The skill name sits just above its "Level: N" line, starting at about the same x.
     let best = null;
@@ -136,9 +182,13 @@ function extractLevels(lines, skills, { maxSkillLevel = 51 } = {}) {
     if (best && lv.level <= maxSkillLevel) {
       used.add(best.n);
       found[best.n.id] = lv.level;
+      placed.push({ ...lv, index: order.get(best.n.id) });
     } else unpaired.push(lv);
   }
-  return { skills: found, characterLevel: null, unpairedLevels: unpaired.map((l) => l.text) };
+  const inferred = inferFromLayout(unpaired, placed, skills, found, maxSkillLevel);
+  const heights = levelLines.map((l) => l.height).sort((a, b) => a - b);
+  const textHeight = heights.length ? heights[Math.floor(heights.length / 2)] : null;
+  return { skills: found, inferred, textHeight, characterLevel: null, unpairedLevels: unpaired.filter((l) => !l.inferred).map((l) => l.text) };
 }
 
 // Tesseract on one rectangle of the image, digits only. Uses a .uzn zone file next to a temporary
@@ -222,10 +272,26 @@ async function readCharacterLevel(file, lines, { maxCharacterLevel = 79, playerL
   return { level: null, check }; // readings disagree: don't guess
 }
 
-async function readScreenshot(file, skills, { playerLevels } = {}) {
-  const tsv = await runTesseract(file);
-  const lines = tsvLines(tsv);
+// The skills page shows a continuous run of the fixed skill order, so a skill far away (in that
+// order) from all the others on the same screenshot is an OCR phantom: drop it.
+function dropOutliers(found, skills) {
+  const order = new Map(skills.map((sk, i) => [sk.id, i]));
+  const ids = Object.keys(found).filter((id) => order.has(id)).sort((a, b) => order.get(a) - order.get(b));
+  if (ids.length < 3) return found;
+  const groups = [[ids[0]]];
+  for (let i = 1; i < ids.length; i++) {
+    if (order.get(ids[i]) - order.get(ids[i - 1]) <= 4) groups[groups.length - 1].push(ids[i]);
+    else groups.push([ids[i]]);
+  }
+  const keep = new Set(groups.sort((a, b) => b.length - a.length)[0]);
+  if (keep.size < 3) return found;
+  return Object.fromEntries(Object.entries(found).filter(([id]) => keep.has(id)));
+}
+
+async function readPass(file, skills, playerLevels) {
+  const lines = tsvLines(await runTesseract(file));
   const result = extractLevels(lines, skills);
+  result.skills = dropOutliers(result.skills, skills);
   const ch = await readCharacterLevel(file, lines, { playerLevels }).catch(() => null);
   if (ch) {
     result.characterLevel = ch.level;
@@ -234,4 +300,52 @@ async function readScreenshot(file, skills, { playerLevels } = {}) {
   return result;
 }
 
-module.exports = { levelFromXp, numberAfter, substringDistance, selectScreenshots, readScreenshot, extractLevels, tsvLines, tesseractAvailable, COORDS_RE };
+const SMALL_TEXT_PX = 22;
+
+async function readScreenshot(file, skills, { playerLevels } = {}) {
+  const first = await readPass(file, skills, playerLevels);
+  // Small text (low resolution or a wide screen with a narrow UI): read again at 2x and merge.
+  // Also when the first read looks weak: few skills, or "Level" lines it couldn't match to a name.
+  const weak = Object.keys(first.skills).length < 6 || first.unpairedLevels.length > 0 || (first.inferred || []).length > 0;
+  const small = first.textHeight == null || first.textHeight < SMALL_TEXT_PX;
+  if (!sharp || (!small && !weak)) return { ...first, enlarged: false };
+  // Each enlarged read misses a few different skills, so read at two sizes and let them vote.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tt-big-'));
+  try {
+    const meta = await sharp(file).metadata();
+    const passes = [];
+    for (const [factor, kernel] of [[2, 'lanczos3'], [2.5, 'cubic']]) {
+      const big = path.join(dir, `x${factor}.png`);
+      await sharp(file).resize({ width: Math.round(meta.width * factor), kernel }).png().toFile(big);
+      passes.push(await readPass(big, skills, playerLevels));
+    }
+    passes.push(first); // last = lowest priority on ties
+    const votes = {};
+    passes.forEach((r, i) => { for (const [id, v] of Object.entries(r.skills)) (votes[id] ||= []).push({ v, i }); });
+    const merged = {};
+    for (const [id, list] of Object.entries(votes)) {
+      const count = new Map();
+      for (const { v } of list) count.set(v, (count.get(v) || 0) + 1);
+      // Most votes wins; ties go to the higher-priority (earlier) pass.
+      merged[id] = list.slice().sort((x, y) => count.get(y.v) - count.get(x.v) || x.i - y.i)[0].v;
+    }
+    for (const id of Object.keys(merged)) if (!(id in dropOutliers(merged, skills))) delete merged[id];
+    const pick = passes.find((r) => r.levelCheck?.confirmed) || passes.find((r) => r.characterLevel) || first;
+    const readDirectly = new Set(passes.flatMap((r) => Object.keys(r.skills).filter((id) => !(r.inferred || []).includes(id))));
+    return {
+      skills: merged,
+      inferred: Object.keys(merged).filter((id) => !readDirectly.has(id)),
+      textHeight: first.textHeight,
+      characterLevel: pick.characterLevel ?? null,
+      levelCheck: pick.levelCheck,
+      unpairedLevels: passes[0].unpairedLevels,
+      enlarged: true,
+    };
+  } catch {
+    return { ...first, enlarged: false };
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+module.exports = { dropOutliers, levelFromXp, numberAfter, substringDistance, selectScreenshots, readScreenshot, extractLevels, tsvLines, tesseractAvailable, COORDS_RE };
