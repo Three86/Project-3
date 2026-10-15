@@ -125,8 +125,8 @@ async function refreshGameData(reason) {
 }
 
 // Bump when the tracker starts using fields older cached game data doesn't have
-// (2: hideout bonuses, active skill list). Older caches are re-downloaded automatically.
-const DATA_VERSION = 2;
+// (2: hideout bonuses, active skill list; 3: XP table). Older caches are re-downloaded automatically.
+const DATA_VERSION = 3; // 3: XP table (playerLevels)
 const dataOutdated = () => !!gameData && (gameData.meta?.dataVersion || 1) < DATA_VERSION && gameData.meta?.source !== 'import';
 
 function dataIsStale() {
@@ -199,10 +199,10 @@ async function runOcr() {
   let characterLevel = null;
   for (const shot of sel.selected) { // oldest first, so later screenshots win
     try {
-      const r = await ocr.readScreenshot(shot.file, skills);
+      const r = await ocr.readScreenshot(shot.file, skills, { playerLevels: gameData?.playerLevels });
       Object.assign(levels, r.skills);
       if (r.characterLevel) characterLevel = r.characterLevel;
-      files.push({ name: shot.name, skills: r.skills, characterLevel: r.characterLevel, unreadLevels: r.unpairedLevels.length });
+      files.push({ name: shot.name, skills: r.skills, characterLevel: r.characterLevel, levelCheck: r.levelCheck, unreadLevels: r.unpairedLevels.length });
     } catch (err) {
       files.push({ name: shot.name, error: err.message });
     }

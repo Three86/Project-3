@@ -124,6 +124,11 @@ async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.
   const q = queryVariants({ gameMode, lang });
   const tasks = await firstWorking(q.tasks, 'tasks', log);
   const hideout = await firstWorking(q.hideoutStations, 'hideoutStations', log);
+  let playerLevels = [];
+  try {
+    // GraphQL has no per-game-mode XP table; this is the PvP one (the JSON feed has both).
+    playerLevels = await firstWorking(['{ playerLevels { level exp } }'], 'playerLevels', log);
+  } catch { /* optional: only used to cross-check the PMC level read from screenshots */ }
   let prestige = [];
   let prestigeError = null;
   try {
@@ -136,6 +141,7 @@ async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.
     tasks,
     hideout,
     prestige,
+    playerLevels,
   };
 }
 

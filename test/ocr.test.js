@@ -38,3 +38,20 @@ test('fuzzy substring distance', () => {
   assert.strictEqual(substringDistance('dmrs', 'pmrs'), 1);
   assert.strictEqual(substringDistance('strength', 'phstrength'), 0);
 });
+
+test('level from total XP, validated by the remaining XP', () => {
+  const { levelFromXp } = require('../server/ocr');
+  const table = [{ level: 1, exp: 0 }, { level: 2, exp: 1000 }, { level: 3, exp: 2000 }, { level: 4, exp: 3000 }];
+  assert.deepStrictEqual(levelFromXp(table, 0), { level: 1, nextAt: 1000 });
+  assert.deepStrictEqual(levelFromXp(table, 2999), { level: 2, nextAt: 3000 });
+  assert.deepStrictEqual(levelFromXp(table, 3000, 3000), { level: 3, nextAt: 6000 });
+  assert.deepStrictEqual(levelFromXp(table, 3000, 2500), { level: null, mismatch: true }); // table from another game version
+});
+
+test('reads space-separated numbers after a label', () => {
+  const { numberAfter } = require('../server/ocr');
+  const w = (text, left) => ({ text, left, top: 170, width: text.length * 10, height: 18 });
+  const label = w('current:', 470);
+  assert.strictEqual(numberAfter([label, w('312', 575), w('146', 618), w('remain', 1460)], label), 312146);
+  assert.strictEqual(numberAfter([label, w('4', 575), w('705', 600)], label), 4705);
+});

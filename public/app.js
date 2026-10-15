@@ -731,12 +731,23 @@ function ocrPanel() {
   if (r?.error) result = `<div class="ocr-result bad">${esc(r.error)}</div>`;
   else if (r) {
     const changes = r.changes.length ? r.changes.map((c) => `<span class="badge">${esc(c.name)} ${c.from} → <b>${c.to}</b></span>`).join(' ') : '<span class="auto">No skill levels changed.</span>';
-    const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span style="color:var(--bad)">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
+    const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span style="color:var(--bad)">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
     result = `<div class="ocr-result"><div><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}
       <button class="btn small" data-act="ocr-dismiss">✕</button></div><div class="ocr-changes">${changes}</div><details><summary>Screenshots</summary><div class="sources">${files}</div></details></div>`;
   }
   return `<div class="toolbar ocr-bar"><button class="btn primary" data-act="ocr-run" ${running || !st?.selected?.length || !st?.tesseract ? 'disabled' : ''}>${running ? 'Reading screenshots…' : '📷 Read levels from screenshots'}</button>
     <span class="auto">${info}</span></div>${result}`;
+}
+
+// "3 of 3 checks agree: big number 17, next level 18 − 1, XP 312 146 → 17"
+function levelCheckText(c) {
+  const parts = [];
+  if (c.number != null) parts.push(`number ${c.number}`);
+  if (c.nextLevel != null) parts.push(`next level ${c.nextLevel + 1} − 1`);
+  if (c.xp != null) parts.push(`XP ${Number(c.xpValue).toLocaleString()} → ${c.xp}`);
+  else if (c.xpValue != null) parts.push(`XP ${Number(c.xpValue).toLocaleString()} ${c.xpTableMissing ? '(no XP table yet)' : c.xpTableMismatch ? '(XP table does not match this game version)' : ''}`);
+  const head = c.agree ? `${c.agree} of ${c.of} checks agree` : 'checks disagree, level not changed';
+  return `${head}: ${parts.join(', ')}`;
 }
 
 let ocrStatusLoading = false;

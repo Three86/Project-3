@@ -191,6 +191,8 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
 
   // Skills tarkov.dev considers active in the game (it filters out removed ones like Prone Movement).
   const skills = Object.values(itemsFile.skills || {}).filter((sk) => sk?.id).map((sk) => ({ id: sk.id, name: sk.name }));
+  // XP table for this game mode: exp = experience needed to reach that level from the one before.
+  const playerLevels = list(itemsFile.playerLevels).filter((l) => l && Number.isFinite(l.level)).map((l) => ({ level: l.level, exp: l.exp }));
 
   return {
     meta: { source: JSON_URL, fetchedAt: new Date().toISOString(), gameMode, lang, prestigeError: null },
@@ -198,6 +200,7 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
     hideout,
     prestige,
     skills,
+    playerLevels,
   };
 }
 

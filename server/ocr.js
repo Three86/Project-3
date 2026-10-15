@@ -156,35 +156,82 @@ async function readDigitsInBox(file, box) {
   }
 }
 
+// Number written right after a label word on the same line, e.g. "current: 312 146" -> 312146.
+function numberAfter(words, label) {
+  const h = label.height || 17;
+  const after = words
+    .filter((w) => w.left > label.left + label.width - 2 && Math.abs(w.top - label.top) < h && w.left - (label.left + label.width) < 30 * h)
+    .sort((a, b) => a.left - b.left);
+  const groups = [];
+  for (const w of after) {
+    if (!/^\d{1,3}$/.test(w.text) || (groups.length && w.text.length !== 3)) break; // thousands are space-separated
+    groups.push(w.text);
+  }
+  return groups.length ? Number(groups.join('')) : null;
+}
+
+// Level for a total amount of XP. levels: [{ level, exp }] where exp is the XP needed to reach that
+// level from the one before. If the "remaining" XP was read too, current + remaining must land exactly
+// on the next level's threshold; otherwise the table doesn't match this game version and is ignored.
+function levelFromXp(levels, xp, remaining) {
+  if (!Array.isArray(levels) || !levels.length || !Number.isFinite(xp)) return null;
+  const sorted = levels.slice().sort((a, b) => a.level - b.level);
+  let total = 0;
+  const threshold = new Map();
+  for (const l of sorted) { total += Number(l.exp) || 0; threshold.set(l.level, total); }
+  let level = null;
+  for (const [lv, t] of threshold) if (t <= xp) level = lv;
+  if (level == null) return null;
+  const next = threshold.get(level + 1);
+  if (Number.isFinite(remaining) && next != null && next !== xp + remaining) return { level: null, mismatch: true };
+  return { level, nextAt: next };
+}
+
 // The character screen header shows "<level> current: 312 146 ... remaining: 4 705 <next level>".
-// Read the big number left of "current:" from its own crop (the rank emblem beside it confuses a
-// full-page read) and cross-check it with the next-level number on the right.
-async function readCharacterLevel(file, lines, { maxCharacterLevel = 79 } = {}) {
+// Three independent readings of the PMC level:
+//  - the big number left of "current:", re-read from its own crop (the rank emblem beside it
+//    confuses a full-page read),
+//  - the next-level number on the right, minus one,
+//  - the level that the total XP ("current") corresponds to in the game's XP table.
+// The level is used when at least two agree, or when only one could be read.
+async function readCharacterLevel(file, lines, { maxCharacterLevel = 79, playerLevels } = {}) {
   const words = lines.flatMap((l) => l.wordBoxes || []);
   const current = words.find((w) => /^current:?$/i.test(w.text));
   if (!current) return null;
   const h = current.height || 17;
   const box = [current.left - 6.5 * h, current.top - 3.8 * h, 6.2 * h, 5.5 * h];
-  const left = Number((await readDigitsInBox(file, box)).replace(/\D/g, '')) || null;
-  // Next level: a number in the same header band, right of "remain(ing)".
-  const remaining = words.find((w) => /^remain/i.test(w.text));
-  const right = remaining ? words
-    .filter((w) => /^\d{1,2}$/.test(w.text) && w.left > remaining.left + remaining.width && w.top > current.top - 5 * h && w.top < current.top + h)
+  const ok = (n) => Number.isFinite(n) && n >= 1 && n <= maxCharacterLevel;
+  const crop = Number((await readDigitsInBox(file, box)).replace(/\D/g, '')) || null;
+  const remainingWord = words.find((w) => /^remain/i.test(w.text));
+  const right = remainingWord ? words
+    .filter((w) => /^\d{1,2}$/.test(w.text) && w.left > remainingWord.left + remainingWord.width && w.top > current.top - 5 * h && w.top < current.top + h)
     .map((w) => Number(w.text))
     .find((n) => n >= 2 && n <= maxCharacterLevel + 1) : null;
-  const ok = (n) => n && n >= 1 && n <= maxCharacterLevel;
-  if (ok(left) && (!right || right === left + 1)) return { level: left, confirmed: right === left + 1 };
-  if (!ok(left) && right) return { level: right - 1, confirmed: false };
-  return null; // the two numbers disagree: don't guess
+  const xp = numberAfter(words, current);
+  const remaining = remainingWord ? numberAfter(words, remainingWord) : null;
+  const fromXp = xp != null ? levelFromXp(playerLevels, xp, remaining) : null;
+
+  const readings = { number: ok(crop) ? crop : null, nextLevel: right ? right - 1 : null, xp: ok(fromXp?.level) ? fromXp.level : null };
+  const values = Object.values(readings).filter((v) => v != null);
+  const check = { ...readings, xpValue: xp, xpTableMismatch: !!fromXp?.mismatch, xpTableMissing: !Array.isArray(playerLevels) || !playerLevels.length };
+  if (!values.length) return null;
+  const counts = new Map();
+  for (const v of values) counts.set(v, (counts.get(v) || 0) + 1);
+  const [best, n] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (n >= 2 || values.length === 1) return { level: best, confirmed: n >= 2, agree: n, of: values.length, check };
+  return { level: null, check }; // readings disagree: don't guess
 }
 
-async function readScreenshot(file, skills) {
+async function readScreenshot(file, skills, { playerLevels } = {}) {
   const tsv = await runTesseract(file);
   const lines = tsvLines(tsv);
   const result = extractLevels(lines, skills);
-  const ch = await readCharacterLevel(file, lines).catch(() => null);
-  if (ch) { result.characterLevel = ch.level; result.characterLevelConfirmed = ch.confirmed; }
+  const ch = await readCharacterLevel(file, lines, { playerLevels }).catch(() => null);
+  if (ch) {
+    result.characterLevel = ch.level;
+    result.levelCheck = { confirmed: !!ch.confirmed, agree: ch.agree, of: ch.of, ...ch.check };
+  }
   return result;
 }
 
-module.exports = { substringDistance, selectScreenshots, readScreenshot, extractLevels, tsvLines, tesseractAvailable, COORDS_RE };
+module.exports = { levelFromXp, numberAfter, substringDistance, selectScreenshots, readScreenshot, extractLevels, tsvLines, tesseractAvailable, COORDS_RE };
