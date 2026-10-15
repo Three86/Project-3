@@ -1,11 +1,12 @@
 'use strict';
-// Reads skill levels (and the PMC level, when shown) from in-game screenshots using the
-// Tesseract OCR command line tool. Screenshots taken in raid have the player position in their
-// file name and are skipped; of the rest only the most recent day's screenshots are used.
+// Reads skill levels (and the PMC level, when shown) from in-game screenshots using an AI OCR model
+// (RapidOCR, see ocr_ai.py) and/or the Tesseract OCR command line tool. Screenshots taken in raid
+// have the player position in their file name and are skipped; of the rest only the most recent
+// day's screenshots are used.
 
 const fs = require('fs');
 const path = require('path');
-const { execFile } = require('child_process');
+const { execFile, spawn } = require('child_process');
 const os = require('os');
 
 // Optional: enlarge small screenshots before OCR (Tesseract misreads text under ~20 px tall).
@@ -146,8 +147,12 @@ function extractLevels(lines, skills, { maxSkillLevel = 51 } = {}) {
   const levelLines = [];
   for (const l of lines) {
     // "Level: 6", also as misread by OCR: "Lever 6", "Levek 8", "Levei: 6", "Leve1 6", "LeveI: 6".
-    const lv = l.text.match(/\b[l1i|]ev[e3c][a-z1|!]?\b\s*[:;.,]?\s*(\d{1,3})\b/i);
-    if (lv) { levelLines.push({ ...l, level: Number(lv[1]) }); continue; }
+    // The number may contain look-alike letters ("Level: B" for 8, "Level: O" for 0).
+    const lv = l.text.match(/\b[l1i|]ev[e3c][a-z1|!]?\b\s*[:;.,]?\s*([\dOoBSIl|]{1,3})(?![a-z])/i);
+    let digits = lv && lv[1].replace(/[Oo]/g, '0').replace(/B/g, '8').replace(/S/g, '5').replace(/[Il|]/g, '1');
+    // An impossible value from a doubled character ("8B" -> 88): keep only the real leading digits.
+    if (lv && Number(digits) > maxSkillLevel && /^\d+/.test(lv[1])) digits = lv[1].match(/^\d+/)[0];
+    if (lv && /^\d+$/.test(digits)) { levelLines.push({ ...l, level: Number(digits) }); continue; }
     const k = norm(l.text);
     if (k.length < 3) continue;
     let hit = names.find((n) => k.includes(n.key));
@@ -191,6 +196,10 @@ function extractLevels(lines, skills, { maxSkillLevel = 51 } = {}) {
   return { skills: found, inferred, textHeight, characterLevel: null, unpairedLevels: unpaired.filter((l) => !l.inferred).map((l) => l.text) };
 }
 
+// ---------- OCR engines ----------
+// Each reader offers lines(file) -> text lines with boxes (the shape tsvLines returns) and
+// digits(file, box) -> digits read from one rectangle. Everything after that is engine-neutral.
+
 // Tesseract on one rectangle of the image, digits only. Uses a .uzn zone file next to a temporary
 // copy of the screenshot (the screenshot folder itself is mounted read-only).
 async function readDigitsInBox(file, box) {
@@ -206,6 +215,103 @@ async function readDigitsInBox(file, box) {
   }
 }
 
+const tesseractReader = {
+  name: 'tesseract',
+  lines: async (file) => tsvLines(await runTesseract(file)),
+  digits: readDigitsInBox,
+  enlargeFactors: [[2, 'lanczos3'], [2.5, 'cubic']],
+  enlargeWhenSmall: true,
+};
+
+// AI engine: RapidOCR (PaddleOCR models on ONNX Runtime, CPU) in a Python sidecar, see ocr_ai.py.
+const AI_PYTHON = process.env.OCR_AI_PYTHON || 'python3';
+const AI_SCRIPT = path.join(__dirname, 'ocr_ai.py');
+let aiAvailableCache;
+function aiAvailable() {
+  if (aiAvailableCache !== undefined) return Promise.resolve(aiAvailableCache);
+  return new Promise((resolve) => execFile(AI_PYTHON, ['-c', 'import rapidocr_onnxruntime'], { timeout: 60000 }, (err) => resolve((aiAvailableCache = !err))));
+}
+
+async function engines() {
+  const [ai, tesseract] = await Promise.all([aiAvailable(), tesseractAvailable()]);
+  return { ai, tesseract };
+}
+
+// One sidecar process per OCR run: the model loads once, then answers one JSON request per line.
+function startAi() {
+  const proc = spawn(AI_PYTHON, [AI_SCRIPT], { stdio: ['pipe', 'pipe', 'pipe'] });
+  const pending = new Map();
+  let nextId = 1;
+  let buf = '';
+  let stderr = '';
+  let readyResolve, readyReject;
+  const ready = new Promise((res, rej) => { readyResolve = res; readyReject = rej; });
+  const timer = setTimeout(() => readyReject(new Error('AI OCR did not start within 120 s')), 120000);
+  proc.stderr.on('data', (d) => { stderr = (stderr + d).slice(-2000); });
+  proc.stdout.on('data', (d) => {
+    buf += d;
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).trim();
+      buf = buf.slice(i + 1);
+      if (line === 'ready') { clearTimeout(timer); readyResolve(); continue; }
+      let msg;
+      try { msg = JSON.parse(line); } catch { continue; }
+      const p = pending.get(msg.id);
+      if (!p) continue;
+      pending.delete(msg.id);
+      msg.error ? p.reject(new Error(msg.error)) : p.resolve(msg.lines);
+    }
+  });
+  const fail = (err) => {
+    clearTimeout(timer);
+    readyReject(err);
+    for (const p of pending.values()) p.reject(err);
+    pending.clear();
+  };
+  proc.on('error', fail);
+  proc.on('exit', (code) => fail(new Error(`AI OCR stopped (exit ${code}) ${stderr.trim().split('\n').pop() || ''}`.trim())));
+  const request = (req) => new Promise((resolve, reject) => {
+    const id = nextId++;
+    pending.set(id, { resolve, reject });
+    proc.stdin.write(`${JSON.stringify({ ...req, id })}\n`);
+  });
+  return {
+    ready,
+    request,
+    stop: () => { try { proc.stdin.end(); proc.kill(); } catch { /* already gone */ } },
+  };
+}
+
+// AI results are whole text lines ("current: 312 146"); split them into words with estimated boxes
+// so the word-level logic (labels, numbers after labels) works the same as with Tesseract.
+function aiLines(raw) {
+  return (raw || []).map((l) => {
+    const text = String(l.text || '').replace(/:(?=\S)/g, ': ').trim();
+    const charW = l.width / Math.max(1, text.length);
+    const wordBoxes = [];
+    let pos = 0;
+    for (const w of text.split(/\s+/)) {
+      if (!w) continue;
+      const at = text.indexOf(w, pos);
+      wordBoxes.push({ text: w, left: Math.round(l.left + at * charW), top: l.top, width: Math.round(w.length * charW), height: l.height });
+      pos = at + w.length;
+    }
+    return { text, left: l.left, top: l.top, right: l.left + l.width, bottom: l.top + l.height, height: l.height, wordBoxes, score: l.score };
+  });
+}
+
+function aiReader(session) {
+  return {
+    name: 'ai',
+    lines: async (file) => aiLines(await session.request({ file })),
+    // Text in the crop, left to right (the big level number; the emblem beside it reads as nothing).
+    digits: async (file, box) => (await session.request({ file, box })).sort((a, b) => a.left - b.left).map((l) => l.text).join(' '),
+    enlargeFactors: [[2, 'lanczos3']],
+    enlargeWhenSmall: false, // reads small text fine; only re-read when the result looks weak
+  };
+}
+
 // Number written right after a label word on the same line, e.g. "current: 312 146" -> 312146.
 function numberAfter(words, label) {
   const h = label.height || 17;
@@ -214,6 +320,7 @@ function numberAfter(words, label) {
     .sort((a, b) => a.left - b.left);
   const groups = [];
   for (const w of after) {
+    if (!groups.length && /^\d{4,8}$/.test(w.text)) { groups.push(w.text); break; } // read without separator
     if (!/^\d{1,3}$/.test(w.text) || (groups.length && w.text.length !== 3)) break; // thousands are space-separated
     groups.push(w.text);
   }
@@ -244,14 +351,14 @@ function levelFromXp(levels, xp, remaining) {
 //  - the next-level number on the right, minus one,
 //  - the level that the total XP ("current") corresponds to in the game's XP table.
 // The level is used when at least two agree, or when only one could be read.
-async function readCharacterLevel(file, lines, { maxCharacterLevel = 79, playerLevels } = {}) {
+async function readCharacterLevel(file, lines, { maxCharacterLevel = 79, playerLevels, digits = readDigitsInBox } = {}) {
   const words = lines.flatMap((l) => l.wordBoxes || []);
   const current = words.find((w) => /^current:?$/i.test(w.text));
   if (!current) return null;
   const h = current.height || 17;
   const box = [current.left - 6.5 * h, current.top - 3.8 * h, 6.2 * h, 5.5 * h];
   const ok = (n) => Number.isFinite(n) && n >= 1 && n <= maxCharacterLevel;
-  const crop = Number((await readDigitsInBox(file, box)).replace(/\D/g, '')) || null;
+  const crop = Number(String(await digits(file, box)).replace(/\D/g, '')) || null;
   const remainingWord = words.find((w) => /^remain/i.test(w.text));
   const right = remainingWord ? words
     .filter((w) => /^\d{1,2}$/.test(w.text) && w.left > remainingWord.left + remainingWord.width && w.top > current.top - 5 * h && w.top < current.top + h)
@@ -288,11 +395,11 @@ function dropOutliers(found, skills) {
   return Object.fromEntries(Object.entries(found).filter(([id]) => keep.has(id)));
 }
 
-async function readPass(file, skills, playerLevels) {
-  const lines = tsvLines(await runTesseract(file));
+async function readPass(reader, file, skills, playerLevels) {
+  const lines = await reader.lines(file);
   const result = extractLevels(lines, skills);
   result.skills = dropOutliers(result.skills, skills);
-  const ch = await readCharacterLevel(file, lines, { playerLevels }).catch(() => null);
+  const ch = await readCharacterLevel(file, lines, { playerLevels, digits: reader.digits }).catch(() => null);
   if (ch) {
     result.characterLevel = ch.level;
     result.levelCheck = { confirmed: !!ch.confirmed, agree: ch.agree, of: ch.of, ...ch.check };
@@ -301,46 +408,49 @@ async function readPass(file, skills, playerLevels) {
 }
 
 const SMALL_TEXT_PX = 22;
+const looksWeak = (r) => Object.keys(r.skills).length < 6 || r.unpairedLevels.length > 0 || (r.inferred || []).length > 0;
 
-async function readScreenshot(file, skills, { playerLevels } = {}) {
-  const first = await readPass(file, skills, playerLevels);
-  // Small text (low resolution or a wide screen with a narrow UI): read again at 2x and merge.
-  // Also when the first read looks weak: few skills, or "Level" lines it couldn't match to a name.
-  const weak = Object.keys(first.skills).length < 6 || first.unpairedLevels.length > 0 || (first.inferred || []).length > 0;
-  const small = first.textHeight == null || first.textHeight < SMALL_TEXT_PX;
-  if (!sharp || (!small && !weak)) return { ...first, enlarged: false };
-  // Each enlarged read misses a few different skills, so read at two sizes and let them vote.
+// Combine several reads of the same screenshot: per skill the value most reads agree on wins,
+// ties go to the earlier (higher-priority) read; phantoms are dropped again afterwards.
+function mergeReads(reads, skills) {
+  const votes = {};
+  reads.forEach((r, i) => { for (const [id, v] of Object.entries(r.skills)) (votes[id] ||= []).push({ v, i }); });
+  const merged = {};
+  for (const [id, list] of Object.entries(votes)) {
+    const count = new Map();
+    for (const { v } of list) count.set(v, (count.get(v) || 0) + 1);
+    merged[id] = list.slice().sort((x, y) => count.get(y.v) - count.get(x.v) || x.i - y.i)[0].v;
+  }
+  const kept = dropOutliers(merged, skills);
+  const pick = reads.find((r) => r.levelCheck?.confirmed) || reads.find((r) => r.characterLevel) || reads[0];
+  const readDirectly = new Set(reads.flatMap((r) => Object.keys(r.skills).filter((id) => !(r.inferred || []).includes(id))));
+  return {
+    skills: kept,
+    inferred: Object.keys(kept).filter((id) => !readDirectly.has(id)),
+    textHeight: reads[reads.length - 1].textHeight,
+    characterLevel: pick.characterLevel ?? null,
+    levelCheck: pick.levelCheck,
+    unpairedLevels: reads[0].unpairedLevels,
+  };
+}
+
+// One engine: read at native size; if the text is small or the read looks weak, also read enlarged
+// copies and let the reads vote.
+async function readWith(reader, file, skills, playerLevels) {
+  const first = await readPass(reader, file, skills, playerLevels);
+  const small = reader.enlargeWhenSmall && (first.textHeight == null || first.textHeight < SMALL_TEXT_PX);
+  if (!sharp || (!small && !looksWeak(first))) return { ...first, enlarged: false };
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tt-big-'));
   try {
     const meta = await sharp(file).metadata();
-    const passes = [];
-    for (const [factor, kernel] of [[2, 'lanczos3'], [2.5, 'cubic']]) {
+    const reads = [];
+    for (const [factor, kernel] of reader.enlargeFactors) {
       const big = path.join(dir, `x${factor}.png`);
       await sharp(file).resize({ width: Math.round(meta.width * factor), kernel }).png().toFile(big);
-      passes.push(await readPass(big, skills, playerLevels));
+      reads.push(await readPass(reader, big, skills, playerLevels));
     }
-    passes.push(first); // last = lowest priority on ties
-    const votes = {};
-    passes.forEach((r, i) => { for (const [id, v] of Object.entries(r.skills)) (votes[id] ||= []).push({ v, i }); });
-    const merged = {};
-    for (const [id, list] of Object.entries(votes)) {
-      const count = new Map();
-      for (const { v } of list) count.set(v, (count.get(v) || 0) + 1);
-      // Most votes wins; ties go to the higher-priority (earlier) pass.
-      merged[id] = list.slice().sort((x, y) => count.get(y.v) - count.get(x.v) || x.i - y.i)[0].v;
-    }
-    for (const id of Object.keys(merged)) if (!(id in dropOutliers(merged, skills))) delete merged[id];
-    const pick = passes.find((r) => r.levelCheck?.confirmed) || passes.find((r) => r.characterLevel) || first;
-    const readDirectly = new Set(passes.flatMap((r) => Object.keys(r.skills).filter((id) => !(r.inferred || []).includes(id))));
-    return {
-      skills: merged,
-      inferred: Object.keys(merged).filter((id) => !readDirectly.has(id)),
-      textHeight: first.textHeight,
-      characterLevel: pick.characterLevel ?? null,
-      levelCheck: pick.levelCheck,
-      unpairedLevels: passes[0].unpairedLevels,
-      enlarged: true,
-    };
+    reads.push(first); // native read: lowest priority on ties
+    return { ...mergeReads(reads, skills), enlarged: true };
   } catch {
     return { ...first, enlarged: false };
   } finally {
@@ -348,4 +458,17 @@ async function readScreenshot(file, skills, { playerLevels } = {}) {
   }
 }
 
-module.exports = { dropOutliers, levelFromXp, numberAfter, substringDistance, selectScreenshots, readScreenshot, extractLevels, tsvLines, tesseractAvailable, COORDS_RE };
+// engine: 'auto' (AI first, Tesseract joins when the AI read looks weak), 'ai' or 'tesseract'.
+// ai: a running AI session from startAi() (required for 'auto'/'ai' to use the AI engine).
+async function readScreenshot(file, skills, { playerLevels, engine = 'auto', ai = null } = {}) {
+  const useAi = ai && engine !== 'tesseract';
+  if (!useAi) return { ...(await readWith(tesseractReader, file, skills, playerLevels)), engines: ['tesseract'] };
+  const fromAi = await readWith(aiReader(ai), file, skills, playerLevels);
+  if (engine === 'ai' || !looksWeak(fromAi)) return { ...fromAi, engines: ['ai'] };
+  const fromTesseract = await readWith(tesseractReader, file, skills, playerLevels).catch(() => null);
+  if (!fromTesseract) return { ...fromAi, engines: ['ai'] };
+  // AI first: it wins ties; Tesseract fills in what the AI missed.
+  return { ...mergeReads([fromAi, fromTesseract], skills), enlarged: fromAi.enlarged || fromTesseract.enlarged, engines: ['ai', 'tesseract'] };
+}
+
+module.exports = { aiLines, engines, startAi, aiAvailable, dropOutliers, levelFromXp, numberAfter, substringDistance, selectScreenshots, readScreenshot, extractLevels, tsvLines, tesseractAvailable, COORDS_RE };

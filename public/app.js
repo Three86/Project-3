@@ -740,10 +740,10 @@ function ocrPanel() {
   if (!st) loadOcrStatus();
   let info = 'Checking screenshot folder…';
   if (st) {
-    if (!st.tesseract) info = 'OCR engine (Tesseract) not installed. It comes with the Docker image.';
+    if (!st.tesseract && !st.ai) info = 'No OCR engine installed. Both come with the Docker image.';
     else if (!st.available) info = `Screenshot folder not found (<code>${esc(st.dir)}</code>). Mount your Tarkov Screenshots folder, see README.`;
     else if (!st.selected.length) info = st.total ? 'Only in-raid screenshots found (those are skipped).' : 'No screenshots in the folder yet.';
-    else info = `Will read ${st.selected.length} screenshot${st.selected.length === 1 ? '' : 's'} from <b>${esc(st.day)}</b>${st.inRaid ? ` · ${st.inRaid} in-raid skipped` : ''}`;
+    else info = `Will read ${st.selected.length} screenshot${st.selected.length === 1 ? '' : 's'} from <b>${esc(st.day)}</b>${st.inRaid ? ` · ${st.inRaid} in-raid skipped` : ''} · engine: ${esc(ocrEngineLabel(st))}`;
   }
   let result = '';
   if (r?.error) result = `<div class="ocr-result bad">${esc(r.error)}</div>`;
@@ -754,11 +754,11 @@ function ocrPanel() {
       ? read.map((x) => { const c = changed.get(x.id); const inf = x.inferred ? ' <span title="Name unreadable; worked out from its position on the page">≈</span>' : ''; return c ? `<span class="badge changed">${esc(x.name)}${inf} ${c.from} → <b>${c.to}</b></span>` : `<span class="badge">${esc(x.name)}${inf} ${x.level} ✓</span>`; }).join(' ')
         + `<div class="auto">${r.changes.length ? `${r.changes.length} changed` : 'All already matched the tracker'} · ✓ = already the same${read.some((x) => x.inferred) ? ' · ≈ = name unreadable, worked out from its position on the page' : ''}.</div>`
       : '<span class="auto">No skill levels could be read from these screenshots. Are they of the skills page?</span>';
-    const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span style="color:var(--bad)">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
-    result = `<div class="ocr-result"><div><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}
+    const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span style="color:var(--bad)">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.engines ? ` <span class="badge">${esc(f.engines.map((e) => (e === 'ai' ? 'AI' : 'Tesseract')).join(' + '))}</span>` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
+    result = `<div class="ocr-result">${r.aiError ? `<div class="auto" style="color:var(--warn)">AI OCR failed to start (${esc(r.aiError)}); Tesseract was used.</div>` : ''}<div><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}
       <button class="btn small" data-act="ocr-dismiss">✕</button></div><div class="ocr-changes">${changes}</div><details><summary>Screenshots</summary><div class="sources">${files}</div></details></div>`;
   }
-  return `<div class="toolbar ocr-bar"><button class="btn primary" data-act="ocr-run" ${running || !st?.selected?.length || !st?.tesseract ? 'disabled' : ''}>${running ? 'Reading screenshots…' : '📷 Read levels from screenshots'}</button>
+  return `<div class="toolbar ocr-bar"><button class="btn primary" data-act="ocr-run" ${running || !st?.selected?.length || !(st?.tesseract || st?.ai) ? 'disabled' : ''}>${running ? 'Reading screenshots…' : '📷 Read levels from screenshots'}</button>
     <span class="auto">${info}</span></div>${result}`;
 }
 
@@ -771,6 +771,14 @@ function levelCheckText(c) {
   else if (c.xpValue != null) parts.push(`XP ${Number(c.xpValue).toLocaleString()} ${c.xpTableMissing ? '(no XP table yet)' : c.xpTableMismatch ? '(XP table does not match this game version)' : ''}`);
   const head = c.agree ? `${c.agree} of ${c.of} checks agree` : 'checks disagree, level not changed';
   return `${head}: ${parts.join(', ')}`;
+}
+
+// What will actually run, given the setting and what is installed.
+function ocrEngineLabel(st) {
+  const want = st.engine || 'auto';
+  if (want === 'tesseract') return st.tesseract ? 'Tesseract' : 'Tesseract (not installed)';
+  if (want === 'ai') return st.ai ? 'AI' : 'AI (not installed)';
+  return st.ai ? (st.tesseract ? 'AI, Tesseract as backup' : 'AI') : 'Tesseract (AI not installed)';
 }
 
 let ocrStatusLoading = false;
@@ -1068,6 +1076,10 @@ function renderSettings() {
         <button class="btn" data-act="rescan">Re-read all logs</button></div>
       ${(logs.lastEvents || []).length ? `<div class="kv">Recent: ${logs.lastEvents.slice(0, 8).map((e) => `${esc(idx.tasks.get(e.taskId)?.name || e.taskId)} → ${esc(e.status)}`).join(' · ')}</div>` : ''}
     </div>
+    <div class="card"><h3>Screenshot reading (OCR)</h3>
+      <div class="row"><label>Engine <select data-set="ocrEngine">${[['auto', 'Auto: AI, Tesseract as backup (recommended)'], ['ai', 'AI only'], ['tesseract', 'Tesseract only']].map(([v, t]) => `<option value="${v}" ${(s.ocrEngine || 'auto') === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
+      <div class="kv">The AI engine (PaddleOCR models, runs on the CPU, no graphics card needed) reads Tarkov's font more reliably; Tesseract is the older engine and joins in when the AI read looks incomplete.</div>
+    </div>
     <div class="card"><h3>Progress</h3>
       <div class="row"><button class="btn" data-act="export">Export progress</button>
         <label class="btn">Import progress…<input type="file" accept=".json" data-act="import-progress" hidden></label>
@@ -1228,6 +1240,7 @@ document.addEventListener('change', async (e) => {
     if (key === 'logsSince') value = el.value ? new Date(el.value).toISOString() : '';
     await setProgress({ section: 'settings', id: key, value });
     if (key === 'gameMode') await refreshData();
+    if (key === 'ocrEngine') S.ocr.status = null;
   } else if (el.dataset.act === 'import-data' || el.dataset.act === 'import-progress') {
     const file = el.files[0];
     if (!file) return;

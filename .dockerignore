@@ -3,3 +3,4 @@ test
 .git
 .env
 node_modules
+scripts

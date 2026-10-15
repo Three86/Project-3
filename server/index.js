@@ -41,7 +41,7 @@ const DEFAULT_LOGS_SINCE = process.env.WIPE_START || '2025-11-15T09:00:00Z';
 
 const emptyProgress = () => ({
   rev: 0,
-  settings: { playerLevel: 1, faction: 'USEC', gameMode: process.env.GAME_MODE || 'regular', autoLogs: true, logsSince: DEFAULT_LOGS_SINCE },
+  settings: { playerLevel: 1, faction: 'USEC', gameMode: process.env.GAME_MODE || 'regular', autoLogs: true, logsSince: DEFAULT_LOGS_SINCE, ocrEngine: 'auto' },
   tasks: {}, // taskId -> { status: active|completed|failed, updatedAt, source: manual|log }
   objectives: {}, // objectiveId -> true | number
   hideout: {}, // stationLevelId -> true (built)
@@ -189,7 +189,11 @@ function skillsConfig() {
 // Read skill / PMC levels from the newest day's out-of-raid screenshots and apply them.
 let ocrRunning = null;
 async function runOcr() {
-  if (!(await ocr.tesseractAvailable())) return { error: 'Tesseract OCR is not installed (it is included in the Docker image).' };
+  const avail = await ocr.engines();
+  const engine = ['auto', 'ai', 'tesseract'].includes(progress.settings.ocrEngine) ? progress.settings.ocrEngine : 'auto';
+  if (engine === 'ai' && !avail.ai) return { error: 'The AI OCR engine is not installed (it is included in the Docker image). Choose "Auto" or "Tesseract" in Settings.' };
+  if (!avail.ai && !avail.tesseract) return { error: 'No OCR engine is installed (both are included in the Docker image).' };
+  if (engine === 'tesseract' && !avail.tesseract) return { error: 'Tesseract OCR is not installed. Choose "Auto" or "AI" in Settings.' };
   const sel = ocr.selectScreenshots(SHOTS_DIR);
   if (!sel.available) return { error: `Screenshot folder ${SHOTS_DIR} not found. Mount your Escape from Tarkov Screenshots folder (see README).` };
   if (!sel.selected.length) return { error: sel.all.length ? 'All screenshots were taken in raid (they have coordinates in the file name); nothing to read.' : 'No screenshots found.' };
@@ -198,17 +202,26 @@ async function runOcr() {
   const levels = {};
   const inferredIds = new Set(); // skills whose name was worked out from the page layout
   let characterLevel = null;
+  // One AI process for the whole batch (the model loads once). Falls back to Tesseract if it fails.
+  let ai = null;
+  let aiError = null;
+  if (engine !== 'tesseract' && avail.ai) {
+    ai = ocr.startAi();
+    try { await ai.ready; } catch (err) { aiError = err.message; ai.stop(); ai = null; }
+    if (!ai && (engine === 'ai' || !avail.tesseract)) return { error: `AI OCR failed to start: ${aiError}` };
+  }
   for (const shot of sel.selected) { // oldest first, so later screenshots win
     try {
-      const r = await ocr.readScreenshot(shot.file, skills, { playerLevels: gameData?.playerLevels });
+      const r = await ocr.readScreenshot(shot.file, skills, { playerLevels: gameData?.playerLevels, engine: ai ? engine : 'tesseract', ai });
       Object.assign(levels, r.skills);
       for (const id of Object.keys(r.skills)) { if ((r.inferred || []).includes(id)) inferredIds.add(id); else inferredIds.delete(id); }
       if (r.characterLevel) characterLevel = r.characterLevel;
-      files.push({ name: shot.name, skills: r.skills, characterLevel: r.characterLevel, levelCheck: r.levelCheck, unreadLevels: r.unpairedLevels.length });
+      files.push({ name: shot.name, skills: r.skills, characterLevel: r.characterLevel, levelCheck: r.levelCheck, unreadLevels: r.unpairedLevels.length, engines: r.engines });
     } catch (err) {
       files.push({ name: shot.name, error: err.message });
     }
   }
+  if (ai) ai.stop();
   const nameOf = Object.fromEntries(skills.map((sk) => [sk.id, sk.name]));
   const changes = [];
   for (const [id, level] of Object.entries(levels)) {
@@ -224,7 +237,7 @@ async function runOcr() {
   if (changes.length || playerLevel) saveProgress();
   log(`OCR: read ${files.length} screenshot(s) from ${sel.day}; ${Object.keys(levels).length} skills found, ${changes.length} changed`);
   const read = Object.entries(levels).map(([id, level]) => ({ id, name: nameOf[id] || id, level, inferred: inferredIds.has(id) }));
-  return { day: sel.day, files, found: read.length, read, changes, playerLevel, skippedInRaid: sel.all.length - sel.usable.length, skippedOlder: sel.usable.length - sel.selected.length, rev: progress.rev };
+  return { day: sel.day, engine, aiError, files, found: read.length, read, changes, playerLevel, skippedInRaid: sel.all.length - sel.usable.length, skippedOlder: sel.usable.length - sel.selected.length, rev: progress.rev };
 }
 
 // ---------- http ----------
@@ -280,7 +293,7 @@ async function handleApi(req, res, url) {
     case 'GET /api/ocr/status': {
       const sel = ocr.selectScreenshots(SHOTS_DIR);
       return send(res, 200, {
-        dir: SHOTS_DIR, available: sel.available, tesseract: await ocr.tesseractAvailable(), running: !!ocrRunning,
+        dir: SHOTS_DIR, available: sel.available, ...(await ocr.engines()), engine: progress.settings.ocrEngine || 'auto', running: !!ocrRunning,
         total: sel.all.length, inRaid: sel.all.length - sel.usable.length, day: sel.day, selected: sel.selected.map((x) => x.name),
       });
     }

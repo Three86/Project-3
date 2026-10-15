@@ -1,0 +1,3 @@
+# AI OCR engine for screenshot reading (CPU only). Installed into /opt/ocr-venv by the Dockerfile.
+rapidocr_onnxruntime==1.2.3
+onnxruntime==1.31.0
