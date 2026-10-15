@@ -922,11 +922,11 @@
   ],
   "fuelTanksSource": "community wiki",
   "bitcoin": {
-   "baseSeconds": 145000,
+   "baseSeconds": 300000,
    "gpuBoostRate": 0.041225,
    "storage": 3,
    "maxGpus": 50,
-   "source": "game config (hideout/production.json + hideout/settings.json, as mirrored by the SPT project, Aug 2026)"
+   "source": "game config gpuBoostRate 0.041225 (SPT mirror); 300000 s base verified against the in-game Bitcoin Farm (1 GPU: 3d 11h 20m, 50 GPUs: 1d 3h 35m 36s)"
   },
   "craftSpeedWithoutFuel": 0.07
  }

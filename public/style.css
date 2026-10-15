@@ -198,3 +198,5 @@ ul.ingredients { list-style: none; margin: 6px 0 0; padding: 0; font-size: 13px;
 ul.ingredients .num { color: var(--muted); }
 .btc-panel { margin-bottom: 12px; max-width: 760px; }
 .btc-panel .ov-row { padding-left: 0; font-size: 14px; border-top: 1px dashed var(--line); padding: 3px 0; }
+.btc-table { margin-top: 8px; }
+.btc-table tr.mine td { color: var(--accent); font-weight: 600; }

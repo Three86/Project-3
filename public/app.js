@@ -931,13 +931,14 @@ function craftTimeFactor() {
   return 1 + (e ? effectValue(cr, e, Number(S.progress.skills?.Crafting || 0)) : 0) / 100;
 }
 
-const isBitcoinCraft = (c) => /bitcoin/i.test(c.station?.name || '') || (c.rewardItems || []).some((r) => /bitcoin/i.test(r.item?.name || ''));
+// The Bitcoin Farm station (it has no regular recipes; its production depends on graphics cards).
+const isBitcoinFarm = (st) => /bitcoin/i.test(st?.name || '');
 
-// Seconds per bitcoin with N graphics cards (each card after the first adds gpuBoostRate).
-function bitcoinSeconds(c, gpus) {
+// Seconds per bitcoin with N graphics cards: base / (1 + (N - 1) x gpuBoostRate).
+// Base and rate match the in-game farm (1 GPU 3d 11h 20m, 50 GPUs 1d 3h 35m 36s).
+function bitcoinSeconds(gpus) {
   const b = activeSkillConfig().baseValues?.bitcoin || {};
-  const base = c?.duration || b.baseSeconds || 145000;
-  return base / (1 + Math.max(0, gpus - 1) * (b.gpuBoostRate ?? 0.041225));
+  return (b.baseSeconds || 300000) / (1 + Math.max(0, gpus - 1) * (b.gpuBoostRate ?? 0.041225));
 }
 
 // Why a recipe can't be made yet, or null when it can.
@@ -952,10 +953,8 @@ function craftCard(c, pins) {
   const lock = craftLock(c);
   const pinned = pins.includes(c.id);
   const full = !pinned && pins.length >= MAX_PINS;
-  const btc = isBitcoinCraft(c);
-  const gpus = Math.max(1, Number(S.progress.settings.gpuCount || 1));
-  const secs = btc ? bitcoinSeconds(c, gpus) : c.duration * craftTimeFactor();
-  const timeNote = btc ? `${gpus} GPU${gpus === 1 ? '' : 's'}` : secs !== c.duration ? `base ${fmtDuration(c.duration)}` : '';
+  const secs = c.duration * craftTimeFactor();
+  const timeNote = secs !== c.duration ? `base ${fmtDuration(c.duration)}` : '';
   // Product: full item name (ingredients keep the short name, full name on hover).
   const out = (c.rewardItems || []).map((r) => {
     const img = r.item?.iconLink ? `<img class="req-icon" src="${esc(r.item.iconLink)}" alt="" loading="lazy" onerror="this.remove()">` : '';
@@ -973,22 +972,40 @@ function craftCard(c, pins) {
   </div>`;
 }
 
-function bitcoinPanel(c) {
+const fmtDurationSec = (sec) => {
+  const t = Math.floor(sec + 1e-6); // the game drops the fraction of a second
+  const d = Math.floor(t / 86400), h = Math.floor((t % 86400) / 3600), m = Math.floor((t % 3600) / 60), x = t % 60;
+  return `${d ? `${d}d ` : ''}${h}h ${String(m).padStart(2, '0')}m ${String(x).padStart(2, '0')}s`;
+};
+
+// Own section for the Bitcoin Farm: time per bitcoin for your graphics cards, a comparison table,
+// and bitcoins per fuel tank with your generator fuel use.
+function bitcoinSection(st) {
   const b = activeSkillConfig().baseValues || {};
   const btc = b.bitcoin || {};
   const gpus = Math.max(1, Number(S.progress.settings.gpuCount || 1));
-  const secs = bitcoinSeconds(c, gpus);
+  const secs = bitcoinSeconds(gpus);
   const perHour = generatorFuelPerHour();
+  const storage = (btc.storage || 3) + (Number(S.progress.skills?.HideoutManagement || 0) >= 51 ? 2 : 0);
+  const rows = uniq([1, 10, 25, 50, gpus]).sort((x, y) => x - y).map((n) => {
+    const t = bitcoinSeconds(n);
+    return `<tr class="${n === gpus ? 'mine' : ''}"><td>${n}${n === gpus ? ' <span class="auto">(yours)</span>' : ''}</td><td>${fmtDurationSec(t)}</td><td class="num">${(86400 / t).toFixed(4)}</td></tr>`;
+  }).join('');
   const tanks = (b.fuelTanks || [{ name: 'Metal fuel tank', resource: 100 }]).map((t) => {
     const hours = t.resource / perHour;
     return `<div class="ov-row"><span>${esc(t.name)} (${t.resource}) lasts ${fmtDuration(hours * 3600)}</span><span class="num"><b>${(hours / (secs / 3600)).toFixed(2)}</b> bitcoins per tank</span></div>`;
   }).join('');
-  return `<div class="card btc-panel">
-    <div class="row"><label>Graphics cards installed <input type="number" min="1" max="${btc.maxGpus || 50}" value="${gpus}" data-set="gpuCount"></label>
-      <span class="auto">1 bitcoin every <b>${fmtDuration(secs)}</b> · ${(86400 / secs).toFixed(2)} per day · farm holds ${btc.storage || 3}${Number(S.progress.skills?.HideoutManagement || 0) >= 51 ? ' (+2 with elite Hideout Management)' : ''}</span></div>
-    <div class="auto">Generator burns ${perHour.toFixed(2)} fuel/h (Hideout Management and hideout bonuses included):</div>
-    ${tanks}
-  </div>`;
+  const open = S.ui.recOpen.bitcoin ?? true;
+  return `<details class="group recipes-station bitcoin-farm" data-recopen="bitcoin" ${open ? 'open' : ''}>
+    <summary class="group-title"><span class="caret"></span>${esc(st.name)} <span class="count">level ${builtLevel(st)} · ${gpus} GPU${gpus === 1 ? '' : 's'} · ${(86400 / secs).toFixed(4)} BTC/day</span></summary>
+    <div class="card btc-panel">
+      <div class="row"><label>Graphics cards installed <input type="number" min="1" max="${btc.maxGpus || 50}" value="${gpus}" data-set="gpuCount"></label>
+        <span>1 bitcoin every <b>${fmtDurationSec(secs)}</b> · ${(86400 / secs).toFixed(4)} per day · farm holds ${storage}</span></div>
+      <table class="items btc-table"><thead><tr><th>Graphics cards</th><th>Time to produce 1 bitcoin</th><th class="num">BTC/day</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="auto" style="margin-top:8px">Generator burns ${perHour.toFixed(2)} fuel/h (Hideout Management and hideout bonuses included):</div>
+      ${tanks}
+    </div>
+  </details>`;
 }
 
 function renderRecipes() {
@@ -997,7 +1014,9 @@ function renderRecipes() {
   const f = S.ui.rec;
   const text = norm(f.text);
   const pinsAll = S.progress.craftPins || {};
-  const stations = (S.data.hideout || []).filter((st) => crafts.some((c) => c.station?.id === st.id)).sort((a, b) => byName(a.name, b.name));
+  const stations = (S.data.hideout || []).filter((st) => !isBitcoinFarm(st) && crafts.some((c) => c.station?.id === st.id)).sort((a, b) => byName(a.name, b.name));
+  const farm = (S.data.hideout || []).find(isBitcoinFarm);
+  const farmSection = farm && builtLevel(farm) > 0 && !text ? bitcoinSection(farm) : '';
   let shownTotal = 0, hiddenLocked = 0;
   const sections = stations.map((st) => {
     const pins = (pinsAll[st.id] || []).filter((id) => crafts.some((c) => c.id === id));
@@ -1013,10 +1032,8 @@ function renderRecipes() {
     shownTotal += pinned.length + rest.length;
     const key = st.id;
     const open = S.ui.recOpen[key] ?? !!pinned.length;
-    const btcCraft = list.find(isBitcoinCraft);
     return `<details class="group recipes-station" data-recopen="${esc(key)}" ${open || text ? 'open' : ''}>
       <summary class="group-title"><span class="caret"></span>${esc(st.name)} <span class="count">level ${builtLevel(st)} · ${unlocked.length} available${pins.length ? ` · ★ ${pins.length}/${MAX_PINS} pinned` : ''}</span></summary>
-      ${btcCraft && !craftLock(btcCraft) ? bitcoinPanel(btcCraft) : ''}
       ${pinned.length ? `<div class="pinned-row"><div class="grid">${pinned.map((c) => craftCard(c, pins)).join('')}</div></div>` : ''}
       ${rest.length ? `<div class="grid">${rest.map((c) => craftCard(c, pins)).join('')}</div>` : ''}
     </details>`;
@@ -1028,7 +1045,7 @@ function renderRecipes() {
     <span class="auto">Times include your Crafting skill (×${factor.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')})</span>
     <button class="btn small" data-act="rec-open" data-v="1">Expand all</button><button class="btn small" data-act="rec-open" data-v="0">Collapse all</button>
   </div>`;
-  return toolbar + (sections || `<div class="empty">${text ? 'No recipe uses or makes that item.' : 'No recipes available yet. Build hideout stations to unlock them.'}</div>`)
+  return toolbar + farmSection + (sections || `<div class="empty">${text ? 'No recipe uses or makes that item.' : 'No recipes available yet. Build hideout stations to unlock them.'}</div>`)
     + '<p class="kv">Recipes appear when their station level is built and their unlocking quest is completed. Crafts run at 7% speed while the generator has no fuel.</p>';
 }
 
