@@ -1,30 +1,68 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tarkov Tracker</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script>
+    // Dark by default; Basecoat's theme toggle stores the choice in localStorage.themeMode.
+    try { document.documentElement.classList.toggle('dark', localStorage.getItem('themeMode') !== 'light'); } catch { /* storage unavailable */ }
+  </script>
+  <link rel="stylesheet" href="vendor/basecoat/basecoat.cdn.min.css">
   <link rel="stylesheet" href="style.css">
+  <script src="vendor/basecoat/basecoat.all.min.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
   <header class="topbar">
     <div class="brand">TARKOV<span>TRACKER</span></div>
-    <nav class="tabs" id="tabs">
-      <button data-tab="quests">Quests</button>
-      <button data-tab="hideout">Hideout</button>
-      <button data-tab="recipes">Recipes</button>
-      <button data-tab="prestige">Prestige</button>
-      <button data-tab="skills">Skills</button>
-      <button data-tab="buffs">Buffs</button>
-      <button data-tab="items">Needed items</button>
-      <button data-tab="search">Search</button>
-      <button data-tab="settings">Settings</button>
-    </nav>
-    <input id="globalSearch" type="search" placeholder="Search quests &amp; items…" autocomplete="off">
+    <div class="tabs app-tabs">
+      <nav role="tablist" aria-orientation="horizontal" data-variant="line" id="tabs" aria-label="Sections">
+        <button type="button" role="tab" id="tab-quests" data-tab="quests" aria-controls="view" aria-selected="true" tabindex="0">Quests</button>
+        <button type="button" role="tab" id="tab-hideout" data-tab="hideout" aria-controls="view" aria-selected="false" tabindex="-1">Hideout</button>
+        <button type="button" role="tab" id="tab-recipes" data-tab="recipes" aria-controls="view" aria-selected="false" tabindex="-1">Recipes</button>
+        <button type="button" role="tab" id="tab-prestige" data-tab="prestige" aria-controls="view" aria-selected="false" tabindex="-1">Prestige</button>
+        <button type="button" role="tab" id="tab-skills" data-tab="skills" aria-controls="view" aria-selected="false" tabindex="-1">Skills</button>
+        <button type="button" role="tab" id="tab-buffs" data-tab="buffs" aria-controls="view" aria-selected="false" tabindex="-1">Buffs</button>
+        <button type="button" role="tab" id="tab-items" data-tab="items" aria-controls="view" aria-selected="false" tabindex="-1">Needed items</button>
+        <button type="button" role="tab" id="tab-search" data-tab="search" aria-controls="view" aria-selected="false" tabindex="-1">Search</button>
+        <button type="button" role="tab" id="tab-settings" data-tab="settings" aria-controls="view" aria-selected="false" tabindex="-1">Settings</button>
+      </nav>
+    </div>
+    <div class="input-group global-search">
+      <input id="globalSearch" type="search" placeholder="Search quests &amp; items…" autocomplete="off" aria-label="Search quests and items">
+      <span data-align="start" aria-hidden="true"><svg class="lucide" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></span>
+      <span data-align="end"><button type="button" class="btn" data-variant="ghost" data-size="xs" data-act="palette" aria-label="Open command palette" data-tooltip="Command palette" data-side="bottom" data-align="end"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">K</kbd></button></span>
+    </div>
+    <button type="button" class="btn theme-toggle" data-variant="outline" data-size="icon" data-act="theme" aria-label="Toggle dark mode" data-tooltip="Toggle dark mode" data-side="bottom" data-align="end">
+      <svg class="lucide icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      <svg class="lucide icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+    </button>
   </header>
   <div id="banner" class="banner hidden"></div>
-  <main id="view"></main>
-  <script src="app.js"></script>
+  <main id="view" role="tabpanel" aria-labelledby="tab-quests" tabindex="-1">
+    <div class="loading-skeleton" aria-label="Loading">
+      <div class="skeleton sk-bar"></div>
+      <div class="sk-grid"><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div></div>
+    </div>
+  </main>
+
+  <div id="toaster" class="toaster"></div>
+
+  <dialog id="confirmDialog" class="alert-dialog" aria-labelledby="confirmDialog-title" aria-describedby="confirmDialog-desc">
+    <div>
+      <header>
+        <h2 id="confirmDialog-title"></h2>
+        <p id="confirmDialog-desc"></p>
+      </header>
+      <footer>
+        <button type="button" class="btn" data-variant="outline" value="cancel" data-confirm="0">Cancel</button>
+        <button type="button" class="btn" value="ok" data-confirm="1">Continue</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog id="cmdk" class="command-dialog" aria-label="Command palette"></dialog>
 </body>
 </html>

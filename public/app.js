@@ -48,6 +48,111 @@ const norm = (s) => String(s ?? '').toLowerCase();
 const uniq = (a) => [...new Set(a)];
 const byName = (a, b) => String(a).localeCompare(String(b));
 
+// ---------------------------------------------------------------- Basecoat UI helpers
+// Markup follows basecoat-css 1.0.2 (public/vendor/basecoat). Every element keeps the data-* attributes
+// the delegated event handlers below rely on, so behaviour does not depend on the styling.
+const ICON_PATHS = {
+  chevron: '<path d="m6 9 6 6 6-6"/>',
+  more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  minus: '<path d="M5 12h14"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/>',
+  external: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+  refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  download: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+  upload: '<path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+  search: '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
+  list: '<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+  home: '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  loader: '<path d="M21 12a9 9 0 1 1-6.219-8.56"/>',
+};
+const icon = (name, cls = '') => `<svg class="lucide ${cls}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ''}</svg>`;
+const spinner = () => `<svg aria-label="Loading" role="status" class="animate-spin lucide" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_PATHS.loader}</svg>`;
+
+// <button class="btn">. opts: variant (primary|secondary|outline|ghost|link|destructive), size
+// (xs|sm|lg|icon|icon-xs|icon-sm), tip (tooltip text), side, disabled, cls. attrs: raw data-* attributes.
+function btn(label, attrs = '', { variant, size, tip, side, disabled, cls = '' } = {}) {
+  const b = `<button type="button" class="btn ${cls}"${variant ? ` data-variant="${variant}"` : ''}${size ? ` data-size="${size}"` : ''}${tip && !disabled ? ` data-tooltip="${esc(tip)}"${side ? ` data-side="${side}"` : ''}` : ''} ${attrs}${disabled ? ' disabled' : ''}>${label}</button>`;
+  // Disabled buttons get no hover events; wrap them so the tooltip still shows (as in the Basecoat docs).
+  return tip && disabled ? `<span class="tip-wrap" data-tooltip="${esc(tip)}"${side ? ` data-side="${side}"` : ''}>${b}</span>` : b;
+}
+// <span class="badge">. variant: primary (default) | secondary | outline | destructive | ghost.
+const badge = (text, variant = 'outline', cls = '', tip = '') => `<span class="badge ${cls}" data-variant="${variant}"${tip ? ` data-tooltip="${esc(tip)}"` : ''}>${text}</span>`;
+// Labelled control on one line (toolbar fields).
+const fieldInline = (label, control) => `<label class="label tb-field"><span>${label}</span>${control}</label>`;
+// Checkbox with Basecoat styling; attrs carry the data-* the change handler needs.
+const checkbox = (attrs, checked, extra = '') => `<input type="checkbox" class="input" ${attrs} ${checked ? 'checked' : ''} ${extra}>`;
+// Switch with its label.
+const toggleSwitch = (label, attrs, checked) => `<label class="label sw-field"><input type="checkbox" role="switch" class="input" ${attrs} ${checked ? 'checked' : ''}>${label}</label>`;
+// Basecoat progress bar.
+function progressBar(done, total, label = 'Progress') {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return `<div class="progress" role="progressbar" aria-label="${esc(label)}" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>`;
+}
+// Counter for multi-count requirements: [−] 3/5 [+].
+function stepperControl(attrs, cur, target, disabled = false) {
+  return `<div role="group" class="button-group stepper" aria-label="Count">
+    ${btn(icon('minus'), `${attrs} data-d="-1" data-max="${target}" aria-label="One less"`, { variant: 'outline', size: 'icon-xs', disabled })}
+    <span class="step-val">${cur}/${target}</span>
+    ${btn(icon('plus'), `${attrs} data-d="1" data-max="${target}" aria-label="One more"`, { variant: 'outline', size: 'icon-xs', disabled })}</div>`;
+}
+// Empty state.
+const emptyState = (title, text = '', footer = '', ic = 'info') => `<section class="empty">
+  <header><figure>${icon(ic)}</figure>${title ? `<h3>${title}</h3>` : ''}${text ? `<p>${text}</p>` : ''}</header>${footer ? `<footer>${footer}</footer>` : ''}</section>`;
+// Dropdown menu (Basecoat dropdown-menu). items: [{ label, attrs, destructive, disabled }] or 'sep'.
+let uid = 0;
+function dropdownMenu(triggerLabel, items, { tip = 'More actions', align = 'end' } = {}) {
+  const id = `dd${++uid}`;
+  return `<div id="${id}" class="dropdown-menu">
+    <button type="button" id="${id}-trigger" aria-haspopup="menu" aria-controls="${id}-menu" aria-expanded="false" class="btn" data-variant="ghost" data-size="icon-sm" aria-label="${esc(tip)}">${triggerLabel}</button>
+    <div id="${id}-popover" data-popover aria-hidden="true" data-align="${align}">
+      <div role="menu" id="${id}-menu" aria-labelledby="${id}-trigger">${items.map((it) => it === 'sep' ? '<hr role="separator">' : `<div role="menuitem" ${it.attrs || ''}${it.destructive ? ' data-variant="destructive"' : ''}${it.disabled ? ' aria-disabled="true"' : ''}>${it.label}</div>`).join('')}</div>
+    </div></div>`;
+}
+// Popover: trigger button plus floating content (Basecoat popover).
+function popover(triggerLabel, content, { variant = 'outline', size = 'xs', align = 'start', cls = '' } = {}) {
+  const id = `pop${++uid}`;
+  return `<div id="${id}" class="popover ${cls}">
+    <button id="${id}-trigger" type="button" aria-expanded="false" aria-controls="${id}-popover" class="btn" data-variant="${variant}" data-size="${size}">${triggerLabel}</button>
+    <div id="${id}-popover" data-popover aria-hidden="true" data-align="${align}">${content}</div></div>`;
+}
+
+// Toast notification (Basecoat toaster). Basecoat inserts title/description as HTML, so escape here.
+function toast(category, title, description = '') {
+  const t = document.getElementById('toaster');
+  if (t?.toast) t.toast({ category, title: esc(title), description: esc(description) });
+}
+
+// Confirmation dialog (Basecoat alert-dialog); resolves true when confirmed.
+function confirmDialog(title, text, okLabel = 'Continue', destructive = false) {
+  const d = document.getElementById('confirmDialog');
+  d.querySelector('h2').textContent = title;
+  d.querySelector('p').textContent = text;
+  const ok = d.querySelector('[data-confirm="1"]');
+  ok.textContent = okLabel;
+  ok.toggleAttribute('data-variant', destructive);
+  if (destructive) ok.dataset.variant = 'destructive';
+  return new Promise((resolve) => {
+    const done = (v) => { d.removeEventListener('click', onClick); d.removeEventListener('close', onClose); if (d.open) d.close(); resolve(v); };
+    const onClick = (e) => { const b = e.target.closest('[data-confirm]'); if (b) done(b.dataset.confirm === '1'); };
+    const onClose = () => done(false); // Esc
+    d.addEventListener('click', onClick);
+    d.addEventListener('close', onClose);
+    d.showModal();
+    d.querySelector('[data-confirm="0"]').focus();
+  });
+}
+
 async function api(path, opts = {}) {
   const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opts });
   const body = await res.json().catch(() => ({}));
@@ -71,13 +176,14 @@ async function setProgress(ops) {
     const { body } = await api('/api/progress', { method: 'POST', body: JSON.stringify({ ops }) });
     S.progress.rev = body.rev;
   } catch (err) {
-    banner(`Could not save progress: ${err.message}`);
+    toast('error', 'Could not save progress', err.message);
   }
 }
 
-function banner(html) {
+// Message strip under the top bar (Basecoat alert). kind: 'info' | 'error'.
+function banner(html, kind = /fail|cannot|could not|error/i.test(html || '') ? 'error' : 'info') {
   const b = $('#banner');
-  b.innerHTML = html || '';
+  b.innerHTML = html ? `<div class="alert"${kind === 'error' ? ' data-variant="destructive"' : ''}>${icon(kind === 'error' ? 'alert' : 'info')}<section>${html}</section></div>` : '';
   b.classList.toggle('hidden', !html);
 }
 
@@ -221,28 +327,28 @@ function objValue(section, key, o) {
 function itemTag(it) {
   if (!it) return '';
   const img = it.iconLink ? `<img src="${esc(it.iconLink)}" alt="" loading="lazy" onerror="this.remove()">` : '';
-  return `<span class="item" title="${esc(it.name)}">${img}${esc(it.shortName || it.name)}</span>`;
+  return `<span class="it-tag" title="${esc(it.name)}">${img}${esc(it.shortName || it.name)}</span>`;
 }
 
 function objTags(o) {
   const tags = [];
   const items = objItems(o);
-  if (items.length) tags.push(items.length > 1 ? `<span class="badge">any of:</span> ${items.map(itemTag).join(' ')}` : itemTag(items[0]));
+  if (items.length) tags.push(items.length > 1 ? `<span class="badge" data-variant="outline">any of:</span> ${items.map(itemTag).join(' ')}` : itemTag(items[0]));
   if (['giveItem', 'findItem', 'plantItem', 'mark', 'useItem', 'sellItem'].includes(o.type) && items.length) {
-    tags.push(o.foundInRaid ? '<span class="badge fir" title="Must be found in raid">FIR</span>' : '<span class="badge nofir" title="Does not need to be found in raid">not FIR</span>');
+    tags.push(o.foundInRaid ? badge('FIR', 'primary', 'fir', 'Must be found in raid') : badge('not FIR', 'outline', 'nofir', 'Does not need to be found in raid'));
   }
-  if (o.questItem) tags.push(`<span class="badge">quest item: ${esc(o.questItem.name)}</span>`);
-  if (o.dogTagLevel) tags.push(`<span class="badge">dogtag lvl ≥ ${o.dogTagLevel}</span>`);
-  if (o.minDurability || (o.maxDurability && o.maxDurability < 100)) tags.push(`<span class="badge">durability ${o.minDurability || 0}–${o.maxDurability ?? 100}%</span>`);
-  if (o.targetNames?.length) tags.push(`<span class="badge">target: ${esc(o.targetNames.join(', '))}</span>`);
-  if (o.bodyParts?.length) tags.push(`<span class="badge">${esc(o.bodyParts.join(', '))}</span>`);
-  if (o.zoneNames?.length) tags.push(`<span class="badge">zone: ${esc(o.zoneNames.join(', '))}</span>`);
-  if (o.usingWeapon?.length) tags.push(`<span class="badge">weapon:</span> ${o.usingWeapon.slice(0, 6).map(itemTag).join(' ')}${o.usingWeapon.length > 6 ? ` +${o.usingWeapon.length - 6}` : ''}`);
-  for (const set of o.wearing || []) if (set?.length) tags.push(`<span class="badge">wearing:</span> ${set.map(itemTag).join(' + ')}`);
-  if (o.notWearing?.length) tags.push(`<span class="badge">not wearing: ${esc(o.notWearing.map((i) => i.shortName || i.name).join(', '))}</span>`);
-  if (o.skillLevel) tags.push(`<span class="badge">${esc(o.skillLevel.name)} ${o.skillLevel.level}</span>`);
-  if (o.exitStatus?.length) tags.push(`<span class="badge">${esc(o.exitStatus.join('/'))}</span>`);
-  if (o.maps?.length) tags.push(`<span class="badge">${esc(o.maps.map((m) => m.name).join(', '))}</span>`);
+  if (o.questItem) tags.push(`<span class="badge" data-variant="outline">quest item: ${esc(o.questItem.name)}</span>`);
+  if (o.dogTagLevel) tags.push(`<span class="badge" data-variant="outline">dogtag lvl ≥ ${o.dogTagLevel}</span>`);
+  if (o.minDurability || (o.maxDurability && o.maxDurability < 100)) tags.push(`<span class="badge" data-variant="outline">durability ${o.minDurability || 0}–${o.maxDurability ?? 100}%</span>`);
+  if (o.targetNames?.length) tags.push(`<span class="badge" data-variant="outline">target: ${esc(o.targetNames.join(', '))}</span>`);
+  if (o.bodyParts?.length) tags.push(`<span class="badge" data-variant="outline">${esc(o.bodyParts.join(', '))}</span>`);
+  if (o.zoneNames?.length) tags.push(`<span class="badge" data-variant="outline">zone: ${esc(o.zoneNames.join(', '))}</span>`);
+  if (o.usingWeapon?.length) tags.push(`<span class="badge" data-variant="outline">weapon:</span> ${o.usingWeapon.slice(0, 6).map(itemTag).join(' ')}${o.usingWeapon.length > 6 ? ` +${o.usingWeapon.length - 6}` : ''}`);
+  for (const set of o.wearing || []) if (set?.length) tags.push(`<span class="badge" data-variant="outline">wearing:</span> ${set.map(itemTag).join(' + ')}`);
+  if (o.notWearing?.length) tags.push(`<span class="badge" data-variant="outline">not wearing: ${esc(o.notWearing.map((i) => i.shortName || i.name).join(', '))}</span>`);
+  if (o.skillLevel) tags.push(`<span class="badge" data-variant="outline">${esc(o.skillLevel.name)} ${o.skillLevel.level}</span>`);
+  if (o.exitStatus?.length) tags.push(`<span class="badge" data-variant="outline">${esc(o.exitStatus.join('/'))}</span>`);
+  if (o.maps?.length) tags.push(`<span class="badge" data-variant="outline">${esc(o.maps.map((m) => m.name).join(', '))}</span>`);
   return tags.join(' ');
 }
 
@@ -250,10 +356,9 @@ function objTags(o) {
 function objRow(section, key, o, { disabled = false, forceDone = false } = {}) {
   const v = forceDone ? { cur: objTarget(o), target: objTarget(o), done: true } : objValue(section, key, o);
   let control;
-  if (v.auto) control = `<input type="checkbox" disabled ${v.done ? 'checked' : ''} title="Tracked automatically">`;
-  else if (v.target > 1) {
-    control = `<span class="stepper"><button data-act="step" data-sec="${section}" data-key="${esc(key)}" data-d="-1" data-max="${v.target}" ${disabled ? 'disabled' : ''}>−</button><span>${v.cur}/${v.target}</span><button data-act="step" data-sec="${section}" data-key="${esc(key)}" data-d="1" data-max="${v.target}" ${disabled ? 'disabled' : ''}>+</button></span>`;
-  } else control = `<input type="checkbox" data-act="check" data-sec="${section}" data-key="${esc(key)}" ${v.done ? 'checked' : ''} ${disabled ? 'disabled' : ''}>`;
+  if (v.auto) control = `<span class="tip-wrap" data-tooltip="Tracked automatically" data-side="right">${checkbox('disabled aria-label="Tracked automatically"', v.done)}</span>`;
+  else if (v.target > 1) control = stepperControl(`data-act="step" data-sec="${section}" data-key="${esc(key)}"`, v.cur, v.target, disabled);
+  else control = checkbox(`data-act="check" data-sec="${section}" data-key="${esc(key)}" aria-label="Done"`, v.done, disabled ? 'disabled' : '');
   const auto = v.auto ? `<span class="auto">auto – ${esc(v.auto.why)}</span>` : '';
   // No description from the game: build the title from the data and skip the (now redundant) tags.
   const generated = !o.description || o.description === o.type;
@@ -394,29 +499,32 @@ window.addEventListener('blur', releasePointer); // mouse released outside the w
 function render() {
   if (pointerDown) { renderPending = true; return; }
   renderPending = false;
-  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === S.ui.tab));
+  document.querySelectorAll('#tabs [role=tab]').forEach((b) => {
+    const on = b.dataset.tab === S.ui.tab;
+    b.setAttribute('aria-selected', String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
   const view = $('#view');
-  if (S.ui.tab === 'settings') { view.innerHTML = renderSettings(); return; }
-  if (S.ui.tab === 'skills') { view.innerHTML = renderSkills(); return; }
-  if (S.ui.tab === 'buffs') { view.innerHTML = renderBuffs(); return; }
-  if (!S.data) { view.innerHTML = renderNoData(); return; }
-  const fn = { quests: renderQuests, hideout: renderHideout, recipes: renderRecipes, prestige: renderPrestige, skills: renderSkills, buffs: renderBuffs, items: renderItems, search: renderSearch }[S.ui.tab] || renderQuests;
-  view.innerHTML = fn();
+  view.hidden = false;
+  view.setAttribute('aria-labelledby', `tab-${S.ui.tab}`);
+  uid = 0;
+  const fn = { quests: renderQuests, hideout: renderHideout, recipes: renderRecipes, prestige: renderPrestige, skills: renderSkills, buffs: renderBuffs, items: renderItems, search: renderSearch, settings: renderSettings }[S.ui.tab] || renderQuests;
+  view.innerHTML = S.data || ['settings', 'skills', 'buffs'].includes(S.ui.tab) ? fn() : renderNoData();
+  // Basecoat's MutationObserver initialises new components on its own; this catches any it missed.
+  window.basecoat?.initAll();
 }
 
 function renderNoData() {
   const st = S.status || {};
-  return `<div class="empty">
-    <h2>No game data yet</h2>
-    <p>${st.refreshing ? 'Downloading quest &amp; hideout data from tarkov.dev…' : 'Quest and hideout definitions are downloaded once from tarkov.dev and cached locally.'}</p>
-    ${st.refreshError ? `<p style="color:var(--bad)">Last attempt failed: ${esc(st.refreshError)}</p>` : ''}
-    ${/server unavailable/i.test(st.refreshError || '') ? '<p>tarkov.dev reports its own server is down. That is an outage on their side, not a problem with your setup. The tracker retries every 5 minutes and loads as soon as tarkov.dev is back.</p>' : ''}
-    <p><button class="btn primary" data-act="refresh">Download now</button> or import a data file under <a href="#" data-act="tab" data-tab="settings">Settings</a>.</p>
-  </div>`;
+  const text = `${st.refreshing ? 'Downloading quest &amp; hideout data from tarkov.dev…' : 'Quest and hideout definitions are downloaded once from tarkov.dev and cached locally.'}
+    ${st.refreshError ? `<br><span class="bad">Last attempt failed: ${esc(st.refreshError)}</span>` : ''}
+    ${/server unavailable/i.test(st.refreshError || '') ? '<br>tarkov.dev reports its own server is down. That is an outage on their side, not a problem with your setup. The tracker retries every 5 minutes and loads as soon as tarkov.dev is back.' : ''}`;
+  return emptyState('No game data yet', text, `<div class="row-gap">${btn(st.refreshing ? `${spinner()} Downloading…` : `${icon('download')} Download now`, 'data-act="refresh"', { disabled: !!st.refreshing })}
+    ${btn('Import a data file', 'data-act="tab" data-tab="settings"', { variant: 'outline' })}</div>`, 'database');
 }
 
 function select(name, value, options, label) {
-  return `<label>${label}<select data-ui="${name}">${options.map(([v, t]) => `<option value="${esc(v)}" ${String(v) === String(value) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>`;
+  return fieldInline(label, `<select class="select" data-size="sm" data-ui="${name}">${options.map(([v, t]) => `<option value="${esc(v)}" ${String(v) === String(value) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>`);
 }
 
 // ---------------------------------------------------------------- render: quests
@@ -483,30 +591,41 @@ function renderQuests() {
   const counts = {};
   for (const t of S.data.tasks) { const s = taskStatus(t.id); counts[s] = (counts[s] || 0) + 1; }
   const toolbar = `<div class="toolbar">
-    <div class="chips">${Object.keys(STATUS_LABEL).map((s) => `<button class="chip ${f.statuses.includes(s) ? 'on' : ''}" data-act="qstatus" data-s="${s}">${STATUS_LABEL[s]} (${counts[s] || 0})</button>`).join('')}</div>
+    <div class="chips" role="group" aria-label="Status">${Object.keys(STATUS_LABEL).map((s) => {
+      const on = f.statuses.includes(s);
+      return btn(`${STATUS_LABEL[s]} ${badge(counts[s] || 0, on ? 'secondary' : 'outline', 'count-badge')}`, `data-act="qstatus" data-s="${s}" aria-pressed="${on}"`, { variant: on ? 'primary' : 'outline', size: 'sm' });
+    }).join('')}</div>
+    <div class="tb-row">
     ${select('q.trader', f.trader, [['', 'All traders'], ...idx.traders.map((x) => [x, x])], 'Trader')}
     ${select('q.map', f.map, [['', 'All maps'], ...idx.maps.map((x) => [x, x])], 'Map')}
     ${select('q.need', f.need, [['', 'Anything'], ...Object.entries(NEEDS)], 'Needs')}
     ${select('q.groupBy', f.groupBy, [['none', 'No grouping'], ['trader', 'Trader'], ['map', 'Map'], ['need', 'Requirement type'], ['status', 'Status']], 'Group')}
     ${select('q.sortBy', f.sortBy, [['level', 'Level'], ['trader', 'Trader'], ['map', 'Map'], ['name', 'Name'], ['progress', 'Progress']], 'Sort')}
-    <label><input type="checkbox" data-ui="q.kappa" ${f.kappa ? 'checked' : ''}>Kappa</label>
-    <label><input type="checkbox" data-ui="q.lightkeeper" ${f.lightkeeper ? 'checked' : ''}>Lightkeeper</label>
-    <input type="search" data-ui="q.text" value="${esc(f.text)}" placeholder="Filter…">
-    <span class="count">${list.length} quests</span>
+    <label class="label cb-field">${checkbox('data-ui="q.kappa"', f.kappa)}Kappa</label>
+    <label class="label cb-field">${checkbox('data-ui="q.lightkeeper"', f.lightkeeper)}Lightkeeper</label>
+    <input type="search" class="input tb-search" data-ui="q.text" value="${esc(f.text)}" placeholder="Filter…" aria-label="Filter quests">
+    <span class="count">${list.length} quests</span></div>
   </div>`;
-  if (!list.length) return toolbar + `<div class="empty">No quests match these filters.</div>`;
+  if (!list.length) return toolbar + emptyState('No quests match these filters', 'Loosen a filter or pick more statuses above.', '', 'search');
   const groups = groupTasks(list);
   const tools = `<div class="collapse-tools">
-    <button class="btn small" data-act="quests-open" data-v="1">Expand all quests</button><button class="btn small" data-act="quests-open" data-v="0">Collapse all quests</button>
-    ${groups.length > 1 ? '<button class="btn small" data-act="groups-open" data-v="1">Expand all groups</button><button class="btn small" data-act="groups-open" data-v="0">Collapse all groups</button>' : ''}</div>`;
-  return toolbar + tools + groups.map(([name, ts]) => {
+    <div role="group" class="button-group">${btn('Expand all quests', 'data-act="quests-open" data-v="1"', { variant: 'outline', size: 'sm' })}${btn('Collapse all quests', 'data-act="quests-open" data-v="0"', { variant: 'outline', size: 'sm' })}</div>
+    ${groups.length > 1 ? `<div role="group" class="button-group">${btn('Expand all groups', 'data-act="groups-open" data-v="1"', { variant: 'outline', size: 'sm' })}${btn('Collapse all groups', 'data-act="groups-open" data-v="0"', { variant: 'outline', size: 'sm' })}</div>` : ''}</div>`;
+  // Per-group completion across every quest in that group (not just the filtered ones).
+  const totals = ['trader', 'map', 'need'].includes(f.groupBy) ? new Map(groupTasks(S.data.tasks)) : new Map();
+  const sections = groups.map(([name, ts]) => {
     const grid = `<div class="grid">${ts.map(taskCard).join('')}</div>`;
     if (!name) return grid;
     const key = groupKey(name);
     const active = ts.filter((t) => taskStatus(t.id) === 'active').length;
+    const all = totals.get(name);
+    const doneAll = all ? all.filter((t) => taskStatus(t.id) === 'completed').length : 0;
     return `<details class="group" data-group="${esc(key)}" ${S.ui.groups[key] === false ? '' : 'open'}>
-      <summary class="group-title"><span class="caret"></span>${esc(name)} <span class="count">${ts.length} quest${ts.length === 1 ? '' : 's'}${active ? ` · ${active} active` : ''}</span></summary>${grid}</details>`;
-  }).join('');
+      <summary><span class="group-name">${esc(name)}</span><span class="count">${ts.length} quest${ts.length === 1 ? '' : 's'}${active ? ` · ${active} active` : ''}</span>
+        ${all ? `<span class="group-progress" data-tooltip="${doneAll} of ${all.length} ${esc(name)} quests completed">${progressBar(doneAll, all.length, `${name} quests completed`)}<span class="count">${doneAll}/${all.length}</span></span>` : ''}${icon('chevron')}</summary>
+      <section>${grid}</section></details>`;
+  });
+  return toolbar + tools + (groups.length === 1 && !groups[0][0] ? sections.join('') : `<section class="accordion groups" data-multiple>${sections.join('')}</section>`);
 }
 
 function taskCard(t) {
@@ -515,29 +634,40 @@ function taskCard(t) {
   const pct = Math.round(taskProgress(t) * 100);
   const open = S.ui.open[t.id] ?? false;
   const actions = [];
-  if (st !== 'active' && st !== 'completed') actions.push(`<button class="btn small" data-act="task" data-id="${t.id}" data-v="active">Start</button>`);
-  if (st !== 'completed') actions.push(`<button class="btn small" data-act="task" data-id="${t.id}" data-v="completed">Complete</button>`);
-  if (st === 'locked') actions.push(`<button class="btn small" data-act="taskchain" data-id="${t.id}" title="Mark all prerequisite quests completed and start this one">Start + complete prereqs</button>`);
-  if (st === 'active') actions.push(`<button class="btn small danger" data-act="task" data-id="${t.id}" data-v="failed">Failed</button>`);
-  if (p) actions.push(`<button class="btn small" data-act="task" data-id="${t.id}" data-v="">Reset</button>`);
+  if (st !== 'active' && st !== 'completed') actions.push(btn('Start', `data-act="task" data-id="${t.id}" data-v="active"`, { variant: st === 'available' ? 'primary' : 'outline', size: 'sm' }));
+  if (st !== 'completed') actions.push(btn('Complete', `data-act="task" data-id="${t.id}" data-v="completed"`, { variant: st === 'active' ? 'primary' : 'outline', size: 'sm' }));
+  const more = [];
+  if (st === 'locked') more.push({ label: 'Start + complete prereqs', attrs: `data-act="taskchain" data-id="${t.id}" title="Mark all prerequisite quests completed and start this one"` });
+  if (st === 'active') more.push({ label: 'Mark failed', attrs: `data-act="task" data-id="${t.id}" data-v="failed"`, destructive: true });
+  if (p) more.push({ label: 'Reset quest', attrs: `data-act="task" data-id="${t.id}" data-v=""` });
   const prereqs = t.taskRequirements.filter((r) => r.task).map((r) => {
     const ok = autoValue({ type: 'taskStatus', task: r.task, status: r.status }).done;
-    return `<span class="${ok ? 'ok' : ''}">${ok ? '✓' : '✗'} <a href="#" data-act="goto" data-id="${r.task.id}">${esc(r.task.name)}</a>${reqStatuses(r).join() !== 'complete' ? ` (${esc(reqStatuses(r).join('/'))})` : ''}</span>`;
+    return { ok, html: `<span class="${ok ? 'ok' : ''}">${ok ? '✓' : '✗'} <a href="#" data-act="goto" data-id="${r.task.id}">${esc(r.task.name)}</a>${reqStatuses(r).join() !== 'complete' ? ` (${esc(reqStatuses(r).join('/'))})` : ''}</span>` };
   });
+  // Locked: a popover explains exactly what is missing.
+  let why = '';
+  if (st === 'locked') {
+    const missing = prereqs.filter((x) => !x.ok).map((x) => `<li>${x.html}</li>`);
+    const lvl = (t.minPlayerLevel || 0) > S.progress.settings.playerLevel ? `<li>Reach level ${t.minPlayerLevel} (you are ${S.progress.settings.playerLevel})</li>` : '';
+    why = popover(`${icon('lock')} Why locked?`, `<header><h4>Still needed</h4></header><ul class="why-list">${missing.join('')}${lvl}${!missing.length && !lvl ? '<li>A prerequisite chain is still locked.</li>' : ''}</ul>`, { variant: 'ghost', size: 'sm', align: 'start' });
+  }
   const pending = t.objectives.filter((o) => !o.optional && !objValue('objectives', o.id, o).done).length;
-  return `<details class="card quest st-${st}" id="task-${t.id}" data-open="${t.id}" ${open ? 'open' : ''}>
-    <summary class="quest-sum">
-      <div class="card-head"><span class="caret"></span><div class="title">${esc(t.name)}</div>
-        ${p?.source === 'log' ? '<span class="badge log" title="Detected from game logs">log</span>' : ''}<span class="badge status-${st}">${STATUS_LABEL[st]}</span></div>
+  return `<details class="card qcard st-${st}" data-size="sm" id="task-${t.id}" data-open="${t.id}" ${open ? 'open' : ''}>
+    <summary>
+      <div class="qhead"><span class="title">${esc(t.name)}</span>
+        ${p?.source === 'log' ? badge('log', 'secondary', 'log', 'Detected from game logs') : ''}${badge(STATUS_LABEL[st], 'outline', `status-${st}`)}${icon('chevron', 'caret')}</div>
       <div class="meta"><span>${esc(t.trader?.name || '?')}</span>·<span>${esc(taskMaps(t).join(', '))}</span>·<span>Lvl ${t.minPlayerLevel || 1}</span>
         ${t.objectives.length ? `·<span>${pending ? `${pending} left` : 'all objectives done'} (${pct}%)</span>` : ''}
-        ${t.kappaRequired ? '<span class="badge kappa">Kappa</span>' : ''}${t.lightkeeperRequired ? '<span class="badge kappa">Lightkeeper</span>' : ''}
-        ${t.factionName && t.factionName !== 'Any' ? `<span class="badge">${esc(t.factionName)}</span>` : ''}</div>
-      ${t.objectives.length ? `<div class="progressbar"><div style="width:${pct}%"></div></div>` : ''}
+        ${t.kappaRequired ? badge('Kappa', 'outline', 'kappa') : ''}${t.lightkeeperRequired ? badge('Lightkeeper', 'outline', 'kappa') : ''}
+        ${t.factionName && t.factionName !== 'Any' ? badge(esc(t.factionName)) : ''}</div>
+      ${t.objectives.length ? progressBar(pct, 100, 'Objectives done') : ''}
     </summary>
-    <ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
-    ${prereqs.length ? `<div class="prereqs">Requires: ${prereqs.join(', ')}</div>` : ''}
-    <div class="actions">${actions.join('')}${t.wikiLink ? `<a class="btn small" href="${esc(t.wikiLink)}" target="_blank" rel="noopener">Wiki ↗</a>` : ''}</div>
+    <section>
+      <ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
+      ${prereqs.length ? `<div class="prereqs">Requires: ${prereqs.map((x) => x.html).join(', ')}</div>` : ''}
+    </section>
+    <footer class="actions">${actions.join('')}${why}${t.wikiLink ? `<a class="btn" data-variant="ghost" data-size="sm" href="${esc(t.wikiLink)}" target="_blank" rel="noopener">Wiki ${icon('external')}</a>` : ''}
+      ${more.length ? `<span class="spacer"></span>${dropdownMenu(icon('more'), more, { tip: 'More quest actions' })}` : ''}</footer>
   </details>`;
 }
 
@@ -585,33 +715,35 @@ function renderHideout() {
     ${select('h.show', f.show, [['next', 'Available upgrades'], ['nextAll', 'Next level (incl. locked)'], ['todo', 'All unbuilt levels'], ['built', 'Built levels'], ['all', 'All levels']], 'Show')}
     ${select('h.need', f.need, [['', 'Anything'], ...Object.entries(REQ_NEEDS)], 'Needs')}
     ${select('h.sortBy', f.sortBy, [['name', 'Station name'], ['ready', 'Closest to buildable']], 'Sort')}
-    <input type="search" data-ui="h.text" value="${esc(f.text)}" placeholder="Filter station or item…">
+    <input type="search" class="input tb-search" data-ui="h.text" value="${esc(f.text)}" placeholder="Filter station or item…" aria-label="Filter stations">
     <span class="count">${rows.length} stations</span>
   </div>`;
   const tools = `<div class="collapse-tools">
-    <button class="btn small" data-act="stations-open" data-v="1">Expand all</button><button class="btn small" data-act="stations-open" data-v="0">Collapse all</button>
-    ${locked ? `<span class="auto">${locked} station${locked === 1 ? '' : 's'} hidden until the stations they need are built · <a href="#" data-act="h-show" data-v="nextAll">show them</a></span>` : ''}</div>`;
-  if (!rows.length) return toolbar + tools + '<div class="empty">Nothing to show. Everything built? Show-off.</div>';
+    <div role="group" class="button-group">${btn('Expand all', 'data-act="stations-open" data-v="1"', { variant: 'outline', size: 'sm' })}${btn('Collapse all', 'data-act="stations-open" data-v="0"', { variant: 'outline', size: 'sm' })}</div>
+    ${locked ? `<span class="auto">${icon('lock')} ${locked} station${locked === 1 ? '' : 's'} hidden until the stations they need are built · <a href="#" data-act="h-show" data-v="nextAll">show them</a></span>` : ''}</div>`;
+  if (!rows.length) return toolbar + tools + emptyState('Nothing to show', 'Everything built? Show-off.', '', 'home');
   return toolbar + tools + `<div class="grid">${rows.map(stationCard).join('')}</div>`;
 }
 
 function stationCard({ st, built, levels }) {
   const max = st.levels[st.levels.length - 1]?.level || 0;
   const top = st.levels.find((l) => l.level === built);
-  const undo = top ? `<button class="btn small" data-act="build" data-id="${top.id}" data-v="0" title="Marked built by mistake? Sets the station back to level ${built - 1}">↶ Unmark level ${built}</button>` : '';
+  const undo = top ? btn(`${icon('undo')} Unmark level ${built}`, `data-act="build" data-id="${top.id}" data-v="0"`, { variant: 'ghost', size: 'xs', tip: `Marked built by mistake? Sets the station back to level ${built - 1}` }) : '';
   const next = st.levels.find((l) => l.level === built + 1);
   let state = '';
-  if (built >= max) state = '<span class="badge status-completed">Fully built</span>';
-  else if (next && !levelUnlocked(next)) state = '<span class="badge">Locked</span>';
+  if (built >= max) state = badge('Fully built', 'outline', 'status-completed');
+  else if (next && !levelUnlocked(next)) state = badge(`${icon('lock')} Locked`);
   else if (next) {
     const reqs = hideoutReqs(next);
     const done = reqs.filter((r) => r.done).length;
-    state = done === reqs.length ? '<span class="badge status-available">Ready to build</span>' : `<span class="badge">${done}/${reqs.length} requirements</span>`;
+    state = done === reqs.length ? badge('Ready to build', 'outline', 'status-available') : badge(`${done}/${reqs.length} requirements`);
   }
   const open = S.ui.hOpen[st.id] ?? (levels.length > 0 && built < max);
-  return `<details class="card station ${built >= max ? 'st-completed' : 'st-available'}" data-hopen="${esc(st.id)}" ${open ? 'open' : ''}>
-    <summary class="quest-sum"><div class="card-head"><span class="caret"></span><div class="title">${esc(st.name)}</div>${state}${undo}<span class="badge">Level ${built}/${max}</span></div></summary>
-    ${levels.length ? levels.map((l) => levelBlock(st, l)).join('') : `<div class="auto">${built >= max ? 'Fully built.' : 'Next level is locked until the stations it needs are built.'}</div>`}
+  return `<details class="card qcard station ${built >= max ? 'st-completed' : 'st-available'}" data-size="sm" data-hopen="${esc(st.id)}" ${open ? 'open' : ''}>
+    <summary><div class="qhead"><span class="title">${esc(st.name)}</span>${state}${badge(`Level ${built}/${max}`, 'secondary')}${icon('chevron', 'caret')}</div>
+      ${progressBar(built, max, `${st.name} level`)}</summary>
+    <section>${undo ? `<div class="undo-row">${undo}</div>` : ''}
+    ${levels.length ? levels.map((l) => levelBlock(st, l)).join('') : `<div class="auto">${built >= max ? 'Fully built.' : 'Next level is locked until the stations it needs are built.'}</div>`}</section>
   </details>`;
 }
 
@@ -621,18 +753,18 @@ function levelBlock(st, l) {
   const ready = reqs.every((r) => r.done);
   const rows = reqs.map((r) => {
     let control;
-    if (r.auto || built) control = `<input type="checkbox" disabled ${r.done || built ? 'checked' : ''}>`;
-    else if (r.target > 1) control = `<span class="stepper"><button data-act="step" data-sec="hideoutReqs" data-key="${esc(r.key)}" data-d="-1" data-max="${r.target}">−</button><span>${r.cur}/${r.target}</span><button data-act="step" data-sec="hideoutReqs" data-key="${esc(r.key)}" data-d="1" data-max="${r.target}">+</button></span>`;
-    else control = `<input type="checkbox" data-act="check" data-sec="hideoutReqs" data-key="${esc(r.key)}" ${r.done ? 'checked' : ''}>`;
+    if (r.auto || built) control = checkbox(`disabled aria-label="${built ? 'Built' : 'Tracked automatically'}"`, r.done || built);
+    else if (r.target > 1) control = stepperControl(`data-act="step" data-sec="hideoutReqs" data-key="${esc(r.key)}"`, r.cur, r.target);
+    else control = checkbox(`data-act="check" data-sec="hideoutReqs" data-key="${esc(r.key)}" aria-label="Done"`, r.done);
     const label = r.kind === 'item'
-      ? `${itemTag(r.item)} ×${r.count} ${r.fir ? '<span class="badge fir">FIR</span>' : '<span class="badge nofir">not FIR</span>'}`
+      ? `${itemTag(r.item)} ×${r.count} ${r.fir ? badge('FIR', 'primary', 'fir', 'Must be found in raid') : badge('not FIR', 'outline', 'nofir')}`
       : `${esc(r.label)} ${r.auto ? '<span class="auto">auto</span>' : ''}`;
     return `<li class="${r.done || built ? 'done' : ''}">${control}<div class="body"><div class="tags"><span class="type-icon">${REQ_NEEDS[r.kind]}</span> ${label}</div></div></li>`;
   });
   const time = l.constructionTime ? `${Math.round(l.constructionTime / 360) / 10}h build` : '';
   return `<div class="station-level">
-    <div class="lvl-title">Level ${l.level} ${built ? '<span class="badge status-completed">Built</span>' : !levelUnlocked(l) ? '<span class="badge">Locked</span>' : ready ? '<span class="badge status-available">Ready to build</span>' : ''}<span class="count">${time}</span>
-      <button class="btn small" data-act="build" data-id="${l.id}" data-v="${built ? 0 : 1}">${built ? 'Unbuild' : 'Mark built'}</button></div>
+    <div class="lvl-title">Level ${l.level} ${built ? badge('Built', 'outline', 'status-completed') : !levelUnlocked(l) ? badge(`${icon('lock')} Locked`) : ready ? badge('Ready to build', 'outline', 'status-available') : ''}<span class="count">${time}</span>
+      ${btn(built ? 'Unbuild' : 'Mark built', `data-act="build" data-id="${l.id}" data-v="${built ? 0 : 1}"`, { variant: built ? 'outline' : ready ? 'primary' : 'secondary', size: 'sm' })}</div>
     ${rows.length ? `<ul class="objs">${rows.join('')}</ul>` : '<div class="auto">No requirements</div>'}
   </div>`;
 }
@@ -643,35 +775,36 @@ function renderPrestige() {
   const custom = Object.entries(S.progress.custom);
   const customBlock = (pid) => {
     const rows = custom.filter(([, c]) => c.prestigeId === pid);
-    return `<ul class="objs" style="margin-top:6px">${rows.map(([id, c]) => `<li class="${c.done ? 'done' : ''}"><input type="checkbox" data-act="custom-toggle" data-id="${esc(id)}" ${c.done ? 'checked' : ''}><div class="body"><div class="desc">${esc(c.text)} <span class="optional">(custom)</span></div></div><button class="btn small danger" data-act="custom-del" data-id="${esc(id)}">✕</button></li>`).join('')}</ul>
-      <form class="custom-add" data-act="custom-add" data-pid="${esc(pid)}"><input type="text" name="text" placeholder="Add your own requirement…"><button class="btn small">Add</button></form>`;
+    return `${rows.length ? `<ul class="objs custom-list">${rows.map(([id, c]) => `<li class="${c.done ? 'done' : ''}">${checkbox(`data-act="custom-toggle" data-id="${esc(id)}" aria-label="Done"`, c.done)}<div class="body"><div class="desc">${esc(c.text)} <span class="optional">(custom)</span></div></div>${btn(icon('trash'), `data-act="custom-del" data-id="${esc(id)}" aria-label="Delete requirement"`, { variant: 'ghost', size: 'icon-sm', tip: 'Delete', side: 'left' })}</li>`).join('')}</ul>` : ''}
+      <form class="custom-add" data-act="custom-add" data-pid="${esc(pid)}"><div class="input-group"><input type="text" name="text" placeholder="Add your own requirement…" aria-label="New requirement"><span data-align="end"><button type="submit" class="btn" data-size="xs">${icon('plus')} Add</button></span></div></form>`;
   };
-  let html = `<div class="toolbar"><span>Prestige requirements. Quest, level and hideout conditions update automatically; tick the rest yourself. Your level: <b>${S.progress.settings.playerLevel}</b> (change in Settings).</span></div>`;
+  let html = `<div class="alert intro">${icon('info')}<section><p>Prestige requirements. Quest, level and hideout conditions update automatically; tick the rest yourself. Your level: <b>${S.progress.settings.playerLevel}</b> (change in <a href="#" data-act="tab" data-tab="settings">Settings</a>).</p></section></div>`;
   if (!list.length) {
-    html += `<div class="empty">No prestige data came back from tarkov.dev${S.data.meta?.prestigeError ? ` (${esc(S.data.meta.prestigeError)})` : ''}.<br>Try refreshing game data, or track requirements by hand below.</div>
-      <div class="card" style="margin-top:10px"><div class="card-head"><div class="title">My prestige checklist</div></div>${customBlock('general')}</div>`;
+    html += emptyState('No prestige data', `No prestige data came back from tarkov.dev${S.data.meta?.prestigeError ? ` (${esc(S.data.meta.prestigeError)})` : ''}. Try refreshing game data, or track requirements by hand below.`, '', 'list')
+      + `<div class="card prestige-card" data-size="sm"><header><h2>My prestige checklist</h2></header><section>${customBlock('general')}</section></div>`;
     return html;
   }
   const achieved = (p) => !!S.progress.prestige[`achieved|${p.id}`];
   // Default to the first prestige not yet achieved; the buttons can pick any other.
   const current = list.find((p) => p.id === S.ui.prestigeView) || list.find((p) => !achieved(p)) || list[list.length - 1];
-  const switcher = `<div class="chips prestige-switch">${list.map((p) => `<button class="chip ${p.id === current.id ? 'on' : ''}" data-act="prestige-view" data-id="${esc(p.id)}">${achieved(p) ? '✓ ' : ''}${esc(p.name || `Prestige ${p.prestigeLevel}`)}</button>`).join('')}
-    ${S.ui.prestigeView ? '<button class="chip" data-act="prestige-view" data-id="" title="Show the next prestige you have not achieved">Next unachieved</button>' : ''}</div>`;
+  const switcher = `<div class="tabs prestige-switch"><nav role="tablist" aria-orientation="horizontal" aria-label="Prestige level">${list.map((p) => `<button type="button" role="tab" aria-selected="${p.id === current.id}" tabindex="${p.id === current.id ? 0 : -1}" data-act="prestige-view" data-id="${esc(p.id)}">${achieved(p) ? '✓ ' : ''}${esc(p.name || `Prestige ${p.prestigeLevel}`)}</button>`).join('')}</nav>
+    ${S.ui.prestigeView ? btn('Next unachieved', 'data-act="prestige-view" data-id=""', { variant: 'ghost', size: 'sm', tip: 'Show the next prestige you have not achieved' }) : ''}</div>`;
   const p = current;
   const conds = p.conditions || [];
   const isAchieved = achieved(p);
   // Once achieved, the conditions were met at the time even if level etc. reset since.
   const done = isAchieved ? conds.length : conds.filter((o) => objValue('prestige', `${p.id}|${o.id}`, o).done).length;
   const all = conds.length && done === conds.length;
-  return html + switcher + `<div class="card prestige-card ${isAchieved || all ? 'st-completed' : 'st-active'}">
-      <div class="card-head"><div class="title">${esc(p.name || `Prestige ${p.prestigeLevel}`)}</div>
-        ${isAchieved ? '<span class="badge status-completed">Achieved</span>' : ''}<span class="badge">${done}/${conds.length}</span></div>
-      <div class="progressbar"><div style="width:${conds.length ? Math.round((done / conds.length) * 100) : 0}%"></div></div>
+  const name = esc(p.name || `Prestige ${p.prestigeLevel}`);
+  return html + switcher + `<div class="card prestige-card ${isAchieved || all ? 'st-completed' : 'st-active'}" data-size="sm">
+      <header><h2>${name}</h2><p>${done} of ${conds.length} conditions met</p>
+        <div class="card-action">${isAchieved ? badge('Achieved', 'outline', 'status-completed') : ''}${badge(`${done}/${conds.length}`, 'secondary')}</div></header>
+      <section>${progressBar(done, conds.length, 'Conditions met')}
       <ul class="objs">${conds.map((o) => objRow('prestige', `${p.id}|${o.id}`, o, { disabled: isAchieved, forceDone: isAchieved })).join('')}</ul>
-      ${customBlock(p.id)}
-      <div class="actions">${isAchieved
-        ? `<button class="btn small" data-act="prestige-achieved" data-id="${esc(p.id)}" data-v="0">Undo: mark not achieved</button>`
-        : `<button class="btn small ${all ? 'primary' : ''}" data-act="prestige-achieved" data-id="${esc(p.id)}" data-v="1">Mark ${esc(p.name || `Prestige ${p.prestigeLevel}`)} achieved</button>`}</div>
+      ${customBlock(p.id)}</section>
+      <footer class="actions">${isAchieved
+        ? btn(`${icon('undo')} Undo: mark not achieved`, `data-act="prestige-achieved" data-id="${esc(p.id)}" data-v="0"`, { variant: 'outline', size: 'sm' })
+        : btn(`Mark ${name} achieved`, `data-act="prestige-achieved" data-id="${esc(p.id)}" data-v="1"`, { variant: all ? 'primary' : 'outline', size: 'sm' })}</footer>
     </div>`;
 }
 
@@ -716,17 +849,17 @@ function skillOverview(cfg, lv) {
     }
   }
   const shared = [...combined.entries()].filter(([, c]) => c.from.length > 1);
-  return leveled.length ? `<details class="card skill-overview" data-skill-overview ${S.ui.skillOverviewOpen === false ? '' : 'open'}>
-      <summary class="quest-sum"><div class="card-head"><span class="caret"></span><div class="title">Total buffs on your PMC</div><span class="badge">${leveled.length} skills leveled · ${leveled.filter((sk) => lv(sk) >= elite).length} elite</span></div></summary>
-      <div class="overview-grid">${cats.map((cat) => {
+  return leveled.length ? `<details class="card qcard skill-overview" data-size="sm" data-skill-overview ${S.ui.skillOverviewOpen === false ? '' : 'open'}>
+      <summary><div class="qhead"><span class="title">Total buffs on your PMC</span>${badge(`${leveled.length} skills leveled · ${leveled.filter((sk) => lv(sk) >= elite).length} elite`, 'secondary')}${icon('chevron', 'caret')}</div></summary>
+      <section><div class="overview-grid">${cats.map((cat) => {
         const sks = leveled.filter((sk) => sk.category === cat);
         if (!sks.length) return '';
-        return `<div><div class="ov-cat">${esc(cat)}</div>${sks.map((sk) => `<div class="ov-skill"><b>${esc(sk.name)}</b> <span class="auto">lvl ${lv(sk)}</span>${lv(sk) >= elite ? ' <span class="badge kappa">Elite</span>' : ''}
+        return `<div><div class="ov-cat">${esc(cat)}</div>${sks.map((sk) => `<div class="ov-skill"><b>${esc(sk.name)}</b> <span class="auto">lvl ${lv(sk)}</span>${lv(sk) >= elite ? ` ${badge('Elite', 'outline', 'kappa')}` : ''}
           ${(sk.effects || []).map((e) => `<div class="ov-row"><span>${esc(e.name)}</span><span class="num">${fmtNum(effectValue(sk, e, lv(sk)))}${esc(e.unit || '')}</span></div>`).join('')}
           ${lv(sk) >= elite ? (sk.elite || []).map((x) => `<div class="ov-row elite"><span>★ ${esc(x)}</span></div>`).join('') : ''}</div>`).join('')}</div>`;
       }).join('')}</div>
       ${shared.length ? `<div class="ov-cat" style="margin-top:10px">Combined (same effect from several skills)</div>${shared.map(([name, c]) => `<div class="ov-row"><span>${esc(name)} <span class="auto">(${esc(c.from.join(' + '))})</span></span><span class="num">${fmtNum(c.total)}${esc(c.unit || '')}</span></div>`).join('')}` : ''}
-    </details>` : '<div class="empty" style="padding:14px">Enter your skill levels to see the total buffs on your PMC.</div>';
+    </section></details>` : emptyState('', 'Enter your skill levels to see the total buffs on your PMC.', '', 'zap');
 }
 
 function renderSkills() {
@@ -735,7 +868,7 @@ function renderSkills() {
   const maxLevel = cfg.maxLevel || 51;
   const elite = cfg.eliteLevel || 51;
   const lv = (sk) => Number(S.progress.skills[sk.id] || 0);
-  if (!cfg.skills.length) return '<div class="empty">No skill data available.</div>';
+  if (!cfg.skills.length) return emptyState('No skill data available');
   const cats = uniq(cfg.skills.map((sk) => sk.category));
   const text = norm(f.text);
   let list = cfg.skills.filter((sk) =>
@@ -750,29 +883,30 @@ function renderSkills() {
   const overview = skillOverview(cfg, lv);
 
   const toolbar = `<div class="toolbar">
-    <input type="search" data-ui="sk.text" value="${esc(f.text)}" placeholder="Search skills, descriptions, effects…" style="flex:1;min-width:220px">
-    <div class="chips">${[['', 'All'], ...cats.map((c) => [c, c])].map(([v, t]) => `<button class="chip ${f.category === v ? 'on' : ''}" data-act="sk-cat" data-v="${esc(v)}">${esc(t)}</button>`).join('')}</div>
+    <input type="search" class="input tb-search wide" data-ui="sk.text" value="${esc(f.text)}" placeholder="Search skills, descriptions, effects…" aria-label="Search skills">
+    <div role="group" class="button-group" aria-label="Category">${[['', 'All'], ...cats.map((c) => [c, c])].map(([v, t]) => btn(esc(t), `data-act="sk-cat" data-v="${esc(v)}" aria-pressed="${f.category === v}"`, { variant: f.category === v ? 'secondary' : 'outline', size: 'sm' })).join('')}</div>
     ${select('sk.sortBy', f.sortBy, [['category', 'Game order'], ['name', 'Name'], ['level', 'Your level']], 'Sort')}
-    <label><input type="checkbox" data-ui="sk.onlyLeveled" ${f.onlyLeveled ? 'checked' : ''}>Only leveled</label>
+    ${toggleSwitch('Only leveled', 'data-ui="sk.onlyLeveled"', f.onlyLeveled)}
     <span class="count">${list.length} skills</span>
   </div>`;
   const cards = list.map((sk) => {
     const l = lv(sk);
-    return `<div class="card skill ${l >= elite ? 'st-completed' : l > 0 ? 'st-active' : ''}">
-      <div class="card-head"><div class="title">${esc(sk.name)}</div>${l >= elite ? '<span class="badge kappa">Elite</span>' : ''}<span class="badge">${esc(sk.category)}</span></div>
-      <div class="skill-level"><span class="stepper"><button data-act="skill-step" data-id="${esc(sk.id)}" data-d="-1">−</button>
-        <input type="number" min="0" max="${maxLevel}" value="${l}" data-act="skill-level" data-id="${esc(sk.id)}" aria-label="${esc(sk.name)} level">
-        <button data-act="skill-step" data-id="${esc(sk.id)}" data-d="1">+</button></span><span class="auto">level ${l}/${maxLevel}</span></div>
-      <div class="progressbar"><div style="width:${Math.round((l / maxLevel) * 100)}%"></div></div>
+    return `<div class="card skill ${l >= elite ? 'st-completed' : l > 0 ? 'st-active' : ''}" data-size="sm">
+      <header><h2>${esc(sk.name)}</h2><div class="card-action">${l >= elite ? badge('Elite', 'outline', 'kappa') : ''}${badge(esc(sk.category), 'secondary')}</div></header>
+      <section>
+      <div class="skill-level"><div role="group" class="button-group stepper">${btn(icon('minus'), `data-act="skill-step" data-id="${esc(sk.id)}" data-d="-1" aria-label="Level down"`, { variant: 'outline', size: 'icon-sm' })}
+        <input type="number" class="input" min="0" max="${maxLevel}" value="${l}" data-act="skill-level" data-id="${esc(sk.id)}" aria-label="${esc(sk.name)} level">
+        ${btn(icon('plus'), `data-act="skill-step" data-id="${esc(sk.id)}" data-d="1" aria-label="Level up"`, { variant: 'outline', size: 'icon-sm' })}</div><span class="auto">level ${l}/${maxLevel}</span></div>
+      ${progressBar(l, maxLevel, `${sk.name} level`)}
       <div class="desc">${esc(sk.description)}</div>
       ${sk.levelUp ? `<div class="auto">Levels up by: ${esc(sk.levelUp)}</div>` : ''}
       <ul class="effects">${(sk.effects || []).map((e) => `<li><span>${esc(e.name)}</span><span class="num">${fmtNum(effectValue(sk, e, l))}${esc(e.unit || '')} <span class="auto">(${fmtNum(e.perLevel)}${esc(e.unit || '')}/lvl, max ${fmtNum(effectValue(sk, e, maxLevel))}${esc(e.unit || '')})</span></span></li>`).join('')}
         ${(sk.elite || []).map((x) => `<li class="${l >= elite ? '' : 'locked'}"><span>★ Elite: ${esc(x)}</span></li>`).join('')}</ul>
-    </div>`;
+    </section></div>`;
   }).join('');
   // Wide screens: skill cards on the left, buff totals in a sticky sidebar. Narrow: totals on top.
   return ocrPanel() + toolbar + `<div class="skills-layout">
-      <div class="skills-main"><div class="grid skills-grid">${cards || '<div class="empty">No skills match.</div>'}</div></div>
+      <div class="skills-main"><div class="grid skills-grid">${cards || emptyState('No skills match', '', '', 'search')}</div></div>
       <aside class="skills-side">${overview}</aside>
     </div>
     <p class="kv">${esc(cfg.note || '')}</p>`;
@@ -790,20 +924,23 @@ function ocrPanel() {
     else info = `Will read ${st.selected.length} screenshot${st.selected.length === 1 ? '' : 's'} from <b>${esc(st.day)}</b>${st.inRaid ? ` · ${st.inRaid} in-raid skipped` : ''} · engine: ${esc(ocrEngineLabel(st))}`;
   }
   let result = '';
-  if (r?.error) result = `<div class="ocr-result bad">${esc(r.error)}</div>`;
+  if (r?.error) result = `<div class="alert ocr-result" data-variant="destructive">${icon('alert')}<h2>Reading screenshots failed</h2><section>${esc(r.error)}</section><footer>${btn(icon('x'), 'data-act="ocr-dismiss" aria-label="Dismiss"', { variant: 'ghost', size: 'icon-sm' })}</footer></div>`;
   else if (r) {
     const changed = new Map(r.changes.map((c) => [c.id, c]));
     const read = r.read || r.changes.map((c) => ({ id: c.id, name: c.name, level: c.to }));
     const changes = read.length
-      ? read.map((x) => { const c = changed.get(x.id); const inf = x.inferred ? ' <span title="Name unreadable; worked out from its position on the page">≈</span>' : ''; return c ? `<span class="badge changed">${esc(x.name)}${inf} ${c.from} → <b>${c.to}</b></span>` : `<span class="badge">${esc(x.name)}${inf} ${x.level} ✓</span>`; }).join(' ')
+      ? read.map((x) => { const c = changed.get(x.id); const inf = x.inferred ? ' <span data-tooltip="Name unreadable; worked out from its position on the page">≈</span>' : ''; return c ? badge(`${esc(x.name)}${inf} ${c.from} → <b>${c.to}</b>`, 'outline', 'changed') : badge(`${esc(x.name)}${inf} ${x.level} ✓`); }).join(' ')
         + `<div class="auto">${r.changes.length ? `${r.changes.length} changed` : 'All already matched the tracker'} · ✓ = already the same${read.some((x) => x.inferred) ? ' · ≈ = name unreadable, worked out from its position on the page' : ''}.</div>`
       : '<span class="auto">No skill levels could be read from these screenshots. Are they of the skills page?</span>';
-    const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span style="color:var(--bad)">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.engines ? ` <span class="badge">${esc(f.engines.map((e) => (e === 'ai' ? 'AI' : 'Tesseract')).join(' + '))}</span>` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
-    result = `<div class="ocr-result">${r.aiError ? `<div class="auto" style="color:var(--warn)">AI OCR failed to start (${esc(r.aiError)}); Tesseract was used.</div>` : ''}<div><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}
-      <button class="btn small" data-act="ocr-dismiss">✕</button></div><div class="ocr-changes">${changes}</div><details><summary>Screenshots</summary><div class="sources">${files}</div></details></div>`;
+    const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span class="bad">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.engines ? ` ${badge(esc(f.engines.map((e) => (e === 'ai' ? 'AI' : 'Tesseract')).join(' + ')), 'secondary')}` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
+    result = `<div class="alert ocr-result">${icon('camera')}<h2><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}</h2>
+      <section>${r.aiError ? `<p class="warn">AI OCR failed to start (${esc(r.aiError)}); Tesseract was used.</p>` : ''}<div class="ocr-changes">${changes}</div>
+      <section class="accordion"><details><summary>Screenshots${icon('chevron')}</summary><section><div class="sources">${files}</div></section></details></section></section>
+      <footer>${btn(icon('x'), 'data-act="ocr-dismiss" aria-label="Dismiss"', { variant: 'ghost', size: 'icon-sm', tip: 'Dismiss', side: 'left' })}</footer></div>`;
   }
-  return `<div class="toolbar ocr-bar"><button class="btn primary" data-act="ocr-run" ${running || !st?.selected?.length || !(st?.tesseract || st?.ai) ? 'disabled' : ''}>${running ? 'Reading screenshots…' : '📷 Read levels from screenshots'}</button>
-    <span class="auto">${info}</span></div>${result}`;
+  const canRun = !running && st?.selected?.length && (st?.tesseract || st?.ai);
+  return `<div class="card ocr-bar" data-size="sm"><section>${btn(running ? `${spinner()} Reading screenshots…` : `${icon('camera')} Read levels from screenshots`, 'data-act="ocr-run"', { variant: 'primary', disabled: !canRun })}
+    <span class="auto">${st ? info : `${spinner()} ${info}`}</span></section></div>${result}`;
 }
 
 // "3 of 3 checks agree: big number 17, next level 18 − 1, XP 312 146 → 17"
@@ -843,7 +980,8 @@ function renderSkillPractical(cfg, lv) {
   const kg = (n) => `${(Math.round(n * 10) / 10).toLocaleString()} kg`;
   const hrs = (h) => { const m = Math.round(h * 60); return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')} min`; };
   const x = (n) => `×${(Math.round(n * 1000) / 1000).toFixed(3).replace(/0+$/, '').replace(/\.$/, '')}`;
-  const levelBadge = (sk) => `<span class="badge">your level ${lv(sk)}${lv(sk) >= (cfg.eliteLevel || 51) ? ' · Elite' : ''}</span>`;
+  const levelBadge = (sk) => badge(`your level ${lv(sk)}${lv(sk) >= (cfg.eliteLevel || 51) ? ' · Elite' : ''}`, 'secondary');
+  const card = (title, sk, body) => `<div class="card info-card" data-size="sm"><header><h2>${title}</h2><div class="card-action">${levelBadge(sk)}</div></header><section>${body}</section></div>`;
   const row = (label, now, was) => `<div class="ov-row"><span>${label}</span><span class="num"><b>${now}</b>${was != null ? ` <span class="auto">(base ${was})</span>` : ''}</span></div>`;
   const elite = (sk) => lv(sk) >= (cfg.eliteLevel || 51) ? (sk.elite || []).map((t) => `<div class="ov-row elite"><span>★ ${esc(t)}</span></div>`).join('') : '';
   const cards = [];
@@ -852,13 +990,13 @@ function renderSkillPractical(cfg, lv) {
   if (str) {
     const b = pct(str, /carry weight/i);
     const m = 1 + b / 100;
-    cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Strength</div>${levelBadge(str)}</div>
+    cards.push(card('Strength', str, `
       <p class="auto">Carry weight bonus ${fmtNum(b)}% raises the weight limits below.</p>
       ${row('You become overweight at', kg(base.overweightStartKg * m), kg(base.overweightStartKg))}
       ${row('You can no longer sprint at', kg(base.sprintLimitKg * m), kg(base.sprintLimitKg))}
       ${row('Critically overweight at', kg(base.criticalOverweightKg * m), kg(base.criticalOverweightKg))}
       ${row('Sprint speed', `${fmtNum(pct(str, /sprint/i))}%`)}${row('Jump height', `${fmtNum(pct(str, /jump/i))}%`)}${row('Throw distance', `${fmtNum(pct(str, /throw/i))}%`)}
-      ${elite(str)}</div>`);
+      ${elite(str)}`));
   }
 
   const met = get('Metabolism');
@@ -867,12 +1005,12 @@ function renderSkillPractical(cfg, lv) {
     const drainMet = pct(met, /drain/i);
     const drainHealth = pct(get('Health'), /drain/i);
     const drain = 1 + (drainMet + drainHealth) / 100;
-    cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Metabolism</div>${levelBadge(met)}</div>
+    cards.push(card('Metabolism', met, `
       ${row('Food and drinks restore', x(food), '×1')}
       ${row('Example: a 60-energy MRE gives', `${Math.round(60 * food)} energy`, '60')}
       ${row('Energy and hydration drain', x(drain), '×1')}
       <p class="auto">Drain includes Health (${fmtNum(drainHealth)}%) and Metabolism (${fmtNum(drainMet)}%).${drain < 1 ? ` Your energy lasts about ${Math.round((1 / drain - 1) * 100)}% longer.` : ''}</p>
-      ${elite(met)}</div>`);
+      ${elite(met)}`));
   }
 
   const hm = get('HideoutManagement');
@@ -882,23 +1020,23 @@ function renderSkillPractical(cfg, lv) {
     const fuelBonus = hideoutBonusTotals().find((b) => b.type === 'FuelConsumption');
     const zoneFuel = fuelBonus ? 1 + fuelBonus.boosted / 100 : 1;
     const perHour = (base.generatorFuelPerHour || 4.75) * cons * zoneFuel;
-    cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Hideout Management</div>${levelBadge(hm)}</div>
+    cards.push(card('Hideout Management', hm, `
       ${row('Fuel and filter use', x(cons), '×1')}
       ${fuelBonus ? row(`Hideout fuel bonus (${esc(fuelBonus.from.join(', '))})`, `${fmtNum(fuelBonus.boosted)}%`) : ''}
       ${row('Generator burns', `${(Math.round(perHour * 100) / 100)} fuel/h`, `${base.generatorFuelPerHour || 4.75}/h`)}
       ${(base.fuelTanks || []).map((t) => row(`${esc(t.name)} (${t.resource}) lasts`, hrs(t.resource / perHour), hrs(t.resource / (base.generatorFuelPerHour || 4.75)))).join('')}
       ${row('Hideout zone bonuses', x(bonus), '×1')}
       <p class="auto">Example: a zone bonus of +10% becomes +${Math.round(10 * bonus * 10) / 10}%.</p>
-      ${elite(hm)}</div>`);
+      ${elite(hm)}`));
   }
 
   const cr = get('Crafting');
   if (cr) {
     const t = 1 + pct(cr, /production time/i) / 100;
-    cards.push(`<div class="card info-card"><div class="card-head"><div class="title">Crafting</div>${levelBadge(cr)}</div>
+    cards.push(card('Crafting', cr, `
       ${row('Craft time', x(t), '×1')}
       ${(base.craftExampleHours || [1, 8, 24]).map((h) => row(`A ${h} h craft takes`, hrs(h * t), hrs(h))).join('')}
-      ${elite(cr)}</div>`);
+      ${elite(cr)}`));
   }
   return `<div class="grid info-grid">${cards.join('')}</div>
     <p class="kv">Base values: ${esc(base.source || 'n/a')}${base.fuelTanksSource ? `; fuel tank sizes: ${esc(base.fuelTanksSource)}` : ''}. Per-level percentages come from the Skills data (marked "game config" where taken from the game; otherwise community wiki and approximate). Change your levels on the Skills tab.</p>`;
@@ -960,15 +1098,16 @@ function craftCard(c, pins) {
     const img = r.item?.iconLink ? `<img class="req-icon" src="${esc(r.item.iconLink)}" alt="" loading="lazy" onerror="this.remove()">` : '';
     return `<span class="product">${img}${esc(r.item?.name || '?')}${r.count > 1 ? ` <span class="auto">×${r.count}</span>` : ''}</span>`;
   }).join(' ');
-  const ins = (c.requiredItems || []).map((r) => `<li>${itemTag(r.item)} <span class="num">×${Number(r.count).toLocaleString('en-US')}</span>${r.tool ? ' <span class="badge" title="Tools are returned when the craft finishes">tool</span>' : ''}</li>`)
-    .concat((c.requiredQuestItems || []).map((q) => `<li>${esc(q.name)} <span class="badge">quest item</span></li>`)).join('');
-  return `<div class="card recipe ${lock ? 'locked' : ''} ${pinned ? 'pinned' : ''}">
-    <div class="card-head"><div class="title">${out}</div>
-      <button class="btn small pin ${pinned ? 'on' : ''}" data-act="craft-pin" data-station="${esc(c.station.id)}" data-id="${esc(c.id)}" ${full ? 'disabled title="4 recipes pinned for this module; unpin one first"' : `title="${pinned ? 'Unpin' : 'Pin to the top of this module'}"`}>${pinned ? '★ Pinned' : '☆ Pin'}</button></div>
-    <div class="meta"><span>Level ${c.level}</span>·<span class="craft-time"><b>${fmtDuration(secs)}</b>${timeNote ? ` <span class="auto">(${esc(timeNote)})</span>` : ''}</span>
-      ${c.taskUnlock ? `<span class="badge ${lock && /quest/.test(lock) ? '' : 'status-completed'}">quest: ${esc(c.taskUnlock.name)}</span>` : ''}
-      ${lock ? `<span class="badge">🔒 ${esc(lock)}</span>` : ''}</div>
-    <ul class="ingredients">${ins || '<li class="auto">No ingredients</li>'}</ul>
+  const ins = (c.requiredItems || []).map((r) => `<li>${itemTag(r.item)} <span class="num">×${Number(r.count).toLocaleString('en-US')}</span>${r.tool ? ` ${badge('tool', 'outline', '', 'Tools are returned when the craft finishes')}` : ''}</li>`)
+    .concat((c.requiredQuestItems || []).map((q) => `<li>${esc(q.name)} ${badge('quest item')}</li>`)).join('');
+  const pinBtn = btn(`${icon('star', pinned ? 'filled' : '')} ${pinned ? 'Pinned' : 'Pin'}`, `data-act="craft-pin" data-station="${esc(c.station.id)}" data-id="${esc(c.id)}" aria-pressed="${pinned}"`,
+    { variant: pinned ? 'secondary' : 'ghost', size: 'xs', cls: `pin ${pinned ? 'on' : ''}`, disabled: full, side: 'left', tip: full ? `${MAX_PINS} recipes pinned for this module; unpin one first` : pinned ? 'Unpin' : 'Pin to the top of this module' });
+  return `<div class="card recipe ${lock ? 'locked' : ''} ${pinned ? 'pinned' : ''}" data-size="sm">
+    <header><h2 class="title">${out}</h2><div class="card-action">${pinBtn}</div></header>
+    <section><div class="meta"><span>Level ${c.level}</span>·<span class="craft-time"><b>${fmtDuration(secs)}</b>${timeNote ? ` <span class="auto">(${esc(timeNote)})</span>` : ''}</span>
+      ${c.taskUnlock ? badge(`quest: ${esc(c.taskUnlock.name)}`, 'outline', lock && /quest/.test(lock) ? '' : 'status-completed') : ''}
+      ${lock ? badge(`${icon('lock')} ${esc(lock)}`, 'destructive', 'lock-badge') : ''}</div>
+    <ul class="ingredients">${ins || '<li class="auto">No ingredients</li>'}</ul></section>
   </div>`;
 }
 
@@ -989,7 +1128,7 @@ function bitcoinSection(st) {
   const storage = (btc.storage || 3) + (Number(S.progress.skills?.HideoutManagement || 0) >= 51 ? 2 : 0);
   const rows = uniq([1, 10, 25, 50, gpus]).sort((x, y) => x - y).map((n) => {
     const t = bitcoinSeconds(n);
-    return `<tr class="${n === gpus ? 'mine' : ''}"><td>${n}${n === gpus ? ' <span class="auto">(yours)</span>' : ''}</td><td>${fmtDurationSec(t)}</td><td class="num">${(86400 / t).toFixed(4)}</td></tr>`;
+    return `<tr class="${n === gpus ? 'mine' : ''}"><td>${n}${n === gpus ? ` ${badge('yours', 'secondary')}` : ''}</td><td>${fmtDurationSec(t)}</td><td class="num">${(86400 / t).toFixed(4)}</td></tr>`;
   }).join('');
   const tanks = (b.fuelTanks || [{ name: 'Metal fuel tank', resource: 100 }]).map((t) => {
     const hours = t.resource / perHour;
@@ -997,20 +1136,21 @@ function bitcoinSection(st) {
   }).join('');
   const open = S.ui.recOpen.bitcoin ?? true;
   return `<details class="group recipes-station bitcoin-farm" data-recopen="bitcoin" ${open ? 'open' : ''}>
-    <summary class="group-title"><span class="caret"></span>${esc(st.name)} <span class="count">level ${builtLevel(st)} · ${gpus} GPU${gpus === 1 ? '' : 's'} · ${(86400 / secs).toFixed(4)} BTC/day</span></summary>
-    <div class="card btc-panel">
-      <div class="row"><label>Graphics cards installed <input type="number" min="1" max="${btc.maxGpus || 50}" value="${gpus}" data-set="gpuCount"></label>
-        <span>1 bitcoin every <b>${fmtDurationSec(secs)}</b> · ${(86400 / secs).toFixed(4)} per day · farm holds ${storage}</span></div>
-      <table class="items btc-table"><thead><tr><th>Graphics cards</th><th>Time to produce 1 bitcoin</th><th class="num">BTC/day</th></tr></thead><tbody>${rows}</tbody></table>
+    <summary><span class="group-name">${esc(st.name)}</span><span class="count">level ${builtLevel(st)} · ${gpus} GPU${gpus === 1 ? '' : 's'} · ${(86400 / secs).toFixed(4)} BTC/day</span>${icon('chevron')}</summary>
+    <section><div class="card btc-panel" data-size="sm">
+      <header><h2>1 bitcoin every ${fmtDurationSec(secs)}</h2><p>${(86400 / secs).toFixed(4)} per day · farm holds ${storage}</p></header>
+      <section>
+      <div role="group" class="field btc-field"><label class="label" for="gpuCount">Graphics cards installed</label><input id="gpuCount" class="input" type="number" min="1" max="${btc.maxGpus || 50}" value="${gpus}" data-set="gpuCount"></div>
+      <div class="table-container"><table class="table btc-table"><thead><tr><th>Graphics cards</th><th>Time to produce 1 bitcoin</th><th class="num">BTC/day</th></tr></thead><tbody>${rows}</tbody></table></div>
       <div class="auto" style="margin-top:8px">Generator burns ${perHour.toFixed(2)} fuel/h (Hideout Management and hideout bonuses included):</div>
-      ${tanks}
-    </div>
+      ${tanks}</section>
+    </div></section>
   </details>`;
 }
 
 function renderRecipes() {
   const crafts = S.data.crafts;
-  if (!Array.isArray(crafts)) return '<div class="empty">No recipe data yet. Refresh game data under Settings (the tracker does this automatically after an update).</div>';
+  if (!Array.isArray(crafts)) return emptyState('No recipe data yet', 'Refresh game data under Settings (the tracker does this automatically after an update).', '', 'database');
   const f = S.ui.rec;
   const text = norm(f.text);
   const pinsAll = S.progress.craftPins || {};
@@ -1033,19 +1173,20 @@ function renderRecipes() {
     const key = st.id;
     const open = S.ui.recOpen[key] ?? !!pinned.length;
     return `<details class="group recipes-station" data-recopen="${esc(key)}" ${open || text ? 'open' : ''}>
-      <summary class="group-title"><span class="caret"></span>${esc(st.name)} <span class="count">level ${builtLevel(st)} · ${unlocked.length} available${pins.length ? ` · ★ ${pins.length}/${MAX_PINS} pinned` : ''}</span></summary>
-      ${pinned.length ? `<div class="pinned-row"><div class="grid">${pinned.map((c) => craftCard(c, pins)).join('')}</div></div>` : ''}
-      ${rest.length ? `<div class="grid">${rest.map((c) => craftCard(c, pins)).join('')}</div>` : ''}
+      <summary><span class="group-name">${esc(st.name)}</span><span class="count">level ${builtLevel(st)} · ${unlocked.length} available</span>${pins.length ? badge(`${icon('star')} ${pins.length}/${MAX_PINS} pinned`, 'secondary') : ''}${icon('chevron')}</summary>
+      <section>${pinned.length ? `<div class="pinned-row"><div class="grid">${pinned.map((c) => craftCard(c, pins)).join('')}</div></div>` : ''}
+      ${rest.length ? `<div class="grid">${rest.map((c) => craftCard(c, pins)).join('')}</div>` : ''}</section>
     </details>`;
   }).join('');
   const factor = craftTimeFactor();
   const toolbar = `<div class="toolbar">
-    <input type="search" data-ui="rec.text" value="${esc(f.text)}" placeholder="Find recipes by item…" style="flex:1;min-width:220px">
-    <label><input type="checkbox" data-ui="rec.showLocked" ${f.showLocked ? 'checked' : ''}>Show locked${hiddenLocked && !f.showLocked ? ` (${hiddenLocked} hidden)` : ''}</label>
+    <input type="search" class="input tb-search wide" data-ui="rec.text" value="${esc(f.text)}" placeholder="Find recipes by item…" aria-label="Find recipes">
+    ${toggleSwitch(`Show locked${hiddenLocked && !f.showLocked ? ` (${hiddenLocked} hidden)` : ''}`, 'data-ui="rec.showLocked"', f.showLocked)}
     <span class="auto">Times include your Crafting skill (×${factor.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')})</span>
-    <button class="btn small" data-act="rec-open" data-v="1">Expand all</button><button class="btn small" data-act="rec-open" data-v="0">Collapse all</button>
+    <div role="group" class="button-group">${btn('Expand all', 'data-act="rec-open" data-v="1"', { variant: 'outline', size: 'sm' })}${btn('Collapse all', 'data-act="rec-open" data-v="0"', { variant: 'outline', size: 'sm' })}</div>
   </div>`;
-  return toolbar + farmSection + (sections || `<div class="empty">${text ? 'No recipe uses or makes that item.' : 'No recipes available yet. Build hideout stations to unlock them.'}</div>`)
+  const body = farmSection + sections;
+  return toolbar + (body ? `<section class="accordion groups" data-multiple>${body}</section>` : '') + (sections ? '' : emptyState(text ? 'No recipe uses or makes that item' : 'No recipes available yet', text ? '' : 'Build hideout stations to unlock them.', '', 'search'))
     + '<p class="kv">Recipes appear when their station level is built and their unlocking quest is completed. Crafts run at 7% speed while the generator has no fuel.</p>';
 }
 
@@ -1105,20 +1246,21 @@ function renderBuffs() {
     rows.forEach((b) => used.add(b));
     if (!rows.length) return '';
     const key = `hb:${title}`;
-    return `<details class="buff-group" data-buffopen="${esc(key)}" ${S.ui.buffOpen[key] ? 'open' : ''}><summary><span class="caret"></span><span class="ov-cat">${esc(title)}</span><span class="auto">${rows.length} bonus${rows.length === 1 ? '' : 'es'}</span></summary>${rows.map((b) => `<div class="ov-row"><span>${esc(b.name)}${b.skillName ? ` <span class="auto">(${esc(b.skillName)})</span>` : ''}${b.type === 'AdditionalSlots' ? ` <span class="auto">(${esc(b.station)})</span>` : ''}
-      <span class="auto">· ${esc(b.from.join(', '))}</span></span><span class="num"><b>${b.abs ? absValue(b) : fmtPct(b.boosted)}</b>${!b.abs && boost ? ` <span class="auto">(base ${fmtPct(b.pct)})</span>` : ''}</span></div>`).join('')}</details>`;
+    return `<details class="buff-group" data-buffopen="${esc(key)}" ${S.ui.buffOpen[key] ? 'open' : ''}><summary><span class="ov-cat">${esc(title)}</span>${badge(`${rows.length} bonus${rows.length === 1 ? '' : 'es'}`, 'secondary')}${icon('chevron')}</summary><section>${rows.map((b) => `<div class="ov-row"><span>${esc(b.name)}${b.skillName ? ` <span class="auto">(${esc(b.skillName)})</span>` : ''}${b.type === 'AdditionalSlots' ? ` <span class="auto">(${esc(b.station)})</span>` : ''}
+      <span class="auto">· ${esc(b.from.join(', '))}</span></span><span class="num"><b>${b.abs ? absValue(b) : fmtPct(b.boosted)}</b>${!b.abs && boost ? ` <span class="auto">(base ${fmtPct(b.pct)})</span>` : ''}</span></div>`).join('')}</section></details>`;
   }).join('');
   // Game data cached by an older version has no 'bonuses' field on any hideout level.
   const noBonusData = !!S.data?.hideout?.length && !S.data.hideout.some((st) => st.levels.some((l) => Array.isArray(l.bonuses)));
-  const hideoutCard = `<details class="card buffs-hideout" data-buffopen="hb" ${S.ui.buffOpen.hb === false ? '' : 'open'}>
-      <summary class="quest-sum"><div class="card-head"><span class="caret"></span><div class="title">Hideout bonuses</div>
-      <span class="badge">${totals.length} bonuses</span><span class="badge">${(S.data?.hideout || []).filter((st) => builtLevel(st) > 0).length} stations built</span></div></summary>
-      ${totals.length ? '<div class="collapse-tools"><button class="btn small" data-act="buff-groups" data-v="1">Expand all</button><button class="btn small" data-act="buff-groups" data-v="0">Collapse all</button></div>' : ''}
+  const hideoutCard = `<details class="card qcard buffs-hideout" data-size="sm" data-buffopen="hb" ${S.ui.buffOpen.hb === false ? '' : 'open'}>
+      <summary><div class="qhead"><span class="title">Hideout bonuses</span>
+      ${badge(`${totals.length} bonuses`, 'secondary')}${badge(`${(S.data?.hideout || []).filter((st) => builtLevel(st) > 0).length} stations built`, 'secondary')}${icon('chevron', 'caret')}</div></summary>
+      <section>
+      ${totals.length ? `<div class="collapse-tools"><div role="group" class="button-group">${btn('Expand all', 'data-act="buff-groups" data-v="1"', { variant: 'outline', size: 'sm' })}${btn('Collapse all', 'data-act="buff-groups" data-v="0"', { variant: 'outline', size: 'sm' })}</div></div>` : ''}
       ${boost ? `<p class="auto">Includes your Hideout Management bonus: zone bonuses ×${Math.round((1 + boost / 100) * 1000) / 1000}.</p>` : ''}
-      ${sections || (noBonusData
-        ? `<p class="auto">Your saved game data was downloaded before the tracker read hideout bonuses${S.status?.refreshing ? ' and is being refreshed now…' : '.'}</p><button class="btn primary" data-act="refresh">Refresh game data now</button>`
+      ${sections ? `<section class="accordion buff-groups" data-multiple>${sections}</section>` : (noBonusData
+        ? `<p class="auto">Your saved game data was downloaded before the tracker read hideout bonuses${S.status?.refreshing ? ' and is being refreshed now…' : '.'}</p>${btn(`${icon('refresh')} Refresh game data now`, 'data-act="refresh"', { variant: 'primary' })}`
         : `<p class="auto">${S.data ? 'No hideout bonuses yet. Mark stations built on the Hideout tab.' : 'Game data not loaded yet.'}</p>`)}
-      <p class="kv">Bonuses of all built levels are added up; Hideout Management boosts percentage bonuses. Values come from tarkov.dev's hideout data.</p></details>`;
+      <p class="kv">Bonuses of all built levels are added up; Hideout Management boosts percentage bonuses. Values come from tarkov.dev's hideout data.</p></section></details>`;
   return `<div class="buffs-layout">
       <section><h3 class="section-title">Hideout</h3>${hideoutCard}</section>
       <section><h3 class="section-title">Skills in game</h3>${renderSkillPractical(cfg, lv)}</section>
@@ -1170,9 +1312,9 @@ function itemRequirements({ includeEquipment = false } = {}) {
 
 function sourceLine(r) {
   const where = r.kind === 'quest' || r.kind === 'equipment'
-    ? `<a href="#" data-act="goto" data-id="${r.taskId}">${esc(r.label)}</a> <span class="badge status-${r.status}">${STATUS_LABEL[r.status] || r.status}</span>`
-    : `<b>${esc(r.label)}</b> <span class="badge">${r.kind}</span>`;
-  const qty = r.kind === 'equipment' ? '<span class="badge">equipment</span>' : `×${r.count} ${r.fir ? '<span class="badge fir">FIR</span>' : '<span class="badge nofir">not FIR</span>'}${r.alt ? ' <span class="optional">(one of several accepted items)</span>' : ''}`;
+    ? `<a href="#" data-act="goto" data-id="${r.taskId}">${esc(r.label)}</a> ${badge(STATUS_LABEL[r.status] || r.status, 'outline', `status-${r.status}`)}`
+    : `<b>${esc(r.label)}</b> ${badge(r.kind, 'secondary')}`;
+  const qty = r.kind === 'equipment' ? badge('equipment', 'secondary') : `×${r.count} ${r.fir ? badge('FIR', 'primary', 'fir') : badge('not FIR', 'outline', 'nofir')}${r.alt ? ' <span class="optional">(one of several accepted items)</span>' : ''}`;
   return `<div>${r.done ? '✓ ' : ''}${where} — ${qty}${r.have && !r.done ? ` <span class="auto">${r.have} collected</span>` : ''}${r.sub ? `<br><span class="auto">${esc(r.sub)}</span>` : ''}</div>`;
 }
 
@@ -1203,23 +1345,24 @@ function renderItems() {
     ${select('items.fir', f.fir, [['all', 'FIR + not FIR'], ['fir', 'Found in raid only'], ['nofir', 'Not FIR only']], 'Type')}
     ${select('items.source', f.source, [['all', 'Quests + hideout + prestige'], ['quest', 'Quests'], ['hideout', 'Hideout'], ['prestige', 'Prestige']], 'Source')}
     ${select('items.sortBy', f.sortBy, [['remaining', 'Most needed'], ['fir', 'Most FIR needed'], ['name', 'Name']], 'Sort')}
-    <label><input type="checkbox" data-ui="items.includeLocked" ${f.includeLocked ? 'checked' : ''}>Include locked (future) quests</label>
-    <input type="search" data-ui="items.text" value="${esc(f.text)}" placeholder="Filter items…">
+    ${toggleSwitch('Include locked (future) quests', 'data-ui="items.includeLocked"', f.includeLocked)}
+    <input type="search" class="input tb-search" data-ui="items.text" value="${esc(f.text)}" placeholder="Filter items…" aria-label="Filter items">
     <span class="count">${rows.length} items</span>
   </div>`;
-  if (!rows.length) return toolbar + '<div class="empty">Nothing needed. Either you are done, or your filters are lying to you.</div>';
-  return toolbar + `<table class="items"><thead><tr><th>Item</th><th class="num">FIR</th><th class="num">Not FIR</th><th class="num">Collected</th><th>Needed for</th></tr></thead><tbody>
+  if (!rows.length) return toolbar + emptyState('Nothing needed', 'Either you are done, or your filters are lying to you.', '', 'list');
+  return toolbar + `<div class="card table-card"><div class="table-container"><table class="table items"><thead><tr><th>Item</th><th class="num">FIR</th><th class="num">Not FIR</th><th class="num">Collected</th><th>Needed for</th></tr></thead><tbody>
     ${rows.map((a) => `<tr><td>${itemTag(a.item)}<div class="auto">${esc(a.item.name)}</div></td><td class="num">${a.fir || ''}</td><td class="num">${a.nofir || ''}</td><td class="num">${a.have}/${a.fir + a.nofir}</td>
-      <td class="sources"><details><summary>${a.sources.length} source${a.sources.length > 1 ? 's' : ''}</summary>${a.sources.map(sourceLine).join('')}</details></td></tr>`).join('')}
-  </tbody></table>`;
+      <td class="sources">${popover(`${a.sources.length} source${a.sources.length > 1 ? 's' : ''} ${icon('chevron')}`, `<div class="sources pop-sources">${a.sources.map(sourceLine).join('')}</div>`, { variant: 'outline', size: 'xs', align: 'end' })}</td></tr>`).join('')}
+  </tbody></table></div></div>`;
 }
 
 // ---------------------------------------------------------------- render: search
 function renderSearch() {
   const q = norm(S.ui.search).trim();
-  const head = `<div class="toolbar"><input type="search" data-ui="search" value="${esc(S.ui.search)}" placeholder="Quest or item name…" style="flex:1" id="searchBox">
-    <label><input type="checkbox" data-ui="searchCompleted" ${S.ui.searchCompleted ? 'checked' : ''}>Include completed</label></div>`;
-  if (q.length < 2) return head + '<div class="empty">Type at least two characters. Searches quest names, objectives, and every item any quest, hideout level or prestige needs.</div>';
+  const head = `<div class="toolbar"><input type="search" class="input tb-search wide" data-ui="search" value="${esc(S.ui.search)}" placeholder="Quest or item name…" id="searchBox" aria-label="Search">
+    ${toggleSwitch('Include completed', 'data-ui="searchCompleted"', S.ui.searchCompleted)}
+    <span class="auto">Tip: <kbd class="kbd">Ctrl</kbd> <kbd class="kbd">K</kbd> opens the command palette from anywhere.</span></div>`;
+  if (q.length < 2) return head + emptyState('Search everything', 'Type at least two characters. Searches quest names, objectives, and every item any quest, hideout level or prestige needs.', '', 'search');
   const quests = S.data.tasks.filter((t) => norm(t.name).includes(q) && (S.ui.searchCompleted || taskStatus(t.id) !== 'completed'));
   const reqs = itemRequirements({ includeEquipment: true }).filter((r) => (norm(r.item.name).includes(q) || norm(r.item.shortName).includes(q)) && (S.ui.searchCompleted || !r.done) && r.status !== 'unavailable');
   const byItem = new Map();
@@ -1229,12 +1372,12 @@ function renderSearch() {
   }
   const items = [...byItem.values()].sort((a, b) => byName(a.item.name, b.item.name));
   const skillHits = activeSkillConfig().skills.filter((sk) => norm(sk.name).includes(q) || norm(sk.description).includes(q));
-  return head + `<div class="group-title">Quests (${quests.length})</div>
-    ${quests.length ? `<div class="grid">${sortTasks(quests).slice(0, 60).map(taskCard).join('')}</div>` : '<div class="empty">No quests by that name.</div>'}
-    ${skillHits.length ? `<div class="group-title">Skills (${skillHits.length})</div><div class="chips">${skillHits.map((sk) => `<button class="chip" data-act="goto-skill" data-id="${esc(sk.name)}">${esc(sk.name)} · lvl ${Number(S.progress.skills[sk.id] || 0)}</button>`).join('')}</div>` : ''}
-    <div class="group-title">Items (${items.length})</div>
-    ${items.length ? `<table class="items"><thead><tr><th>Item</th><th>Needed for (current &amp; future)</th></tr></thead><tbody>${items.map((a) => `<tr><td>${itemTag(a.item)}<div class="auto">${esc(a.item.name)}</div></td><td class="sources">${a.sources.map(sourceLine).join('')}</td></tr>`).join('')}</tbody></table>`
-      : '<div class="empty">No current or future quest, hideout level or prestige needs an item matching that. Sell it.</div>'}`;
+  return head + `<h3 class="section-title">Quests ${badge(quests.length, 'secondary')}</h3>
+    ${quests.length ? `<div class="grid">${sortTasks(quests).slice(0, 60).map(taskCard).join('')}</div>` : emptyState('', 'No quests by that name.', '', 'search')}
+    ${skillHits.length ? `<h3 class="section-title">Skills ${badge(skillHits.length, 'secondary')}</h3><div class="chips">${skillHits.map((sk) => btn(`${esc(sk.name)} ${badge(`lvl ${Number(S.progress.skills[sk.id] || 0)}`, 'secondary')}`, `data-act="goto-skill" data-id="${esc(sk.name)}"`, { variant: 'outline', size: 'sm' })).join('')}</div>` : ''}
+    <h3 class="section-title">Items ${badge(items.length, 'secondary')}</h3>
+    ${items.length ? `<div class="card table-card"><div class="table-container"><table class="table items"><thead><tr><th>Item</th><th>Needed for (current &amp; future)</th></tr></thead><tbody>${items.map((a) => `<tr><td>${itemTag(a.item)}<div class="auto">${esc(a.item.name)}</div></td><td class="sources">${a.sources.map(sourceLine).join('')}</td></tr>`).join('')}</tbody></table></div></div>`
+      : emptyState('', 'No current or future quest, hideout level or prestige needs an item matching that. Sell it.', '', 'list')}`;
 }
 
 // ---------------------------------------------------------------- render: settings
@@ -1243,36 +1386,44 @@ function renderSettings() {
   const st = S.status || {};
   const logs = st.logs || {};
   const meta = st.dataMeta || {};
+  const sel = (key, value, options) => `<select class="select" id="set-${key}" data-set="${key}">${options.map(([v, t]) => `<option value="${esc(v)}" ${String(value) === String(v) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
+  const field = (id, label, control, desc = '') => `<div role="group" class="field"><label class="label" for="${id}">${label}</label>${control}${desc ? `<p>${desc}</p>` : ''}</div>`;
+  const theme = window.basecoat?.theme?.get?.() || (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
   return `<div class="settings">
-    <div class="card"><h3>Character</h3>
-      <div class="row"><label>PMC level <input type="number" min="1" max="79" data-set="playerLevel" value="${s.playerLevel || 1}"></label>
-        <label>Faction <select data-set="faction">${['USEC', 'BEAR'].map((f) => `<option ${s.faction === f ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
-        <label>Game mode <select data-set="gameMode">${[['regular', 'PvP'], ['pve', 'PvE']].map(([v, t]) => `<option value="${v}" ${s.gameMode === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
-      <div class="kv">Changing game mode re-downloads the matching quest data.</div>
+    <div class="card" data-size="sm"><header><h2>Character</h2><p>Changing game mode re-downloads the matching quest data.</p></header>
+      <section class="field-row">
+        ${field('set-playerLevel', 'PMC level', `<input class="input" id="set-playerLevel" type="number" min="1" max="79" data-set="playerLevel" value="${s.playerLevel || 1}">`)}
+        ${field('set-faction', 'Faction', sel('faction', s.faction, [['USEC', 'USEC'], ['BEAR', 'BEAR']]))}
+        ${field('set-gameMode', 'Game mode', sel('gameMode', s.gameMode, [['regular', 'PvP'], ['pve', 'PvE']]))}
+      </section>
     </div>
-    <div class="card"><h3>Game data</h3>
-      <div class="kv">Source: <code>${esc(meta.source || '–')}</code> · fetched <code>${esc(meta.fetchedAt || 'never')}</code> · mode <code>${esc(meta.gameMode || '–')}</code></div>
-      ${st.refreshError ? `<div class="kv" style="color:var(--bad)">Last refresh failed: ${esc(st.refreshError)}</div>` : ''}
-      <div class="row"><button class="btn" data-act="refresh">${st.refreshing ? 'Refreshing…' : 'Refresh from tarkov.dev'}</button>
-        <label class="btn">Import data file…<input type="file" accept=".json" data-act="import-data" hidden></label></div>
+    <div class="card" data-size="sm"><header><h2>Appearance</h2><p>Dark is the default. Also toggled with the moon/sun button in the top bar.</p></header>
+      <section class="field-row">${field('set-theme', 'Theme', `<select class="select" id="set-theme" data-act="theme-select">${[['dark', 'Dark'], ['light', 'Light']].map(([v, t]) => `<option value="${v}" ${theme === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`)}</section>
     </div>
-    <div class="card"><h3>Game log detection</h3>
-      <div class="kv">Folder: <code>${esc(logs.dir || '–')}</code> — ${logs.available ? `<span style="color:var(--good)">found</span>, ${logs.files} notification log files, ${logs.events} quest events read, last scan ${esc(logs.lastScan || '–')}` : '<span style="color:var(--warn)">not found</span>. Mount your EFT Logs folder (see README) to detect quest starts/completions automatically.'}</div>
-      <div class="row"><label>Count game logs from <input type="datetime-local" data-set="logsSince" value="${esc(toLocalInput(s.logsSince))}"></label>
-        <button class="btn danger" data-act="fresh-start" title="After a wipe, profile reset or prestige">New start from now…</button></div>
-      <div class="kv">Quest events logged before this moment are ignored (the game keeps logs from every wipe, reset and prestige). Changing it re-reads all logs.</div>
-      <div class="row"><label><input type="checkbox" data-set="autoLogs" ${s.autoLogs !== false ? 'checked' : ''}> Update quest status from game logs</label>
-        <button class="btn" data-act="rescan">Re-read all logs</button></div>
-      ${(logs.lastEvents || []).length ? `<div class="kv">Recent: ${logs.lastEvents.slice(0, 8).map((e) => `${esc(idx.tasks.get(e.taskId)?.name || e.taskId)} → ${esc(e.status)}`).join(' · ')}</div>` : ''}
+    <div class="card" data-size="sm"><header><h2>Game data</h2><p>Source: <code>${esc(meta.source || '–')}</code> · fetched <code>${esc(meta.fetchedAt || 'never')}</code> · mode <code>${esc(meta.gameMode || '–')}</code></p></header>
+      ${st.refreshError ? `<section><div class="alert" data-variant="destructive">${icon('alert')}<h2>Last refresh failed</h2><section>${esc(st.refreshError)}</section></div></section>` : ''}
+      <footer class="actions">${btn(st.refreshing ? `${spinner()} Refreshing…` : `${icon('refresh')} Refresh from tarkov.dev`, 'data-act="refresh"', { variant: 'outline', disabled: !!st.refreshing })}
+        <label class="btn" data-variant="outline">${icon('upload')} Import data file…<input type="file" accept=".json" data-act="import-data" hidden></label></footer>
     </div>
-    <div class="card"><h3>Screenshot reading (OCR)</h3>
-      <div class="row"><label>Engine <select data-set="ocrEngine">${[['auto', 'Auto: AI, Tesseract as backup (recommended)'], ['ai', 'AI only'], ['tesseract', 'Tesseract only']].map(([v, t]) => `<option value="${v}" ${(s.ocrEngine || 'auto') === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
-      <div class="kv">The AI engine (PaddleOCR models, runs on the CPU, no graphics card needed) reads Tarkov's font more reliably; Tesseract is the older engine and joins in when the AI read looks incomplete.</div>
+    <div class="card" data-size="sm"><header><h2>Game log detection</h2>
+        <p>Folder: <code>${esc(logs.dir || '–')}</code> — ${logs.available ? `<span class="good">found</span>, ${logs.files} notification log files, ${logs.events} quest events read, last scan ${esc(logs.lastScan || '–')}` : '<span class="warn">not found</span>. Mount your EFT Logs folder (see README) to detect quest starts/completions automatically.'}</p>
+        <div class="card-action">${badge(logs.available ? 'Connected' : 'Not found', 'outline', logs.available ? 'status-completed' : 'status-failed')}</div></header>
+      <section class="stack">
+        <div class="field-row">${field('set-logsSince', 'Count game logs from', `<input class="input" id="set-logsSince" type="datetime-local" data-set="logsSince" value="${esc(toLocalInput(s.logsSince))}">`, 'Quest events logged before this moment are ignored (the game keeps logs from every wipe, reset and prestige). Changing it re-reads all logs.')}
+          <div class="field-btn">${btn('New start from now…', 'data-act="fresh-start"', { variant: 'destructive', tip: 'After a wipe, profile reset or prestige' })}</div></div>
+        ${toggleSwitch('Update quest status from game logs', 'data-set="autoLogs"', s.autoLogs !== false)}
+        ${(logs.lastEvents || []).length ? `<p class="kv">Recent: ${logs.lastEvents.slice(0, 8).map((e) => `${esc(idx.tasks.get(e.taskId)?.name || e.taskId)} → ${esc(e.status)}`).join(' · ')}</p>` : ''}
+      </section>
+      <footer class="actions">${btn(`${icon('refresh')} Re-read all logs`, 'data-act="rescan"', { variant: 'outline' })}</footer>
     </div>
-    <div class="card"><h3>Progress</h3>
-      <div class="row"><button class="btn" data-act="export">Export progress</button>
-        <label class="btn">Import progress…<input type="file" accept=".json" data-act="import-progress" hidden></label>
-        <button class="btn danger" data-act="reset">Reset all progress</button></div>
+    <div class="card" data-size="sm"><header><h2>Screenshot reading (OCR)</h2></header>
+      <section>${field('set-ocrEngine', 'Engine', sel('ocrEngine', s.ocrEngine || 'auto', [['auto', 'Auto: AI, Tesseract as backup (recommended)'], ['ai', 'AI only'], ['tesseract', 'Tesseract only']]),
+        'The AI engine (PaddleOCR models, runs on the CPU, no graphics card needed) reads Tarkov\'s font more reliably; Tesseract is the older engine and joins in when the AI read looks incomplete.')}</section>
+    </div>
+    <div class="card" data-size="sm"><header><h2>Progress</h2><p>Export a backup before resetting or importing.</p></header>
+      <footer class="actions">${btn(`${icon('download')} Export progress`, 'data-act="export"', { variant: 'outline' })}
+        <label class="btn" data-variant="outline">${icon('upload')} Import progress…<input type="file" accept=".json" data-act="import-progress" hidden></label>
+        ${btn(`${icon('trash')} Reset all progress`, 'data-act="reset"', { variant: 'destructive' })}</footer>
     </div>
   </div>`;
 }
@@ -1320,6 +1471,9 @@ document.addEventListener('click', async (e) => {
   if (el.tagName === 'A' || el.closest('summary')) e.preventDefault();
   switch (act) {
     case 'tab': S.ui.tab = el.dataset.tab; saveUi(); render(); break;
+    case 'theme': setTheme(window.basecoat?.theme?.get() === 'dark' ? 'light' : 'dark'); break;
+    case 'palette': openPalette(); break;
+    case 'search-all': S.ui.search = el.dataset.q || ''; S.ui.tab = 'search'; $('#globalSearch').value = S.ui.search; saveUi(); render(); break;
     case 'qstatus': {
       const s = el.dataset.s;
       const set = new Set(S.ui.q.statuses);
@@ -1353,12 +1507,16 @@ document.addEventListener('click', async (e) => {
       document.querySelectorAll('details.buff-group').forEach((d) => { S.ui.buffOpen[d.dataset.buffopen] = el.dataset.v === '1'; });
       saveUi(); render(); break;
     case 'ocr-run': {
+      if (S.ui.tab !== 'skills') { S.ui.tab = 'skills'; saveUi(); }
       S.ocr.running = true; render();
       try {
         const res = await fetch('/api/ocr/run', { method: 'POST' });
         S.ocr.result = await res.json();
       } catch (err) { S.ocr.result = { error: err.message }; }
       S.ocr.running = false; S.ocr.status = null;
+      const r = S.ocr.result;
+      if (r?.error) toast('error', 'Reading screenshots failed', r.error);
+      else if (r) toast('success', `OCR: ${r.changes?.length || 0} skill${r.changes?.length === 1 ? '' : 's'} updated`, `${r.found} read from ${r.files?.length || 0} screenshot${r.files?.length === 1 ? '' : 's'}${r.playerLevel ? ` · PMC level ${r.playerLevel.to}` : ''}`);
       await poll(true);
       render(); break;
     }
@@ -1375,8 +1533,19 @@ document.addEventListener('click', async (e) => {
     }
     case 'rec-open':
       for (const st of S.data.hideout || []) S.ui.recOpen[st.id] = el.dataset.v === '1';
+      S.ui.recOpen.bitcoin = el.dataset.v === '1'; // the Bitcoin Farm section has its own key
       saveUi(); render(); break;
     case 'h-show': S.ui.h.show = el.dataset.v; saveUi(); render(); break;
+    case 'goto-station': {
+      const st = idx.stations.get(id);
+      if (!st) break;
+      S.ui.tab = 'hideout';
+      S.ui.h = { ...S.ui.h, show: 'all', need: '', text: st.name };
+      S.ui.hOpen[id] = true;
+      saveUi(); render();
+      document.querySelector(`[data-hopen="${CSS.escape(id)}"]`)?.scrollIntoView({ block: 'center' });
+      break;
+    }
     case 'sk-cat': S.ui.sk.category = el.dataset.v; saveUi(); render(); break;
     case 'sk-view': S.ui.sk.view = el.dataset.v; saveUi(); render(); break;
     case 'goto-skill': S.ui.tab = 'skills'; S.ui.sk = { ...S.ui.sk, text: id, category: '', onlyLeveled: false, view: 'skills' }; saveUi(); render(); break;
@@ -1387,11 +1556,17 @@ document.addEventListener('click', async (e) => {
       break;
     }
     case 'prestige-view': S.ui.prestigeView = id || null; saveUi(); render(); break;
-    case 'prestige-achieved':
+    case 'prestige-achieved': {
+      const on = el.dataset.v === '1';
+      const p = (S.data.prestige || []).find((x) => x.id === id);
+      const name = p?.name || `Prestige ${p?.prestigeLevel ?? ''}`;
+      if (on && !(await confirmDialog(`Mark ${name} achieved?`, 'Its checklist is closed and the next prestige is shown. You can undo this any time.', 'Mark achieved'))) break;
       // Back to "next unachieved" so marking one achieved moves straight on to the next prestige.
       S.ui.prestigeView = null; saveUi();
-      setProgress({ section: 'prestige', id: `achieved|${id}`, value: el.dataset.v === '1' || null });
+      setProgress({ section: 'prestige', id: `achieved|${id}`, value: on || null });
+      if (on) toast('success', `${name} achieved`);
       break;
+    }
     case 'quests-open': {
       const v = el.dataset.v === '1';
       for (const t of filteredTasks()) S.ui.open[t.id] = v;
@@ -1404,20 +1579,27 @@ document.addEventListener('click', async (e) => {
     }
     case 'custom-del': setProgress({ section: 'custom', id, value: null }); break;
     case 'refresh': await refreshData(); break;
-    case 'rescan': await api('/api/logs/rescan', { method: 'POST' }); await poll(true); break;
+    case 'rescan':
+      try { await api('/api/logs/rescan', { method: 'POST' }); toast('success', 'Game logs re-read'); } catch (err) { toast('error', 'Could not re-read logs', err.message); }
+      await poll(true); break;
     case 'export': {
       const blob = new Blob([JSON.stringify(S.progress, null, 2)], { type: 'application/json' });
       const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `tarkov-progress-${new Date().toISOString().slice(0, 10)}.json` });
-      a.click(); URL.revokeObjectURL(a.href); break;
+      a.click(); URL.revokeObjectURL(a.href);
+      toast('success', 'Progress exported', a.download); break;
     }
     case 'fresh-start':
-      if (confirm('Start fresh from now (after a wipe, profile reset or prestige)?\n\nThis clears quest, objective and hideout progress, sets your level to 1 and ignores all game logs from before now. Prestige checklists and settings are kept. Export first if unsure.')) {
+      if (await confirmDialog('Start fresh from now?', 'For after a wipe, profile reset or prestige. This clears quest, objective and hideout progress, sets your level to 1 and ignores all game logs from before now. Prestige checklists and settings are kept. Export first if unsure.', 'Start fresh', true)) {
         await api('/api/progress/fresh-start', { method: 'POST' });
         await poll(true);
+        toast('success', 'Fresh start', 'Progress cleared; game logs before now are ignored.');
       }
       break;
     case 'reset':
-      if (confirm('Reset ALL quest, hideout and prestige progress? Export first if unsure.')) { await api('/api/progress/reset', { method: 'POST' }); await poll(true); }
+      if (await confirmDialog('Reset ALL progress?', 'This clears every quest, hideout and prestige mark. Export first if unsure.', 'Reset everything', true)) {
+        await api('/api/progress/reset', { method: 'POST' }); await poll(true);
+        toast('success', 'All progress reset');
+      }
       break;
   }
 });
@@ -1427,6 +1609,8 @@ document.addEventListener('change', async (e) => {
   if (el.dataset.ui) {
     setUi(el.dataset.ui, el.type === 'checkbox' ? el.checked : el.value);
     render();
+  } else if (el.dataset.act === 'theme-select') {
+    setTheme(el.value);
   } else if (el.dataset.act === 'skill-level') {
     const max = S.skills?.maxLevel || 51;
     const v = Math.max(0, Math.min(max, Math.round(Number(el.value) || 0)));
@@ -1451,7 +1635,9 @@ document.addEventListener('change', async (e) => {
       const res = await api(el.dataset.act === 'import-data' ? '/api/data/import' : '/api/progress/import', { method: 'POST', body });
       if (!res.ok) throw new Error(res.body.error);
       await loadAll();
-    } catch (err) { alert(`Import failed: ${err.message}`); }
+      toast('success', el.dataset.act === 'import-data' ? 'Game data imported' : 'Progress imported', file.name);
+    } catch (err) { toast('error', 'Import failed', err.message); }
+    el.value = '';
   }
 });
 
@@ -1499,13 +1685,78 @@ document.addEventListener('submit', (e) => {
   setProgress({ section: 'custom', id: `c${Date.now().toString(36)}`, value: { text, done: false, prestigeId: form.dataset.pid } });
 });
 
+// ---------------------------------------------------------------- theme, keyboard, command palette
+function setTheme(mode) {
+  if (window.basecoat?.theme) window.basecoat.theme.set(mode); // stores localStorage.themeMode
+  else {
+    document.documentElement.classList.toggle('dark', mode === 'dark');
+    try { localStorage.setItem('themeMode', mode); } catch { /* storage unavailable */ }
+  }
+  const sel = document.getElementById('set-theme');
+  if (sel) sel.value = mode;
+}
+
+// Basecoat tabs move the selection with the arrow keys; follow it.
+document.getElementById('tabs').addEventListener('keyup', (e) => {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+  const sel = document.querySelector('#tabs [role=tab][aria-selected="true"]');
+  if (sel && sel.dataset.tab !== S.ui.tab) { S.ui.tab = sel.dataset.tab; saveUi(); render(); }
+});
+
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(); }
+});
+
+// Command palette (Basecoat command in a dialog): jump to tabs, quests, skills, stations, or run actions.
+// Items reuse the normal data-act handlers. Rebuilt on every open so it reflects current progress.
+function openPalette() {
+  const d = document.getElementById('cmdk');
+  if (d.open) return;
+  const item = (label, attrs, { keywords = '', hint = '', ic = '' } = {}) => `<div role="menuitem" ${attrs} data-filter="${esc(label)}"${keywords ? ` data-keywords="${esc(keywords)}"` : ''}>${ic ? icon(ic) : ''}<span>${esc(label)}</span>${hint ? `<span class="cmd-hint">${hint}</span>` : ''}</div>`;
+  const group = (id, title, items) => (items.length ? `<div role="group" aria-labelledby="cmdk-${id}"><span role="heading" id="cmdk-${id}">${title}</span>${items.join('')}</div>` : '');
+  const tabs = [...document.querySelectorAll('#tabs [role=tab]')].map((b) => item(b.textContent.trim(), `data-act="tab" data-tab="${b.dataset.tab}"`, { ic: 'list', keywords: 'tab go' }));
+  const actions = [
+    item('Refresh game data', 'data-act="refresh"', { ic: 'refresh', keywords: 'download update tarkov.dev' }),
+    item('Re-read game logs', 'data-act="rescan"', { ic: 'refresh', keywords: 'logs rescan' }),
+    item('Read levels from screenshots (OCR)', 'data-act="ocr-run"', { ic: 'camera', keywords: 'ocr skills screenshot' }),
+    item('Toggle dark mode', 'data-act="theme"', { ic: 'sun', keywords: 'theme light dark' }),
+    item('Export progress', 'data-act="export"', { ic: 'download', keywords: 'backup save' }),
+  ];
+  const quests = S.data ? S.data.tasks.slice().sort((a, b) => byName(a.name, b.name)).map((t) => {
+    const st = taskStatus(t.id);
+    return item(t.name, `data-act="goto" data-id="${esc(t.id)}"`, { keywords: `${t.trader?.name || ''} ${taskMaps(t).join(' ')} ${st}`, hint: `${esc(t.trader?.name || '')} · ${STATUS_LABEL[st]}` });
+  }) : [];
+  const skills = activeSkillConfig().skills.map((sk) => item(sk.name, `data-act="goto-skill" data-id="${esc(sk.name)}"`, { keywords: `skill ${sk.category}`, hint: `lvl ${Number(S.progress?.skills?.[sk.id] || 0)}` }));
+  const stations = (S.data?.hideout || []).filter((st) => st.levels.length).map((st) => item(st.name, `data-act="goto-station" data-id="${esc(st.id)}"`, { keywords: 'hideout station module', hint: `level ${builtLevel(st)}/${st.levels[st.levels.length - 1].level}`, ic: 'home' }));
+  d.innerHTML = `<div class="command">
+    <header>${icon('search')}<input type="text" id="cmdk-input" placeholder="Jump to a quest, skill, station or action…" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" role="combobox" aria-expanded="true" aria-controls="cmdk-menu"></header>
+    <div role="menu" id="cmdk-menu" aria-orientation="vertical" data-empty="No results found.">
+      ${group('actions', 'Actions', actions)}${group('tabs', 'Go to', tabs)}${group('quests', 'Quests', quests)}${group('skills', 'Skills', skills)}${group('stations', 'Hideout', stations)}
+      ${group('search', 'Search', [`<div role="menuitem" data-act="search-all" data-q="" data-force>${icon('search')}<span class="cmd-search-label">Search quests &amp; items…</span></div>`])}
+    </div>
+    <footer><span><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> to move</span><span><kbd class="kbd">Enter</kbd> to select</span><span><kbd class="kbd">Esc</kbd> to close</span></footer>
+  </div>`;
+  window.basecoat?.init('command');
+  const input = d.querySelector('#cmdk-input');
+  const all = d.querySelector('[data-act="search-all"]');
+  input.addEventListener('input', () => {
+    all.dataset.q = input.value.trim();
+    all.querySelector('.cmd-search-label').textContent = input.value.trim() ? `Search everything for “${input.value.trim()}”` : 'Search quests & items…';
+  });
+  d.onclick = (e) => { if (e.target === d) d.close(); };
+  d.showModal();
+  input.focus();
+}
+
 // ---------------------------------------------------------------- loading & sync
 async function refreshData() {
   banner('Downloading game data from tarkov.dev…');
   let serverOk = false;
   try { serverOk = (await api('/api/data/refresh', { method: 'POST' })).ok; } catch { /* fall back below */ }
-  if (!serverOk) await browserDownload();
+  const ok = serverOk || await browserDownload();
   await loadAll();
+  if (ok) toast('success', 'Game data updated', S.data?.meta?.fetchedAt ? `Fetched ${new Date(S.data.meta.fetchedAt).toLocaleString()}` : '');
+  else toast('error', 'Game data could not be downloaded', 'Using the cached data; the tracker keeps retrying.');
 }
 
 // Fallback for when the container's own requests to tarkov.dev are rejected: the browser runs
