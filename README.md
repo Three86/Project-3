@@ -69,3 +69,17 @@ npm test                      # log parser tests
 DATA_DIR=./data EFT_LOGS_DIR=test/fixtures/logs npm start
 ```
 Copy `test/fixtures/gamedata.json` to `data/` to work offline with a small sample dataset.
+
+### UI
+
+The front-end is plain HTML/JS styled with [Basecoat](https://basecoatui.com/) (`basecoat-css`), with no
+build step. Its prebuilt CSS and JS are self-hosted in `public/vendor/basecoat/` (version and checksums in
+`VERSION` there), so the tracker works fully offline. To upgrade, bump the exact version of
+`basecoat-css` in `package.json` (devDependencies) and run `scripts/vendor-basecoat.sh`.
+
+Dark mode is the default. The moon/sun button in the top bar or Settings → Appearance switches it, and
+the choice is kept in the browser. <kbd>Ctrl</kbd>+<kbd>K</kbd> opens a command palette to jump to any
+quest, skill, hideout station or action.
+
+`scripts/ui-check.js` clicks through every tab in Chromium against the sample data in
+`test/fixtures/ui` and checks what gets saved (needs Playwright: `NODE_PATH=$(npm root -g) node scripts/ui-check.js`).
