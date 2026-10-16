@@ -1,0 +1,5 @@
+basecoat-css 1.0.2
+source: https://www.npmjs.com/package/basecoat-css/v/1.0.2 (dist/basecoat.cdn.min.css, dist/js/all.min.js)
+sha256:
+8123677adb9bba43be3298e1543bcc5fc763e8cda3d32dc74c806046a3537ca0  basecoat.cdn.min.css
+bdb364d43e0f3e7b8dfcfa27bbbe8baac96249e57b79e7f0d241bf70b056ea98  basecoat.all.min.js
