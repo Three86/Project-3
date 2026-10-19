@@ -72,14 +72,98 @@ Copy `test/fixtures/gamedata.json` to `data/` to work offline with a small sampl
 
 ### UI
 
-The front-end is plain HTML/JS styled with [Basecoat](https://basecoatui.com/) (`basecoat-css`), with no
-build step. Its prebuilt CSS and JS are self-hosted in `public/vendor/basecoat/` (version and checksums in
-`VERSION` there), so the tracker works fully offline. To upgrade, bump the exact version of
-`basecoat-css` in `package.json` (devDependencies) and run `scripts/vendor-basecoat.sh`.
+The front-end is plain HTML/JS (native ES modules, no build step) styled with
+[Basecoat](https://basecoatui.com/) (`basecoat-css`). Its prebuilt CSS and JS are self-hosted in
+`public/vendor/basecoat/` (version and checksums in `VERSION` there), so the tracker works fully offline.
+To upgrade, bump the exact version of `basecoat-css` in `package.json` (devDependencies) and run
+`scripts/vendor-basecoat.sh`.
 
 Dark mode is the default. The moon/sun button in the top bar or Settings → Appearance switches it, and
 the choice is kept in the browser. <kbd>Ctrl</kbd>+<kbd>K</kbd> opens a command palette to jump to any
 quest, skill, hideout station or action.
 
-`scripts/ui-check.js` clicks through every tab in Chromium against the sample data in
+Settings → Appearance → **Interface** picks the GUI for this browser (so a second monitor can use a
+different one). Two come with the tracker: **Basecoat (full)**, every section in tabs, and **Compact
+(second monitor)**, an active-quest checklist plus needed items, hideout and settings. If a GUI hides its
+switcher, open `http://localhost:3000/?gui=basecoat` to get back.
+
+`scripts/ui-check.js` clicks through every tab and both GUIs in Chromium against the sample data in
 `test/fixtures/ui` and checks what gets saved (needs Playwright: `NODE_PATH=$(npm root -g) node scripts/ui-check.js`).
+
+### How the front-end is put together
+
+```
+public/
+  index.html          loader only (core/boot.js picks the GUI for this browser)
+  core/               game rules and data, no HTML: store.js (state, server API, saving, sync, events),
+                      game.js (quest/hideout/skill rules), progress.js (shared progress changes),
+                      gui.js + registry.js (find and load GUIs and modules)
+  modules/<id>/       one folder per section: quests, hideout, recipes, prestige, skills, buffs,
+                      items, search, settings
+    module.json       { "title", "order", "description", "needsData" }
+    logic.js          that section's filters, numbers and actions; no HTML. Exports uiDefaults.
+    view.js           the default (Basecoat) view
+  ui/basecoat/        shared Basecoat pieces: components, objective rows, quest card, the shell
+                      (top bar, tabs, palette, toasts, dialogs, event routing) and style.css
+  guis/<id>/          one folder per GUI: gui.json, shell.js, optional views and CSS
+```
+
+The server lists `public/guis/*` and `public/modules/*` itself (`GET /api/ui`), so adding a folder is
+all it takes: nothing else is edited.
+
+#### Making your own GUI
+
+Create `public/guis/<id>/gui.json`:
+
+```json
+{
+  "title": "Raid overlay",
+  "description": "Shown in Settings under the title.",
+  "modules": ["quests", "items"],
+  "views": { "quests": "views/quests.js" },
+  "styles": ["../../vendor/basecoat/basecoat.cdn.min.css", "../../ui/basecoat/style.css", "my.css"],
+  "scripts": ["../../vendor/basecoat/basecoat.all.min.js"],
+  "entry": "shell.js"
+}
+```
+
+- `modules`: `"*"` for every section (in `module.json` order) or a list of ids in tab order.
+- `views`: replace a section's default view with your own file. Sections not listed use their default view.
+- `styles` / `scripts`: loaded in order. Paths are relative to the GUI folder.
+- `entry`: a module whose default export receives `{ gui, modules }` and builds the page. Use the shared
+  Basecoat shell with your own options: `startShell({ gui, modules, brand, palette, className })` from
+  `../../ui/basecoat/shell.js`. Or write your own: render `modules[i].view.render(ctx)` and call
+  `core/store.js` `start()`, `on('change', …)`.
+
+Copy `guis/compact/` for a working example with its own quest view and CSS.
+
+#### Writing a view
+
+A view is the default export of a module's `view.js`, or of a file named in a GUI's `views`:
+
+```js
+import { S } from '../../core/store.js';
+import { filteredTasks, setTaskStatus } from '../../modules/quests/logic.js';
+export default {
+  render(ctx) { return `<ul>${filteredTasks().map((t) => `<li>${t.name}
+    <button data-act="done" data-id="${t.id}">Done</button></li>`).join('')}</ul>`; },
+  actions: { done(el) { setTaskStatus(el.dataset.id, 'completed'); } }, // click on data-act
+  changes: {},      // change on data-act inputs
+  submits: {},      // form data-act submit
+  toggle(el) {},    // a <details> opened/closed; return true to save UI state
+  goto(args) {},    // another section links here (data-act="goto…" data-module="<id>")
+  commands() {},    // command palette entries
+  live: false,      // redraw on every 5 s status poll
+};
+```
+
+`ctx.ui` has `render()`, `toast(category, title, text)`, `confirm(title, text, ok, destructive)`,
+`goto(moduleId, args)`, `setTab(id)` and `theme.get()/set()`. Inputs with `data-ui="path"` are bound to the
+GUI's saved UI state (e.g. `data-ui="q.trader"`), and inputs with `data-set="key"` save a Settings value.
+Progress changes go through the module's `logic.js` (or `core/progress.js`). They save to the server and
+redraw every open GUI on its next poll.
+
+#### Adding a section
+
+Create `public/modules/<id>/` with `module.json`, `logic.js` (export `uiDefaults`, even `{}`) and
+`view.js`. GUIs with `"modules": "*"` show it as a new tab; others add its id to their list.

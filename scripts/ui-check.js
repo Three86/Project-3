@@ -19,6 +19,8 @@ const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1
 const shots = opt('--shots');
 const only = opt('--only')?.split(',');
 const PORT = 3200 + Math.floor(Math.random() * 500);
+const PUBLIC = path.join(__dirname, '..', 'public');
+const cleanup = []; // temporary GUI/module folders the checks add
 const BASE = `http://localhost:${PORT}`;
 
 let failures = 0;
@@ -41,6 +43,7 @@ async function main() {
     }
     await run();
   } finally {
+    for (const d of cleanup) fs.rmSync(d, { recursive: true, force: true });
     server.kill();
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -72,9 +75,11 @@ async function run() {
   const want = (name) => !only || only.includes(name);
   // Each section starts from default filters (saved UI state lives in localStorage 'tt-ui').
   const freshUi = async (tabName) => {
+    // A <details> toggle from the previous step can still save UI state a moment later; write after it.
+    await page.waitForTimeout(150);
     await page.evaluate((t) => localStorage.setItem('tt-ui', JSON.stringify({ tab: t })), tabName);
     await page.reload();
-    await page.waitForFunction(() => !document.querySelector('#view .loading-skeleton') && document.querySelector('#view').children.length > 0);
+    await page.waitForFunction(() => document.querySelector('#view') && !document.querySelector('#view .loading-skeleton') && document.querySelector('#view').children.length > 0);
   };
 
   await page.goto(BASE);
@@ -429,6 +434,61 @@ async function run() {
     await page.waitForTimeout(500);
     ok(await page.locator('#toaster .toast', { hasText: 'Progress imported' }).count() === 1, 'progress import works and shows a toast');
     await shot('settings');
+  }
+
+  // ------------------------------------------------------------ interfaces (GUIs) and modules
+  if (want('gui')) {
+    console.log('Interfaces and modules');
+    // A module folder dropped in shows up as a tab of the full GUI with no other change.
+    const extraMod = path.join(PUBLIC, 'modules', 'zz-uicheck');
+    fs.mkdirSync(extraMod, { recursive: true });
+    cleanup.push(extraMod);
+    fs.writeFileSync(path.join(extraMod, 'module.json'), JSON.stringify({ title: 'Check module', order: 95, needsData: false }));
+    fs.writeFileSync(path.join(extraMod, 'logic.js'), "export const uiDefaults = { zzClicks: 0 };\n");
+    fs.writeFileSync(path.join(extraMod, 'view.js'), "import { S, saveUi } from '../../core/store.js';\nexport default { render: () => `<p id=\"zz-text\">Clicked ${S.ui.zzClicks} times</p><button type=\"button\" data-act=\"zz-click\">Click</button>`, actions: { 'zz-click'(el, ctx) { S.ui.zzClicks++; saveUi(); ctx.ui.render(); } } };\n");
+    await freshUi('zz-uicheck');
+    ok(await page.locator('#tab-zz-uicheck').innerText() === 'Check module', 'dropped-in module folder appears as a tab');
+    await page.click('[data-act="zz-click"]'); await settle();
+    ok(await page.locator('#zz-text').innerText() === 'Clicked 1 times', 'its view renders and its action runs');
+    // Switch to the compact GUI in Settings.
+    await freshUi('settings');
+    ok(await page.locator('#set-gui option').count() >= 2, 'Settings lists the installed interfaces');
+    await Promise.all([page.waitForNavigation(), page.selectOption('#set-gui', 'compact')]);
+    await page.waitForSelector('body.compact #tabs');
+    const compactTabs = await page.locator('#tabs [role=tab]').allInnerTexts();
+    ok(JSON.stringify(compactTabs) === JSON.stringify(['Quests', 'Needed items', 'Hideout', 'Settings']), `compact GUI shows only its sections (${compactTabs.join(', ')})`);
+    ok(await page.evaluate(() => localStorage.getItem('tt-gui')) === 'compact', 'choice saved for this browser');
+    await page.click('#tab-quests'); await settle();
+    ok(await page.locator('.cq-list').count() === 1, 'compact GUI uses its own quest view');
+    ops = [];
+    await page.fill('[data-ui="q.text"]', 'Debut'); await page.waitForTimeout(450);
+    await page.click('#task-5936d90786f7742b1420ba5b [data-act="task-set"][data-v="active"]'); await settle();
+    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'tasks', id: '5936d90786f7742b1420ba5b', value: 'active' }), 'starting a quest in the compact GUI saves it');
+    await page.click('#task-5936d90786f7742b1420ba5b [data-act="step"][data-key="o1"][data-d="1"]'); await settle();
+    ok(lastOp()?.id === 'o1' && lastOp()?.value === 1, 'objective counter works in the compact GUI');
+    await page.reload(); await page.waitForSelector('body.compact #tabs');
+    ok(await page.locator('#tabs [role=tab]').count() === 4, 'compact GUI kept after reload');
+    // Recovery address and switching back.
+    await page.goto(`${BASE}/?gui=basecoat`); await page.waitForSelector('#tab-search');
+    ok(await page.locator('#tabs [role=tab]').count() >= 9 && !(await page.evaluate(() => document.body.classList.contains('compact'))), '?gui=basecoat opens the full GUI');
+    await page.click('#tab-quests'); await settle();
+    ok(await page.locator('details.qcard[data-open="5936d90786f7742b1420ba5b"] .badge.status-active').count() === 1, 'quest started in the compact GUI shows as active in the full GUI');
+    await page.click('#tab-settings'); await settle();
+    await Promise.all([page.waitForNavigation(), page.selectOption('#set-gui', 'basecoat')]);
+    await page.waitForSelector('#tab-search');
+    ok(await page.evaluate(() => localStorage.getItem('tt-gui')) === 'basecoat' && !page.url().includes('gui='), 'switching back in Settings drops the override');
+    // A broken GUI falls back to the default one and says so.
+    const broken = path.join(PUBLIC, 'guis', 'zz-broken');
+    fs.mkdirSync(broken, { recursive: true });
+    cleanup.push(broken);
+    fs.writeFileSync(path.join(broken, 'gui.json'), JSON.stringify({ title: 'Broken', modules: '*', entry: 'missing.js' }));
+    await page.evaluate(() => localStorage.setItem('tt-gui', 'zz-broken'));
+    const before = errors.length;
+    await page.reload(); await page.waitForSelector('#tab-search');
+    await page.waitForTimeout(600);
+    ok(await page.locator('#toaster .toast', { hasText: 'Interface fallback' }).count() === 1, 'broken GUI falls back to the default one with a message');
+    errors.splice(before); // the failed import is logged on purpose
+    await page.evaluate(() => localStorage.setItem('tt-gui', 'basecoat'));
   }
 
   ok(errors.length === 0, `no page errors${errors.length ? `: ${errors.join(' | ')}` : ''}`);
