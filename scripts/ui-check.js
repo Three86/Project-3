@@ -31,7 +31,11 @@ const ok = (cond, msg) => {
 
 async function main() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tt-ui-'));
-  for (const f of ['gamedata.json', 'progress.json']) fs.copyFileSync(path.join(__dirname, '..', 'test', 'fixtures', 'ui', f), path.join(dir, f));
+  fs.cpSync(path.join(__dirname, '..', 'test', 'fixtures', 'ui'), dir, { recursive: true });
+  // Restock times a little in the future, as the server would have them from tarkov.dev.
+  const gd = JSON.parse(fs.readFileSync(path.join(dir, 'gamedata.json'), 'utf8'));
+  gd.traders.forEach((t, i) => { t.resetTime = new Date(Date.now() + (25 + i * 17) * 60000).toISOString(); });
+  fs.writeFileSync(path.join(dir, 'gamedata.json'), JSON.stringify(gd));
   const server = spawn(process.execPath, [path.join(__dirname, '..', 'server', 'index.js')], {
     env: { ...process.env, PORT: String(PORT), DATA_DIR: dir, REFRESH_HOURS: '100000', EFT_LOGS_DIR: path.join(dir, 'nologs'), EFT_SCREENSHOTS_DIR: path.join(dir, 'noshots') },
     stdio: 'ignore',
@@ -488,6 +492,70 @@ async function run() {
     await page.waitForTimeout(600);
     ok(await page.locator('#toaster .toast', { hasText: 'Interface fallback' }).count() === 1, 'broken GUI falls back to the default one with a message');
     errors.splice(before); // the failed import is logged on purpose
+    await page.evaluate(() => localStorage.setItem('tt-gui', 'basecoat'));
+  }
+
+  // ------------------------------------------------------------ Icon GUI (quests by trader)
+  if (want('icon')) {
+    console.log('Icon GUI');
+    await page.evaluate(() => { localStorage.setItem('tt-gui', 'icon'); localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'quests' })); });
+    await page.reload(); await page.waitForSelector('.trader-strip .trader');
+    const names = await page.locator('.trader .t-name').allInnerTexts();
+    ok(JSON.stringify(names) === JSON.stringify(['Prapor', 'Therapist', 'Skier', 'Peacekeeper', 'Jaeger']), `trader cards in game order (${names.join(', ')})`);
+    ok(await page.locator('.trader[data-name="Prapor"] .portrait img').evaluate((img) => img.complete && img.naturalWidth > 0), 'cached trader picture is served by the tracker');
+    await page.waitForTimeout(300);
+    ok(await page.locator('.trader[data-name="Therapist"] .portrait img').count() === 0 && (await page.locator('.trader[data-name="Therapist"] .initials').innerText()) === 'T', 'missing picture falls back to initials');
+    const tick1 = await page.locator('.trader[data-name="Therapist"] [data-restock]').innerText();
+    await page.waitForTimeout(1300);
+    const tick2 = await page.locator('.trader[data-name="Therapist"] [data-restock]').innerText();
+    ok(/\d+m \d\ds/.test(tick1) && tick1 !== tick2, `restock countdown ticks (${tick1} → ${tick2})`);
+    await page.click('.trader[data-name="Therapist"]'); await settle();
+    ok(await page.getAttribute('.trader[data-name="Therapist"]', 'aria-pressed') === 'true' && (await page.locator('.trader-head .th-name').innerText()) === 'Therapist', 'clicking a trader selects it');
+    const rows = await page.locator('.qlist .qrow .q-name').allInnerTexts();
+    const therapistQuests = await page.evaluate(() => fetch('/api/data').then((r) => r.json()).then((d) => d.tasks.filter((t) => t.trader.name === 'Therapist').map((t) => t.name)));
+    ok(rows.length > 0 && rows.every((r) => therapistQuests.some((n) => r.startsWith(n))), `quest list shows only that trader's quests (${rows.length})`);
+    // Completing a quest raises that trader's reputation on its card.
+    await page.click('.trader[data-name="Skier"]'); await settle();
+    const repBefore = Number(await page.locator('.trader[data-name="Skier"] .t-stats b').first().innerText());
+    const first = page.locator('.qlist .qrow.st-available').first();
+    const qid = (await first.getAttribute('id')).replace('task-', '');
+    ops = [];
+    await first.locator('[data-act="quest-set"][data-v="active"]').click(); await settle();
+    await page.click(`#task-${qid} [data-act="quest-set"][data-v="completed"]`); await settle();
+    ok(JSON.stringify(ops.map((o) => o.value)) === JSON.stringify(['active', 'completed']), 'Start then Complete save the quest status');
+    const repAfter = Number(await page.locator('.trader[data-name="Skier"] .t-stats b').first().innerText());
+    ok(Math.abs(repAfter - repBefore - 0.02) < 1e-9, `completing a quest adds its reputation (${repBefore} → ${repAfter})`);
+    // Objectives inside a row work like elsewhere.
+    await page.click('[data-act="qstatus"][data-s="completed"]'); await settle();
+    await page.click(`#task-${qid} > summary`); await settle();
+    ok(await page.locator(`#task-${qid}[open] ul.objs li`).count() > 0, 'quest row expands to its objectives');
+    // Manual loyalty levels: off by default, switched on in Settings.
+    await page.click('.trader[data-name="Peacekeeper"]'); await settle();
+    ok(await page.locator('[data-act="ll-set"]').count() === 0, 'no loyalty selector while manual levels are off');
+    await page.click('#tab-settings'); await settle();
+    await page.check('[data-set="loyaltyManual"]'); await settle();
+    ok(lastOp()?.id === 'loyaltyManual' && lastOp()?.value === true, 'Settings: manual loyalty switch saves');
+    await page.click('#tab-quests'); await settle();
+    await page.selectOption('[data-act="ll-set"]', '4'); await settle();
+    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'settings', id: 'loyaltyOverrides', value: { pk: 4 } }), 'loyalty override saves');
+    ok((await page.locator('.trader[data-name="Peacekeeper"] .ll-chip').innerText()) === 'LL4' && await page.locator('.trader[data-name="Peacekeeper"] .pips.manual').count() === 1, 'card shows the manual level');
+    await page.selectOption('[data-act="ll-set"]', 'auto'); await settle();
+    ok(JSON.stringify(lastOp()?.value) === '{}', 'back to the calculated level');
+    await page.click('#tab-settings'); await settle();
+    await page.uncheck('[data-set="loyaltyManual"]'); await settle();
+    // Jaeger is unlocked by completing Checking.
+    await page.click('#tab-quests'); await settle();
+    const jLocked = await page.locator('.trader[data-name="Jaeger"].locked').count();
+    await page.evaluate(() => fetch('/api/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: [{ section: 'tasks', id: '59674cd986f7744ab26e32f2', value: 'completed' }] }) }));
+    await page.reload(); await page.waitForSelector('.trader-strip .trader');
+    ok(jLocked === 1 && await page.locator('.trader[data-name="Jaeger"].locked').count() === 0, 'Jaeger locked until Checking is completed');
+    // Links from other sections open the quest under its trader.
+    await page.click('#tab-items'); await settle();
+    await page.click('.table.items tbody tr:first-child .popover > button'); await settle();
+    await page.locator('.table.items tbody tr:first-child [data-popover] [data-act="goto"]').first().click(); await settle();
+    const head = await page.locator('.trader-head .th-name').innerText();
+    ok(await page.getAttribute('#tab-quests', 'aria-selected') === 'true' && await page.locator('.qrow[open]').count() >= 1 && !!head, `needed-item link opens the quest under its trader (${head})`);
+    await shot('icon-quests');
     await page.evaluate(() => localStorage.setItem('tt-gui', 'basecoat'));
   }
 

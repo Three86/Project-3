@@ -151,3 +151,63 @@ test('every module folder has module.json, logic.js (uiDefaults) and a default v
     }
   }
 });
+
+test('trader reputation from quests: start, finish, failure and implied completion', async () => {
+  const S = await reset();
+  assert.strictEqual(game.traderStanding('p'), 0);
+  S.progress.tasks[DEBUT] = { status: 'completed' };
+  game.resetMemo();
+  assert.strictEqual(game.traderStanding('p'), 0.02);
+  // Checking active implies Debut completed; failing Debut instead costs reputation.
+  S.progress.tasks = { [CHECKING]: { status: 'completed' } };
+  game.resetMemo();
+  assert.strictEqual(game.traderStanding('p'), 0.05, 'Debut (implied) + Checking');
+  S.progress.tasks = { [DEBUT]: { status: 'failed' } };
+  game.resetMemo();
+  assert.strictEqual(game.traderStanding('p'), -0.05);
+  assert.ok(game.hasStandingData());
+});
+
+test('loyalty level: limited by PMC level or reputation, manual override only when switched on', async () => {
+  const S = await reset();
+  const prapor = S.data.traders.find((t) => t.id === 'p');
+  const pk = S.data.traders.find((t) => t.id === 'pk');
+  S.progress.settings.playerLevel = 21;
+  let L = game.loyaltyLevel(prapor);
+  assert.strictEqual(L.level, 1, 'rep 0 < 0.20 needed');
+  assert.deepStrictEqual([L.next.level, L.next.repMissing, L.next.playerLevelMissing], [2, 0.2, 0]);
+  assert.strictEqual(game.loyaltyLevel(pk).level, 2, 'Peacekeeper LL2 needs no reputation');
+  S.progress.settings.playerLevel = 10;
+  L = game.loyaltyLevel(pk);
+  assert.strictEqual(L.level, 1, 'level 10 < 14 needed');
+  assert.strictEqual(L.next.playerLevelMissing, 4);
+  S.progress.settings.loyaltyOverrides = { pk: 4 };
+  assert.strictEqual(game.loyaltyLevel(pk).level, 1, 'override ignored while manual levels are off');
+  S.progress.settings.loyaltyManual = true;
+  L = game.loyaltyLevel(pk);
+  assert.deepStrictEqual([L.level, L.auto, L.manual, L.next.level], [4, 1, true, 2]);
+  const quests = await load('modules/quests/logic.js');
+  await quests.setLoyaltyOverride('pk', 'auto');
+  assert.deepStrictEqual(S.progress.settings.loyaltyOverrides, {});
+});
+
+test('trader unlock, restock countdown and trader cards', async () => {
+  const S = await reset();
+  assert.deepStrictEqual([game.traderUnlock('j').unlocked, game.traderUnlock('j').by.name], [false, 'Checking']);
+  assert.strictEqual(game.traderUnlock('p').unlocked, true);
+  S.progress.tasks[CHECKING] = { status: 'completed' };
+  game.resetMemo();
+  assert.strictEqual(game.traderUnlock('j').unlocked, true);
+  const now = Date.parse('2026-10-20T10:00:00Z');
+  S.status.traderResets = { times: { p: '2026-10-20T11:30:15Z', th: '2026-10-20T09:00:00Z' } };
+  assert.strictEqual(game.restockIn('p', now), 5415);
+  assert.strictEqual(game.restockIn('th', now), 0, 'past restock time = due');
+  assert.strictEqual(game.restockIn('s', now), null);
+  const quests = await load('modules/quests/logic.js');
+  const cards = quests.traderCards();
+  assert.deepStrictEqual(cards.map((c) => c.trader.name), ['Prapor', 'Therapist', 'Skier', 'Peacekeeper', 'Jaeger'], 'in-game order');
+  const p = cards[0];
+  assert.strictEqual(p.image, '/api/images/traders/p');
+  assert.strictEqual(p.counts.total, 17);
+  assert.strictEqual(p.rep, 0.05);
+});

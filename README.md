@@ -83,8 +83,19 @@ the choice is kept in the browser. <kbd>Ctrl</kbd>+<kbd>K</kbd> opens a command 
 quest, skill, hideout station or action.
 
 Settings → Appearance → **Interface** picks the GUI for this browser (so a second monitor can use a
-different one). Two come with the tracker: **Basecoat (full)**, every section in tabs, and **Compact
-(second monitor)**, an active-quest checklist plus needed items, hideout and settings. If a GUI hides its
+different one). Three come with the tracker:
+
+- **Basecoat (full)**: every section in tabs.
+- **Compact (second monitor)**: an active-quest checklist plus needed items, hideout and settings.
+- **Icon GUI**: every section, with quests shown per trader. A row of trader cards shows each
+  trader's portrait, loyalty level, reputation and restock timer; click one to list its quests.
+  - Reputation is the sum of the reputation your started, completed and failed quests give.
+  - Loyalty level comes from your PMC level and that reputation. Money spent with traders is not
+    tracked, so it is assumed to be met.
+  - Settings → Character → *Manual loyalty levels* lets you set a trader's level by hand instead.
+  - Trader portraits are downloaded once into the data folder (`data/images/traders/`), so they work
+    offline.
+  - Restock times are re-read from tarkov.dev every 10 minutes. If a GUI hides its
 switcher, open `http://localhost:3000/?gui=basecoat` to get back.
 
 `scripts/ui-check.js` clicks through every tab and both GUIs in Chromium against the sample data in

@@ -1,0 +1,9 @@
+{
+  "title": "Icon GUI",
+  "description": "Quests by trader: portraits with loyalty, reputation and restock timers, and each trader's quest list.",
+  "modules": "*",
+  "views": { "quests": "views/quests.js" },
+  "styles": ["../../vendor/basecoat/basecoat.cdn.min.css", "../../ui/basecoat/style.css", "icon.css"],
+  "scripts": ["../../vendor/basecoat/basecoat.all.min.js"],
+  "entry": "shell.js"
+}
