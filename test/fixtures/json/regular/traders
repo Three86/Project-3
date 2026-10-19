@@ -2,7 +2,31 @@
  "data": {
   "54cb50c76803fa8b248b4571": {
    "id": "54cb50c76803fa8b248b4571",
-   "name": "pKey"
+   "name": "pKey",
+   "normalizedName": "prapor",
+   "imageLink": "https://assets.tarkov.dev/prapor.webp",
+   "image4xLink": "https://assets.tarkov.dev/prapor-4x.webp",
+   "resetTime": "2026-10-20T12:00:00.000Z",
+   "levels": [
+    {
+     "level": 2,
+     "requiredPlayerLevel": 15,
+     "requiredReputation": 0.2,
+     "requiredCommerce": 1050000
+    },
+    {
+     "level": 1,
+     "requiredPlayerLevel": 1,
+     "requiredReputation": 0,
+     "requiredCommerce": 0
+    }
+   ]
+  },
+  "5c0647fdd443bc2504c2d371": {
+   "id": "5c0647fdd443bc2504c2d371",
+   "name": "jKey",
+   "normalizedName": "jaeger",
+   "levels": []
   }
  },
  "translations": [

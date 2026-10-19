@@ -128,6 +128,37 @@ function normObjective(o, R) {
   return out;
 }
 
+// Trader reputation changes of a quest's start / finish / failure, and traders it unlocks.
+function normRewards(r, R) {
+  if (!r) return undefined;
+  return {
+    traderStanding: list(r.traderStanding).map((s) => ({ trader: R.trader(s.trader), standing: Number(s.standing) || 0 })).filter((s) => s.trader),
+    traderUnlock: list(r.traderUnlock).map(R.trader).filter(Boolean),
+  };
+}
+
+// Traders with portraits, loyalty requirements and the next restock time. The feed's traders file
+// is keyed by id (older feeds wrap it in { traders }).
+function normTraders(tradersFile) {
+  const table = tradersFile?.traders && typeof tradersFile.traders === 'object' ? tradersFile.traders : tradersFile || {};
+  return Object.values(table).filter((t) => t?.id).map((t) => ({
+    id: t.id,
+    name: t.name,
+    normalizedName: t.normalizedName,
+    imageLink: t.imageLink || null,
+    image4xLink: t.image4xLink || null,
+    resetTime: t.resetTime || null,
+    levels: list(t.levels).map((l) => ({ level: l.level, requiredPlayerLevel: l.requiredPlayerLevel ?? 1, requiredReputation: l.requiredReputation ?? 0, requiredCommerce: l.requiredCommerce ?? 0 }))
+      .filter((l) => Number.isFinite(l.level)).sort((a, b) => a.level - b.level),
+  }));
+}
+
+// Just the traders' next restock times: { traderId: ISO time }.
+async function fetchTraderResetsJson({ gameMode = 'regular', lang = 'en' } = {}) {
+  const traders = normTraders(await loadFile(`${gameMode}/traders`, lang));
+  return Object.fromEntries(traders.filter((t) => t.resetTime).map((t) => [t.id, t.resetTime]));
+}
+
 async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = console.log } = {}) {
   const [tasksFile, hideoutFile, itemsFile, tradersFile, mapsFile, craftsFile] = await Promise.all([
     loadFile(`${gameMode}/tasks`, lang),
@@ -160,6 +191,9 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
     map: t.map ? R.map(t.map) : null,
     taskRequirements: list(t.taskRequirements).map((r) => ({ task: R.task(r.task), status: r.status })),
     objectives: list(t.objectives).map((o) => normObjective(o, R)),
+    startRewards: normRewards(t.startRewards, R),
+    finishRewards: normRewards(t.finishRewards, R),
+    failureOutcome: normRewards(t.failureOutcome, R),
   }));
 
   const hideout = Object.values(hideoutFile || {}).map((st) => ({
@@ -216,7 +250,8 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
     skills,
     playerLevels,
     crafts,
+    traders: normTraders(tradersFile),
   };
 }
 
-module.exports = { fetchGameDataJson, eachMatch, translate, JSON_URL };
+module.exports = { fetchGameDataJson, fetchTraderResetsJson, normTraders, eachMatch, translate, JSON_URL };

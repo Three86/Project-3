@@ -27,12 +27,26 @@ const OBJECTIVE_FULL = `
 `;
 const OBJECTIVE_MIN = `__typename id type description optional maps { id name }`;
 
-const tasksQuery = (args, obj) => `{
+// Trader reputation changes per quest (start, finish, failure) and traders a quest unlocks.
+const REWARDS = `
+    startRewards { traderStanding { trader { id name } standing } }
+    finishRewards { traderStanding { trader { id name } standing } traderUnlock { id name } }
+    failureOutcome { traderStanding { trader { id name } standing } }`;
+
+const tasksQuery = (args, obj, rewards = true) => `{
   tasks(${args}) {
     id name wikiLink minPlayerLevel kappaRequired lightkeeperRequired factionName
     trader { id name } map { id name }
     taskRequirements { task { id name } status }
-    objectives { ${obj} }
+    objectives { ${obj} }${rewards ? REWARDS : ''}
+  }
+}`;
+
+// Traders: portraits, loyalty level requirements and the next restock time.
+const tradersQuery = (args) => `{
+  traders(${args}) {
+    id name normalizedName imageLink image4xLink resetTime
+    levels { level requiredPlayerLevel requiredReputation requiredCommerce }
   }
 }`;
 
@@ -115,7 +129,8 @@ function queryVariants({ gameMode = 'regular', lang = 'en' } = {}) {
   const withMode = `lang: ${lang}, gameMode: ${gameMode}`;
   const noMode = `lang: ${lang}`;
   return {
-    tasks: [tasksQuery(withMode, OBJECTIVE_FULL), tasksQuery(noMode, OBJECTIVE_FULL), tasksQuery(noMode, OBJECTIVE_MIN)],
+    tasks: [tasksQuery(withMode, OBJECTIVE_FULL), tasksQuery(withMode, OBJECTIVE_FULL, false), tasksQuery(noMode, OBJECTIVE_FULL, false), tasksQuery(noMode, OBJECTIVE_MIN, false)],
+    traders: [tradersQuery(withMode), tradersQuery(noMode)],
     hideoutStations: [hideoutQuery(withMode, true), hideoutQuery(noMode, true), hideoutQuery(noMode, false)],
     prestige: [prestigeQuery(withMode, OBJECTIVE_FULL), prestigeQuery(noMode, OBJECTIVE_FULL), prestigeQuery(noMode, OBJECTIVE_MIN)],
   };
@@ -143,6 +158,10 @@ async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.
       requiredItems: (c.requiredItems || []).map((r) => ({ item: r.item, count: r.count, tool: (r.attributes || []).some((a) => a.type === 'tool' && String(a.value) === 'true') })),
     }));
   } catch { /* optional: only the Recipes tab needs it */ }
+  let traders = [];
+  try {
+    traders = await firstWorking(q.traders, 'traders', log);
+  } catch { /* optional: only the trader cards need it */ }
   let prestige = [];
   let prestigeError = null;
   try {
@@ -157,7 +176,14 @@ async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.
     prestige,
     playerLevels,
     crafts,
+    traders,
   };
 }
 
-module.exports = { fetchGameData, queryVariants, API_URL };
+// Just the traders' next restock times: { traderId: ISO time }.
+async function fetchTraderResets({ gameMode = 'regular', lang = 'en', log = console.log } = {}) {
+  const raw = await firstWorking([`{ traders(${withModeArgs(gameMode, lang)}) { id resetTime } }`, `{ traders(lang: ${lang}) { id resetTime } }`], 'traders', log);
+  return Object.fromEntries(raw.filter((t) => t?.id && t.resetTime).map((t) => [t.id, t.resetTime]));
+}
+
+module.exports = { fetchGameData, fetchTraderResets, queryVariants, API_URL };

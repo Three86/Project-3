@@ -2,8 +2,8 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { fetchGameData, queryVariants, API_URL } = require('./tarkovdev');
-const { fetchGameDataJson } = require('./tarkovjson');
+const { fetchGameData, fetchTraderResets, queryVariants, API_URL } = require('./tarkovdev');
+const { fetchGameDataJson, fetchTraderResetsJson } = require('./tarkovjson');
 const { LogWatcher } = require('./logwatcher');
 const ocr = require('./ocr');
 
@@ -69,6 +69,8 @@ let gameData = readJson(GAME_FILE, null);
 const logState = readJson(LOGSTATE_FILE, { offsets: {}, events: 0, lastEvents: [] });
 let refreshing = null;
 let lastRefreshError = null;
+// Next restock per trader ({ traderId: ISO time }); re-read every 10 minutes (see refreshTraderResets).
+let traderResets = { fetchedAt: gameData?.meta?.fetchedAt || null, times: Object.fromEntries((gameData?.traders || []).filter((t) => t.resetTime).map((t) => [t.id, t.resetTime])) };
 
 function saveProgress() {
   progress.rev += 1;
@@ -114,7 +116,10 @@ async function refreshGameData(reason) {
       gameData = data;
       writeJson(GAME_FILE, data);
       lastRefreshError = null;
-      log(`game data cached: ${data.tasks.length} quests, ${data.hideout.length} hideout stations, ${data.prestige.length} prestige levels`);
+      log(`game data cached: ${data.tasks.length} quests, ${data.hideout.length} hideout stations, ${data.prestige.length} prestige levels, ${(data.traders || []).length} traders`);
+      const times = Object.fromEntries((data.traders || []).filter((t) => t.resetTime).map((t) => [t.id, t.resetTime]));
+      if (Object.keys(times).length) traderResets = { fetchedAt: data.meta.fetchedAt, times };
+      downloadTraderImages().catch((err) => log(`trader pictures: ${err.message}`));
     } catch (err) {
       lastRefreshError = err.message;
       log(`game data refresh failed: ${err.message}`);
@@ -127,7 +132,7 @@ async function refreshGameData(reason) {
 
 // Bump when the tracker starts using fields older cached game data doesn't have
 // (2: hideout bonuses, active skill list; 3: XP table). Older caches are re-downloaded automatically.
-const DATA_VERSION = 4; // 3: XP table (playerLevels); 4: hideout crafts
+const DATA_VERSION = 5; // 3: XP table (playerLevels); 4: hideout crafts; 5: traders, quest reputation rewards
 const dataOutdated = () => !!gameData && (gameData.meta?.dataVersion || 1) < DATA_VERSION && gameData.meta?.source !== 'import';
 
 function dataIsStale() {
@@ -135,6 +140,62 @@ function dataIsStale() {
   if (dataOutdated()) return true;
   const age = Date.now() - new Date(gameData.meta?.fetchedAt || 0).getTime();
   return REFRESH_HOURS > 0 && age > REFRESH_HOURS * 3600 * 1000;
+}
+
+// ---------- traders: pictures and restock times ----------
+// Trader portraits are downloaded once into the data folder and served by the tracker itself, so they
+// work offline. Missing ones are fetched after every data refresh and at start-up.
+const TRADER_IMG_DIR = path.join(DATA_DIR, 'images', 'traders');
+const IMG_TYPES = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' };
+const safeId = (id) => /^[\w-]+$/.test(String(id));
+
+function traderImageFile(id) {
+  if (!safeId(id)) return null;
+  for (const ext of Object.values(IMG_TYPES)) {
+    const f = path.join(TRADER_IMG_DIR, `${id}${ext}`);
+    if (fs.existsSync(f)) return f;
+  }
+  return null;
+}
+
+let imagesBusy = false;
+async function downloadTraderImages() {
+  if (imagesBusy || !gameData?.traders?.length) return;
+  imagesBusy = true;
+  try {
+    fs.mkdirSync(TRADER_IMG_DIR, { recursive: true });
+    let got = 0;
+    for (const t of gameData.traders) {
+      const url = t.image4xLink || t.imageLink;
+      if (!url || !safeId(t.id) || traderImageFile(t.id)) continue;
+      try {
+        const res = await fetch(url, { headers: { 'User-Agent': 'tarkov-quest-tracker/1.0 (+self-hosted)' }, signal: AbortSignal.timeout(30000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const type = (res.headers.get('content-type') || '').split(';')[0].trim();
+        const ext = IMG_TYPES[type] || (path.extname(new URL(url).pathname).toLowerCase() in { '.png': 1, '.jpg': 1, '.webp': 1, '.gif': 1 } ? path.extname(new URL(url).pathname).toLowerCase() : null);
+        if (!ext) throw new Error(`not an image (${type || 'no type'})`);
+        fs.writeFileSync(path.join(TRADER_IMG_DIR, `${t.id}${ext}`), Buffer.from(await res.arrayBuffer()));
+        got++;
+      } catch (err) {
+        log(`trader picture for ${t.name} not downloaded: ${err.message}`);
+      }
+    }
+    if (got) log(`trader pictures: ${got} downloaded`);
+  } finally {
+    imagesBusy = false;
+  }
+}
+
+async function refreshTraderResets() {
+  if (!gameData) return;
+  const opts = { gameMode: progress.settings.gameMode || 'regular', log: () => {} };
+  try {
+    let times;
+    try { times = await fetchTraderResetsJson(opts); } catch { times = await fetchTraderResets(opts); }
+    if (Object.keys(times).length) traderResets = { fetchedAt: new Date().toISOString(), times };
+  } catch (err) {
+    log(`trader restock times not refreshed: ${err.message}`);
+  }
 }
 
 // ---------- log watcher ----------
@@ -242,7 +303,7 @@ async function runOcr() {
 }
 
 // ---------- http ----------
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json', '.ico': 'image/x-icon' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json', '.ico': 'image/x-icon', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' };
 
 function send(res, status, body, type = 'application/json') {
   const payload = typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body);
@@ -281,6 +342,7 @@ function status() {
     refreshing: !!refreshing,
     refreshError: lastRefreshError,
     logs: { dir: LOGS_DIR, available: watcher.available, files: watcher.filesSeen, lastScan: watcher.lastScan, events: logState.events, lastEvents: logState.lastEvents },
+    traderResets,
   };
 }
 
@@ -302,6 +364,12 @@ function listUiFolders(kind, file) {
 
 async function handleApi(req, res, url) {
   const route = `${req.method} ${url.pathname}`;
+  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/traders\/([\w-]+)$/);
+  if (img) {
+    const file = traderImageFile(img[1]);
+    if (!file) return send(res, 404, { error: 'no picture for this trader (yet)' });
+    return send(res, 200, fs.readFileSync(file), MIME[path.extname(file)]);
+  }
   switch (route) {
     case 'GET /api/status':
       return send(res, 200, status());
@@ -335,6 +403,8 @@ async function handleApi(req, res, url) {
       lastRefreshError = null;
       const viaBrowser = /via browser/.test(body.meta?.source || '');
       gameData = { meta: { source: 'import', fetchedAt: new Date().toISOString(), ...(body.meta || {}), dataVersion: body.meta?.dataVersion || (viaBrowser ? DATA_VERSION : 1) }, tasks: body.tasks, hideout: body.hideout, prestige: body.prestige || [] };
+      // Optional parts of a full game data file (or of the browser download).
+      for (const k of ['traders', 'crafts', 'skills', 'playerLevels']) if (Array.isArray(body[k])) gameData[k] = body[k];
       writeJson(GAME_FILE, gameData);
       return send(res, 200, status());
     }
@@ -411,7 +481,12 @@ server.listen(PORT, () => {
     ticks++;
     if (!gameData) refreshGameData('retry: no data yet');
     else if (ticks % 12 === 0 && dataIsStale()) refreshGameData('scheduled');
+    if (ticks % 2 === 0) refreshTraderResets();
   }, 5 * 60 * 1000).unref();
+  // Restock times go stale fast; re-read them now and every 10 minutes (the tick above). Fetch any
+  // trader pictures still missing.
+  refreshTraderResets();
+  downloadTraderImages().catch((err) => log(`trader pictures: ${err.message}`));
   if (needsLogRebuild && watcher.available) rebuildFromLogs();
   watcher.start();
 });

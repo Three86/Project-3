@@ -133,7 +133,7 @@ export async function browserDownload() {
       }
     }
     if (!out.tasks || !out.hideoutStations) throw new Error(errors.join(' / '));
-    const payload = { meta: { source: `${cfg.url} (via browser)`, gameMode: cfg.gameMode, prestigeError: out.prestige ? null : errors.filter((e) => e.startsWith('prestige')).join(' / ') }, tasks: out.tasks, hideout: out.hideoutStations, prestige: out.prestige || [] };
+    const payload = { meta: { source: `${cfg.url} (via browser)`, gameMode: cfg.gameMode, prestigeError: out.prestige ? null : errors.filter((e) => e.startsWith('prestige')).join(' / ') }, tasks: out.tasks, hideout: out.hideoutStations, prestige: out.prestige || [], traders: out.traders || [] };
     const res = await api('/api/data/import', { method: 'POST', body: JSON.stringify(payload) });
     if (!res.ok) throw new Error(res.body.error);
     banner('');

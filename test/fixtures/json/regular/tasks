@@ -49,7 +49,21 @@
      }
     ],
     "finishRewards": {
-     "customization": []
+     "traderStanding": [
+      {
+       "trader": "54cb50c76803fa8b248b4571",
+       "standing": 0.02
+      }
+     ],
+     "items": []
+    },
+    "failureOutcome": {
+     "traderStanding": [
+      {
+       "trader": "54cb50c76803fa8b248b4571",
+       "standing": -0.05
+      }
+     ]
     }
    },
    "t2": {
@@ -113,7 +127,18 @@
        "complete"
       ]
      }
-    ]
+    ],
+    "finishRewards": {
+     "traderStanding": [
+      {
+       "trader": "54cb50c76803fa8b248b4571",
+       "standing": 0.03
+      }
+     ],
+     "traderUnlock": [
+      "5c0647fdd443bc2504c2d371"
+     ]
+    }
    }
   },
   "questItems": {
