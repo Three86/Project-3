@@ -2,10 +2,10 @@
 // Requirement counters and checkboxes are in core/progress.js.
 import { S, setProgress, saveUi } from '../../core/store.js';
 import { norm, byName } from '../../core/util.js';
-import { idx, builtLevel, hideoutReqs, levelBuilt, levelUnlocked, REQ_NEEDS } from '../../core/game.js';
+import { idx, builtLevel, hideoutReqs, levelBuilt, levelUnlocked, REQ_NEEDS, stationStatus } from '../../core/game.js';
 
 export { stepRequirement, setRequirement } from '../../core/progress.js';
-export { builtLevel, hideoutReqs, levelBuilt, levelUnlocked, REQ_NEEDS };
+export { builtLevel, hideoutReqs, levelBuilt, levelUnlocked, REQ_NEEDS, stationStatus };
 
 export const uiDefaults = {
   h: { show: 'next', need: '', sortBy: 'name', text: '' },
@@ -80,3 +80,21 @@ export function focusStation(id) {
 
 // Stations that have levels (for the command palette etc.).
 export const stations = () => (S.data?.hideout || []).filter((st) => st.levels.length);
+
+// Icon served by the tracker (downloaded once from tarkov.dev); 404 until it has been fetched.
+export const stationImage = (id) => `/api/images/stations/${encodeURIComponent(id)}`;
+
+// Every station with levels, by name, with its status (see core/game.js stationStatus).
+export function stationCards() {
+  return stations().slice().sort((a, b) => byName(a.name, b.name)).map((st) => ({ station: st, image: stationImage(st.id), status: stationStatus(st) }));
+}
+
+// Change a station's built level by one (−1 unbuilds the top level, +1 builds the next one).
+export function stepLevel(stationId, d) {
+  const st = idx.stations.get(stationId);
+  if (!st) return null;
+  const built = builtLevel(st);
+  const target = st.levels.find((l) => l.level === (d > 0 ? built + 1 : built));
+  if (!target) return null;
+  return setBuilt(target.id, d > 0);
+}

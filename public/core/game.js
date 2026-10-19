@@ -230,14 +230,33 @@ export function hideoutReqs(level) {
   });
   (level.stationLevelRequirements || []).forEach((r) => {
     const st = r.station && idx.stations.get(r.station.id);
-    reqs.push({ kind: 'station', key: `${level.id}|station|${r.station?.id}`, label: `${r.station?.name} level ${r.level}`, auto: true, done: st ? builtLevel(st) >= r.level : false });
+    reqs.push({ kind: 'station', key: `${level.id}|station|${r.station?.id}`, station: r.station, need: r.level, have: st ? builtLevel(st) : 0, label: `${r.station?.name} level ${r.level}`, auto: true, done: st ? builtLevel(st) >= r.level : false });
   });
-  (level.traderRequirements || []).forEach((r, i) => reqs.push({ kind: 'trader', key: `${level.id}|trader|${i}`, label: `${r.trader?.name} loyalty level ${r.level ?? r.value}` }));
+  (level.traderRequirements || []).forEach((r, i) => {
+    const key = `${level.id}|trader|${i}`;
+    const trader = (S.data?.traders || []).find((t) => t.id === r.trader?.id);
+    if (r.requirementType === 'reputation') {
+      // Checked against the reputation your quests give (needs quest reward data).
+      const need = Number(r.value ?? r.level);
+      if (hasStandingData()) {
+        const rep = traderStanding(r.trader.id);
+        reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} reputation ${need.toFixed(2)} (yours: ${rep.toFixed(2)})`, auto: true, done: rep >= need });
+      } else reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} reputation ${need.toFixed(2)}` });
+      return;
+    }
+    // Loyalty level: checked against the level worked out from your PMC level and quest reputation
+    // (or set by hand in Settings) once the game data has the trader's loyalty levels.
+    const need = Number(r.level ?? r.value);
+    if (trader?.levels?.length) {
+      const ll = loyaltyLevel(trader).level;
+      reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} loyalty level ${need} (yours: LL${ll})`, auto: true, done: ll >= need });
+    } else reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} loyalty level ${need}` });
+  });
   (level.skillRequirements || []).forEach((r, i) => {
     const lvl = skillLevel(r.name);
     // Tracked automatically once you enter that skill on the Skills tab; otherwise a manual checkbox.
-    if (lvl > 0) reqs.push({ kind: 'skill', key: `${level.id}|skill|${i}`, label: `${r.name} level ${r.level} (yours: ${lvl})`, auto: true, done: lvl >= r.level });
-    else reqs.push({ kind: 'skill', key: `${level.id}|skill|${i}`, label: `${r.name} level ${r.level}` });
+    if (lvl > 0) reqs.push({ kind: 'skill', key: `${level.id}|skill|${i}`, name: r.name, need: r.level, have: lvl, label: `${r.name} level ${r.level} (yours: ${lvl})`, auto: true, done: lvl >= r.level });
+    else reqs.push({ kind: 'skill', key: `${level.id}|skill|${i}`, name: r.name, need: r.level, have: 0, label: `${r.name} level ${r.level}` });
   });
   for (const r of reqs) {
     if (r.auto) continue;
@@ -458,4 +477,20 @@ export function restockIn(traderId, now = Date.now()) {
   const t = iso ? Date.parse(iso) : NaN;
   if (!Number.isFinite(t)) return null;
   return Math.max(0, Math.round((t - now) / 1000));
+}
+
+// ---------------------------------------------------------------- hideout module status
+// Where a hideout station stands with its next level:
+// { built, max, next (level object or null), key: 'max' | 'ready' | 'missing' | 'locked',
+//   reqs (of the next level), missing (unmet count), lockedBy (unmet station requirements) }
+// locked = another station is not built high enough; missing = stations fine, other things unmet.
+export function stationStatus(st) {
+  const built = builtLevel(st);
+  const max = st.levels.length ? st.levels[st.levels.length - 1].level : 0;
+  const next = st.levels.find((l) => l.level === built + 1) || null;
+  if (!next) return { built, max, next: null, key: 'max', reqs: [], missing: 0, lockedBy: [] };
+  const reqs = hideoutReqs(next);
+  const lockedBy = reqs.filter((r) => r.kind === 'station' && !r.done);
+  const missing = reqs.filter((r) => !r.done).length;
+  return { built, max, next, reqs, missing, lockedBy, key: lockedBy.length ? 'locked' : missing ? 'missing' : 'ready' };
 }
