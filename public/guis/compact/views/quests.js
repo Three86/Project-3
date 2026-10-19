@@ -7,7 +7,7 @@ import { badge, btn, checkbox, emptyState, progressBar } from '../../../ui/basec
 import { objRow, objectiveActions, objectiveChanges } from '../../../ui/basecoat/objectives.js';
 import { filteredTasks, sortTasks, toggleStatusFilter, focusTask, setTaskStatus } from '../../../modules/quests/logic.js';
 
-const SHOWN = ['active', 'available', 'locked', 'completed'];
+const SHOWN = ['active', 'locked', 'completed'];
 
 function questRow(t) {
   const st = taskStatus(t.id);

@@ -8,10 +8,14 @@ export { setTaskStatus, startWithPrereqs, stepRequirement, setRequirement } from
 
 // UI state this section keeps (merged into the GUI's saved UI state).
 export const uiDefaults = {
-  q: { statuses: ['active', 'available'], trader: '', map: '', need: '', groupBy: 'trader', sortBy: 'level', text: '', kappa: false, lightkeeper: false },
+  q: { statuses: ['active'], trader: '', map: '', need: '', groupBy: 'trader', sortBy: 'level', text: '', kappa: false, lightkeeper: false },
   open: {}, // quest id -> card open
   groups: {}, // group key -> open (false = collapsed)
 };
+
+// Status filters offered in quest lists. Available (startable, not started) quests are not listed:
+// starts come from the game logs. An empty filter (a link to one quest) still shows every status.
+export const STATUS_FILTERS = ['active', 'locked', 'completed', 'failed', 'unavailable'];
 
 export const traders = () => idx.traders;
 export const maps = () => idx.maps;
@@ -21,7 +25,7 @@ export function filteredTasks() {
   const text = norm(f.text);
   return S.data.tasks.filter((t) => {
     const st = taskStatus(t.id);
-    if (f.statuses.length && !f.statuses.includes(st)) return false;
+    if (f.statuses.length && (st === 'available' || !f.statuses.includes(st))) return false;
     if (f.trader && t.trader?.name !== f.trader) return false;
     if (f.map && !taskMaps(t).includes(f.map) && !taskMaps(t).includes('Any')) return false;
     if (f.kappa && !t.kappaRequired) return false;

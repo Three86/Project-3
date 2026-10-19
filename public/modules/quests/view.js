@@ -5,7 +5,7 @@ import { idx, NEEDS, STATUS_LABEL, taskMaps, taskStatus } from '../../core/game.
 import { badge, btn, checkbox, emptyState, icon, progressBar, select } from '../../ui/basecoat/components.js';
 import { objectiveActions, objectiveChanges } from '../../ui/basecoat/objectives.js';
 import { taskCard, questCardActions, questCardToggle } from '../../ui/basecoat/quest-card.js';
-import { filteredTasks, sortTasks, groupKey, groupTasks, toggleStatusFilter, setAllOpen, setAllGroupsOpen, focusTask } from './logic.js';
+import { STATUS_FILTERS, filteredTasks, sortTasks, groupKey, groupTasks, toggleStatusFilter, setAllOpen, setAllGroupsOpen, focusTask } from './logic.js';
 
 function renderQuests() {
   const f = S.ui.q;
@@ -13,7 +13,7 @@ function renderQuests() {
   const counts = {};
   for (const t of S.data.tasks) { const s = taskStatus(t.id); counts[s] = (counts[s] || 0) + 1; }
   const toolbar = `<div class="toolbar">
-    <div class="chips" role="group" aria-label="Status">${Object.keys(STATUS_LABEL).map((s) => {
+    <div class="chips" role="group" aria-label="Status">${STATUS_FILTERS.map((s) => {
       const on = f.statuses.includes(s);
       return btn(`${STATUS_LABEL[s]} ${badge(counts[s] || 0, on ? 'secondary' : 'outline', 'count-badge')}`, `data-act="qstatus" data-s="${s}" aria-pressed="${on}"`, { variant: on ? 'primary' : 'outline', size: 'sm' });
     }).join('')}</div>

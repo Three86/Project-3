@@ -78,10 +78,10 @@ async function run() {
   const shot = async (name) => { if (shots) await page.screenshot({ path: path.join(shots, `${name}.png`), fullPage: false }); };
   const want = (name) => !only || only.includes(name);
   // Each section starts from default filters (saved UI state lives in localStorage 'tt-ui').
-  const freshUi = async (tabName) => {
+  const freshUi = async (tabName, extra = {}) => {
     // A <details> toggle from the previous step can still save UI state a moment later; write after it.
     await page.waitForTimeout(150);
-    await page.evaluate((t) => localStorage.setItem('tt-ui', JSON.stringify({ tab: t })), tabName);
+    await page.evaluate(([t, x]) => localStorage.setItem('tt-ui', JSON.stringify({ tab: t, ...x })), [tabName, extra]);
     await page.reload();
     await page.waitForFunction(() => document.querySelector('#view') && !document.querySelector('#view .loading-skeleton') && document.querySelector('#view').children.length > 0);
   };
@@ -133,9 +133,15 @@ async function run() {
   if (want('quests')) {
     console.log('Quests');
     await freshUi('quests');
+    ok(await page.locator('[data-act="qstatus"]').count() > 0 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0, 'no Available filter');
+    ok(await page.locator('details.qcard').count() === 0 && await page.locator('[data-open="5936d90786f7742b1420ba5b"]').count() === 0, 'available quests are not listed (only active ones by default)');
+    // The rest of this section works on the full list: an empty status filter shows every quest
+    // (what a link to a quest uses), so available quests like Debut are reachable.
+    await freshUi('quests', { q: { statuses: [] } });
     await page.click('[data-act="qstatus"][data-s="locked"]'); await settle();
     ok(await page.getAttribute('[data-act="qstatus"][data-s="locked"]', 'aria-pressed') === 'true', 'status chip toggles on');
-    ok(await page.locator('[data-open="59674cd986f7744ab26e32f2"]').count() === 1, 'locked quest shown once the Locked chip is on');
+    ok(await page.locator('[data-open="59674cd986f7744ab26e32f2"]').count() === 1 && await page.locator('details.qcard').count() === 1, 'Locked chip shows only the locked quest');
+    await page.click('[data-act="qstatus"][data-s="locked"]'); await settle();
     await page.selectOption('[data-ui="q.trader"]', 'Jaeger'); await settle();
     ok(/^1 quests$/.test(await page.locator('.toolbar .count').innerText()), 'trader select filters quests');
     await page.selectOption('[data-ui="q.trader"]', ''); await settle();
@@ -463,20 +469,23 @@ async function run() {
     ok(JSON.stringify(compactTabs) === JSON.stringify(['Quests', 'Needed items', 'Hideout', 'Settings']), `compact GUI shows only its sections (${compactTabs.join(', ')})`);
     ok(await page.evaluate(() => localStorage.getItem('tt-gui')) === 'compact', 'choice saved for this browser');
     await page.click('#tab-quests'); await settle();
+    ok(await page.locator('[data-act="qstatus"]').count() === 3 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0, 'compact GUI has no Available filter');
+    // Start a locked quest (Checking) from the Locked filter.
+    await page.click('[data-act="qstatus"][data-s="locked"]'); await settle();
+    await page.fill('[data-ui="q.text"]', 'Checking'); await page.waitForTimeout(450);
     ok(await page.locator('.cq-list').count() === 1, 'compact GUI uses its own quest view');
     ops = [];
-    await page.fill('[data-ui="q.text"]', 'Debut'); await page.waitForTimeout(450);
-    await page.click('#task-5936d90786f7742b1420ba5b [data-act="task-set"][data-v="active"]'); await settle();
-    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'tasks', id: '5936d90786f7742b1420ba5b', value: 'active' }), 'starting a quest in the compact GUI saves it');
-    await page.click('#task-5936d90786f7742b1420ba5b [data-act="step"][data-key="o1"][data-d="1"]'); await settle();
-    ok(lastOp()?.id === 'o1' && lastOp()?.value === 1, 'objective counter works in the compact GUI');
+    await page.click('#task-59674cd986f7744ab26e32f2 [data-act="task-set"][data-v="active"]'); await settle();
+    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'tasks', id: '59674cd986f7744ab26e32f2', value: 'active' }), 'starting a quest in the compact GUI saves it');
+    await page.click('#task-59674cd986f7744ab26e32f2 [data-act="check"][data-key="o3"]'); await settle();
+    ok(lastOp()?.id === 'o3' && lastOp()?.value === true, 'objective checkbox works in the compact GUI');
     await page.reload(); await page.waitForSelector('body.compact #tabs');
     ok(await page.locator('#tabs [role=tab]').count() === 4, 'compact GUI kept after reload');
     // Recovery address and switching back.
     await page.goto(`${BASE}/?gui=basecoat`); await page.waitForSelector('#tab-search');
     ok(await page.locator('#tabs [role=tab]').count() >= 9 && !(await page.evaluate(() => document.body.classList.contains('compact'))), '?gui=basecoat opens the full GUI');
     await page.click('#tab-quests'); await settle();
-    ok(await page.locator('details.qcard[data-open="5936d90786f7742b1420ba5b"] .badge.status-active').count() === 1, 'quest started in the compact GUI shows as active in the full GUI');
+    ok(await page.locator('details.qcard[data-open="59674cd986f7744ab26e32f2"] .badge.status-active').count() === 1, 'quest started in the compact GUI shows as active in the full GUI');
     await page.click('#tab-settings'); await settle();
     await Promise.all([page.waitForNavigation(), page.selectOption('#set-gui', 'basecoat')]);
     await page.waitForSelector('#tab-search');
@@ -499,6 +508,10 @@ async function run() {
   if (want('icon')) {
     console.log('Icon GUI');
     await page.evaluate(() => { localStorage.setItem('tt-gui', 'icon'); localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'quests' })); });
+    await page.reload(); await page.waitForSelector('.trader-strip .trader');
+    ok(await page.locator('[data-act="qstatus"]').count() > 0 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0 && await page.locator('.qrow.st-available').count() === 0, 'Icon GUI: no Available filter, available quests not listed');
+    // The checks below use every quest of a trader (empty status filter, as a link to a quest does).
+    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'quests', q: { statuses: [] } })));
     await page.reload(); await page.waitForSelector('.trader-strip .trader');
     const names = await page.locator('.trader .t-name').allInnerTexts();
     ok(JSON.stringify(names) === JSON.stringify(['Prapor', 'Therapist', 'Skier', 'Peacekeeper', 'Jaeger']), `trader cards in game order (${names.join(', ')})`);

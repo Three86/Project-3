@@ -10,7 +10,7 @@ import { questCardToggle } from '../../../ui/basecoat/quest-card.js';
 import defaultView from '../../../modules/quests/view.js';
 import { filteredTasks, sortTasks, toggleStatusFilter, focusTask, setTaskStatus, startWithPrereqs, traderCards, selectTrader, setLoyaltyOverride, hasStandingData, restockIn } from '../../../modules/quests/logic.js';
 
-const STATUSES = ['active', 'available', 'locked', 'completed', 'failed'];
+const STATUSES = ['active', 'locked', 'completed', 'failed'];
 const CLOCK = '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>';
 const clock = `<svg class="lucide" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CLOCK}</svg>`;
 
