@@ -1,4 +1,5 @@
-/* Tarkov Tracker: layout and Tarkov-specific accents on top of Basecoat (public/vendor/basecoat).
+/* Tarkov Tracker: layout and Tarkov-specific accents on top of Basecoat (public/vendor/basecoat), for the
+   default module views and the shared Basecoat shell (ui/basecoat/shell.js).
    Basecoat provides the components (buttons, cards, badges, inputs, tables, dialogs, …) and the colour
    tokens; this file only does layout, which Basecoat's prebuilt CSS has no utility classes for. */
 

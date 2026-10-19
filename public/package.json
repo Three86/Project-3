@@ -1,0 +1,5 @@
+{
+  "//": "Marks the browser code as ES modules so Node tests can import it too. Not an npm package.",
+  "type": "module",
+  "private": true
+}

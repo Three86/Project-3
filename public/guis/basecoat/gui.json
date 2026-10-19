@@ -1,0 +1,8 @@
+{
+  "title": "Basecoat (full)",
+  "description": "Every section in tabs, with the command palette (Ctrl+K).",
+  "modules": "*",
+  "styles": ["../../vendor/basecoat/basecoat.cdn.min.css", "../../ui/basecoat/style.css"],
+  "scripts": ["../../vendor/basecoat/basecoat.all.min.js"],
+  "entry": "shell.js"
+}

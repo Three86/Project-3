@@ -284,11 +284,29 @@ function status() {
   };
 }
 
+// Installed interfaces (public/guis/<id>/gui.json) and section modules (public/modules/<id>/module.json).
+// Read on every request, so dropping in a folder is enough to add one.
+function listUiFolders(kind, file) {
+  const dir = path.join(PUBLIC_DIR, kind);
+  let names = [];
+  try { names = fs.readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name); } catch { return []; }
+  const out = [];
+  for (const id of names.sort()) {
+    if (!/^[\w-]+$/.test(id)) continue;
+    try { out.push({ ...JSON.parse(fs.readFileSync(path.join(dir, id, file), 'utf8')), id }); } catch (err) {
+      if (err.code !== 'ENOENT') log(`ignoring ${kind}/${id}: ${file} is not valid JSON (${err.message})`);
+    }
+  }
+  return out;
+}
+
 async function handleApi(req, res, url) {
   const route = `${req.method} ${url.pathname}`;
   switch (route) {
     case 'GET /api/status':
       return send(res, 200, status());
+    case 'GET /api/ui':
+      return send(res, 200, { guis: listUiFolders('guis', 'gui.json'), modules: listUiFolders('modules', 'module.json') });
     case 'GET /api/skills':
       return send(res, 200, skillsConfig());
     case 'GET /api/ocr/status': {
