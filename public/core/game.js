@@ -382,3 +382,80 @@ export function itemRequirements({ includeEquipment = false } = {}) {
   }
   return out;
 }
+
+// ---------------------------------------------------------------- traders
+// In-game order (by normalizedName); traders not listed go last, by name.
+const TRADER_ORDER = ['prapor', 'therapist', 'fence', 'skier', 'peacekeeper', 'mechanic', 'ragman', 'jaeger', 'ref', 'lightkeeper', 'btr-driver'];
+const slug = (s) => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// Every trader: from the game data (portraits, loyalty levels), plus any quest giver it lacks.
+export function traderList() {
+  const byId = new Map((S.data?.traders || []).map((t) => [t.id, t]));
+  for (const t of S.data?.tasks || []) {
+    if (t.trader?.id && !byId.has(t.trader.id)) byId.set(t.trader.id, { id: t.trader.id, name: t.trader.name, levels: [] });
+  }
+  const rank = (t) => { const i = TRADER_ORDER.indexOf(t.normalizedName || slug(t.name)); return i < 0 ? 99 : i; };
+  return [...byId.values()].sort((a, b) => rank(a) - rank(b) || byName(a.name, b.name));
+}
+
+// Whether the game data has quest reputation rewards at all (older cached data does not).
+export const hasStandingData = () => (S.data?.tasks || []).some((t) => t.finishRewards || t.startRewards);
+
+// Reputation with a trader from quests: start rewards of started quests, finish rewards of completed
+// ones (also those implied by later quests) and the outcome of failed ones.
+export function traderStanding(traderId) {
+  const key = `rep:${traderId}`;
+  if (key in memo) return memo[key];
+  let rep = 0;
+  const add = (r) => { for (const s of r?.traderStanding || []) if (s.trader?.id === traderId) rep += Number(s.standing) || 0; };
+  for (const t of S.data?.tasks || []) {
+    const st = taskStatus(t.id);
+    if (st === 'active' || st === 'completed' || st === 'failed') add(t.startRewards);
+    if (st === 'completed') add(t.finishRewards);
+    if (st === 'failed') add(t.failureOutcome);
+  }
+  return (memo[key] = Math.round(rep * 10000) / 10000);
+}
+
+// A trader some quest unlocks (e.g. Jaeger) is locked until that quest is completed.
+// { unlocked, by: quest or null }
+export function traderUnlock(traderId) {
+  const by = (S.data?.tasks || []).filter((t) => (t.finishRewards?.traderUnlock || []).some((x) => x?.id === traderId));
+  if (!by.length) return { unlocked: true, by: null };
+  const done = by.find((t) => taskStatus(t.id) === 'completed');
+  return { unlocked: !!done, by: done || by[0] };
+}
+
+// Loyalty level from your PMC level and quest reputation. Money spent with the trader is not tracked
+// and assumed to be met. With "Manual loyalty levels" on in Settings, a level set by hand wins.
+// { level, auto, manual, max, next: { level, requiredPlayerLevel, requiredReputation, requiredCommerce,
+//   repMissing, playerLevelMissing } | null }
+export function loyaltyLevel(trader) {
+  const levels = (trader.levels || []).slice().sort((a, b) => a.level - b.level);
+  const rep = traderStanding(trader.id);
+  const pl = Number(S.progress?.settings?.playerLevel || 1);
+  let auto = levels[0]?.level ?? 1;
+  for (const l of levels) {
+    if (pl >= (l.requiredPlayerLevel ?? 1) && rep >= (l.requiredReputation ?? 0)) auto = Math.max(auto, l.level);
+    else break;
+  }
+  const s = S.progress?.settings || {};
+  const override = s.loyaltyManual ? s.loyaltyOverrides?.[trader.id] : null;
+  const level = Number.isFinite(Number(override)) && override != null ? Number(override) : auto;
+  const n = levels.find((l) => l.level === auto + 1);
+  const next = n ? {
+    ...n,
+    repMissing: Math.max(0, Math.round(((n.requiredReputation ?? 0) - rep) * 100) / 100),
+    playerLevelMissing: Math.max(0, (n.requiredPlayerLevel ?? 1) - pl),
+  } : null;
+  return { level, auto, manual: level !== auto || override != null, max: levels.length ? levels[levels.length - 1].level : 4, next };
+}
+
+// Seconds until the trader's next restock (from the server's 10-minute snapshot), 0 when due, or
+// null when unknown.
+export function restockIn(traderId, now = Date.now()) {
+  const iso = S.status?.traderResets?.times?.[traderId];
+  const t = iso ? Date.parse(iso) : NaN;
+  if (!Number.isFinite(t)) return null;
+  return Math.max(0, Math.round((t - now) / 1000));
+}

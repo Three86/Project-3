@@ -1,8 +1,8 @@
 // Quests: filtering, sorting and grouping of the quest list, and the list-level actions.
 // Quest status and objective changes are in core/progress.js (shared with other sections).
-import { S, saveUi } from '../../core/store.js';
+import { S, saveUi, setProgress } from '../../core/store.js';
 import { norm, uniq, byName } from '../../core/util.js';
-import { idx, NEEDS, STATUS_LABEL, objItems, objNeeds, taskMaps, taskProgress, taskStatus } from '../../core/game.js';
+import { idx, NEEDS, STATUS_LABEL, objItems, objNeeds, taskMaps, taskProgress, taskStatus, traderList, traderStanding, traderUnlock, loyaltyLevel, restockIn } from '../../core/game.js';
 
 export { setTaskStatus, startWithPrereqs, stepRequirement, setRequirement } from '../../core/progress.js';
 
@@ -105,3 +105,45 @@ export function focusTask(id) {
   return t;
 }
 
+
+// ---------------------------------------------------------------- traders
+export { traderList, traderStanding, traderUnlock, loyaltyLevel, restockIn, hasStandingData } from '../../core/game.js';
+
+// Portrait served by the tracker (downloaded once from tarkov.dev); 404 until it has been fetched.
+export const traderImage = (id) => `/api/images/traders/${encodeURIComponent(id)}`;
+
+// One entry per trader for trader cards: { trader, image, rep, loyalty, unlock, restock, counts }.
+// counts: quests per status for that trader.
+export function traderCards() {
+  const counts = new Map();
+  for (const t of S.data?.tasks || []) {
+    const id = t.trader?.id;
+    if (!id) continue;
+    const c = counts.get(id) || { total: 0 };
+    const st = taskStatus(t.id);
+    c[st] = (c[st] || 0) + 1;
+    c.total++;
+    counts.set(id, c);
+  }
+  return traderList().map((trader) => ({
+    trader,
+    image: traderImage(trader.id),
+    rep: traderStanding(trader.id),
+    loyalty: loyaltyLevel(trader),
+    unlock: traderUnlock(trader.id),
+    restock: restockIn(trader.id),
+    counts: counts.get(trader.id) || { total: 0 },
+  }));
+}
+
+// Show one trader's quests (the trader filter of the quest list).
+export function selectTrader(name) { S.ui.q.trader = name || ''; saveUi(); }
+
+// Set a trader's loyalty level by hand (null = back to the calculated one). Only used while
+// "Manual loyalty levels" is on in Settings.
+export function setLoyaltyOverride(traderId, level) {
+  const overrides = { ...(S.progress.settings.loyaltyOverrides || {}) };
+  if (level == null || level === '' || level === 'auto') delete overrides[traderId];
+  else overrides[traderId] = Number(level);
+  return setProgress({ section: 'settings', id: 'loyaltyOverrides', value: overrides });
+}
