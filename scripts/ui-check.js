@@ -564,11 +564,62 @@ async function run() {
     ok(jLocked === 1 && await page.locator('.trader[data-name="Jaeger"].locked').count() === 0, 'Jaeger locked until Checking is completed');
     // Links from other sections open the quest under its trader.
     await page.click('#tab-items'); await settle();
-    await page.click('.table.items tbody tr:first-child .popover > button'); await settle();
-    await page.locator('.table.items tbody tr:first-child [data-popover] [data-act="goto"]').first().click(); await settle();
+    const salewaRow = '.table.items tbody tr:has(.it-tag[title^="Salewa"])';
+    await page.click(`${salewaRow} .popover > button`); await settle();
+    await page.locator(`${salewaRow} [data-popover] [data-act="goto"]`).first().click(); await settle();
     const head = await page.locator('.trader-head .th-name').innerText();
     ok(await page.getAttribute('#tab-quests', 'aria-selected') === 'true' && await page.locator('.qrow[open]').count() >= 1 && !!head, `needed-item link opens the quest under its trader (${head})`);
     await shot('icon-quests');
+
+    // ---------------- Icon GUI hideout
+    console.log('Icon GUI hideout');
+    const post = (ops) => page.evaluate((o) => fetch('/api/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: o }) }), ops);
+    await post([
+      { section: 'hideout', id: 'gen1', value: true }, { section: 'hideout', id: 'gen2', value: null }, { section: 'hideout', id: 'med1', value: true }, { section: 'hideout', id: 'med2', value: null }, { section: 'hideout', id: 'btc1', value: true },
+      { section: 'hideoutReqs', id: 'gen2|item|0', value: null }, { section: 'hideoutReqs', id: 'med2|item|0', value: null },
+      { section: 'skills', id: 'Endurance', value: 3 }, { section: 'settings', id: 'playerLevel', value: 21 }, { section: 'settings', id: 'loyaltyManual', value: false },
+    ]);
+    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'hideout' })));
+    await page.reload(); await page.waitForSelector('.hx-grid .station');
+    const cardFor = (id) => `.station[data-id="${id}"]`;
+    ok(JSON.stringify(await page.locator('.station .s-name').allInnerTexts()) === JSON.stringify(['Bitcoin Farm', 'Generator', 'Medstation']), 'a card for every module, locked ones included');
+    ok(await page.locator(`${cardFor('s-gen')} .s-icon img`).evaluate((img) => img.complete && img.naturalWidth > 0), 'cached module icon is served by the tracker');
+    await page.waitForTimeout(300);
+    ok(await page.locator(`${cardFor('s-btc')} img`).count() === 0 && (await page.locator(`${cardFor('s-btc')} .initials`).innerText()) === 'BF', 'missing icon falls back to initials');
+    const stateOf = async (id) => (await page.locator(`${cardFor(id)} .s-state`).innerText()).trim();
+    ok(await stateOf('s-btc') === 'Max level' && await stateOf('s-gen') === '2 missing' && await stateOf('s-med') === 'Locked', `card status from what is built (${await stateOf('s-btc')}, ${await stateOf('s-gen')}, ${await stateOf('s-med')})`);
+    ok((await page.locator(`${cardFor('s-gen')} .lv`).innerText()).replace(/\s/g, '') === '1/2', 'card shows the level');
+    // Panel for the Generator: every kind of requirement, trader loyalty checked automatically.
+    await page.click(cardFor('s-gen')); await settle();
+    const groups = await page.locator('.hx-panel .req-group h4 span:first-child').allInnerTexts();
+    ok(JSON.stringify(groups.map((g) => g.toUpperCase())) === JSON.stringify(['HIDEOUT', 'SKILLS', 'TRADERS', 'ITEMS']), `panel lists modules, skills, traders and items (${groups.join(', ')})`);
+    const traderRow = page.locator('.hx-panel .req-group:has(h4:has-text("Traders")) .req');
+    ok((await traderRow.innerText()).includes('Prapor loyalty level 2 (yours: LL1)') && await traderRow.locator('.no').count() === 1, 'trader loyalty requirement checked automatically (not met)');
+    await post([{ section: 'settings', id: 'loyaltyManual', value: true }, { section: 'settings', id: 'loyaltyOverrides', value: { p: 2 } }]);
+    await page.reload(); await page.waitForSelector('.hx-grid .station');
+    ok(await page.locator('.hx-panel .req-group:has(h4:has-text("Traders")) .req .ok').count() === 1, 'trader requirement met once loyalty is LL2');
+    ops = [];
+    await page.click('.hx-panel [data-act="check"][data-key="gen2|item|0"]'); await settle();
+    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'hideoutReqs', id: 'gen2|item|0', value: true }), 'item requirement saves');
+    ok(await stateOf('s-gen') === 'Ready' && await page.locator(`${cardFor('s-gen')} [data-act="hx-step"][data-d="1"][data-variant="primary"]`).count() === 1, 'all met: Ready with a highlighted +');
+    // + builds the next level and unlocks the Medstation upgrade.
+    await page.click(`${cardFor('s-gen')} [data-act="hx-step"][data-d="1"]`); await settle();
+    ok(ops.some((o) => o.section === 'hideout' && o.id === 'gen2' && o.value === true), '+ marks the next level built');
+    ok(await stateOf('s-gen') === 'Max level' && await stateOf('s-med') !== 'Locked', 'Generator maxed; Medstation no longer locked');
+    // Medstation: money is one tick, reputation requirement shown.
+    await page.click(cardFor('s-med')); await settle();
+    ok(await page.locator('.hx-panel [data-act="check"][data-key="med2|item|0"]').count() === 1, 'money requirement is a single tick');
+    ok((await page.locator('.hx-panel .req-group:has(h4:has-text("Traders"))').innerText()).includes('Therapist reputation 0.10'), 'trader reputation requirement listed');
+    await page.click('.hx-panel a[data-act="hx-select"][data-id="s-gen"]'); await settle();
+    ok((await page.locator('.hx-panel h2').innerText()) === 'Generator', 'module requirement links to that module');
+    await page.click('.hx-panel [data-act="hx-view"][data-v="1"]'); await settle();
+    ok((await page.locator('.hx-panel header p').innerText()).includes('level 1 built'), 'level buttons show other levels');
+    // − unbuilds the top level.
+    ops = [];
+    await page.click(`${cardFor('s-gen')} [data-act="hx-step"][data-d="-1"]`); await settle();
+    ok(ops.some((o) => o.id === 'gen2' && o.value === false) && (await page.locator(`${cardFor('s-gen')} .lv`).innerText()).replace(/\s/g, '') === '1/2', '− unbuilds the top level');
+    await post([{ section: 'settings', id: 'loyaltyManual', value: false }, { section: 'settings', id: 'loyaltyOverrides', value: {} }]);
+    await shot('icon-hideout');
     await page.evaluate(() => localStorage.setItem('tt-gui', 'basecoat'));
   }
 

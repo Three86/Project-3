@@ -95,7 +95,14 @@ different one). Three come with the tracker:
   - Settings → Character → *Manual loyalty levels* lets you set a trader's level by hand instead.
   - Trader portraits are downloaded once into the data folder (`data/images/traders/`), so they work
     offline.
-  - Restock times are re-read from tarkov.dev every 10 minutes. If a GUI hides its
+  - Restock times are re-read from tarkov.dev every 10 minutes.
+  - Hideout shows a card per module, locked ones included. Each card has its icon, a status (Ready,
+    N missing, Locked, Max level), and its level with − / + buttons.
+  - Clicking a module lists everything a level needs: other modules, skills, trader loyalty or
+    reputation, and items.
+  - Trader requirements are checked automatically in every GUI, against the loyalty level and
+    reputation worked out from your quests.
+  - Module icons are cached in `data/images/stations/`, like the trader portraits. If a GUI hides its
 switcher, open `http://localhost:3000/?gui=basecoat` to get back.
 
 `scripts/ui-check.js` clicks through every tab and both GUIs in Chromium against the sample data in

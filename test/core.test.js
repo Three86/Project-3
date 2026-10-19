@@ -211,3 +211,34 @@ test('trader unlock, restock countdown and trader cards', async () => {
   assert.strictEqual(p.counts.total, 17);
   assert.strictEqual(p.rep, 0.05);
 });
+
+test('hideout module status and automatic trader requirements', async () => {
+  const S = await reset();
+  S.progress.settings.playerLevel = 21;
+  S.progress.skills.Endurance = 3;
+  S.progress.hideout = { gen1: true, med1: true, btc1: true };
+  game.resetMemo();
+  const st = (id) => game.stationStatus(game.idx.stations.get(id));
+  assert.strictEqual(st('s-btc').key, 'max');
+  const gen = st('s-gen');
+  assert.deepStrictEqual([gen.key, gen.missing, gen.built, gen.max], ['missing', 2, 1, 2], 'Prapor LL2 and the shotgun missing');
+  const trader = gen.reqs.find((r) => r.kind === 'trader');
+  assert.deepStrictEqual([trader.auto, trader.done, trader.label], [true, false, 'Prapor loyalty level 2 (yours: LL1)']);
+  assert.deepStrictEqual([st('s-med').key, st('s-med').lockedBy.map((r) => r.label)], ['locked', ['Generator level 2']]);
+  // Loyalty set by hand + item ticked: ready.
+  S.progress.settings.loyaltyManual = true;
+  S.progress.settings.loyaltyOverrides = { p: 2 };
+  S.progress.hideoutReqs['gen2|item|0'] = true;
+  assert.strictEqual(st('s-gen').key, 'ready');
+  // Build it: Medstation level 2 is no longer locked; its reputation requirement is checked against quests.
+  const hideout = await load('modules/hideout/logic.js');
+  await hideout.stepLevel('s-gen', 1);
+  assert.strictEqual(st('s-gen').key, 'max');
+  const med = st('s-med');
+  assert.strictEqual(med.key, 'missing');
+  const rep = med.reqs.find((r) => r.kind === 'trader');
+  assert.deepStrictEqual([rep.auto, rep.done, rep.label], [true, false, 'Therapist reputation 0.10 (yours: 0.00)']);
+  await hideout.stepLevel('s-gen', -1);
+  assert.strictEqual(S.progress.hideout.gen2, undefined, '− unbuilds the top level');
+  assert.strictEqual(await hideout.stepLevel('s-btc', 1), null, 'no level above the max');
+});

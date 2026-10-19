@@ -58,3 +58,50 @@
 
 .trader-head .tb-field .select { min-width: 130px; }
 .qrow > summary .q-rep.none { visibility: hidden; }
+
+/* ---------------------------------------------------------------- hideout: module cards + requirements panel */
+.hx-layout { display: grid; gap: 14px; }
+@media (min-width: 1100px) { .hx-layout { grid-template-columns: minmax(0, 1fr) 420px; align-items: start; } .hx-panel { position: sticky; top: 72px; max-height: calc(100vh - 88px); overflow-y: auto; } }
+.hx-summary { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 10px; font-size: 13px; color: var(--muted-foreground); }
+.hx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.station { position: relative; display: grid; gap: 6px; padding: 8px; border-radius: var(--radius-xl, 14px); background: var(--card); border: 1px solid var(--border); cursor: pointer; text-align: left; color: inherit; font: inherit; transition: border-color .15s, box-shadow .15s; }
+.station:hover { border-color: color-mix(in oklab, var(--primary) 50%, var(--border)); }
+.station:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.station[aria-pressed="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.station.locked .s-icon, .station.locked .s-name { opacity: .5; }
+.s-icon { aspect-ratio: 4 / 3; max-width: 100%; border-radius: var(--radius-lg, 10px); background: radial-gradient(circle at 50% 40%, color-mix(in oklab, var(--primary) 14%, var(--muted)), var(--muted)); display: grid; place-items: center; overflow: hidden; position: relative; }
+.pic { position: relative; display: grid; place-items: center; width: 100%; height: 100%; }
+.pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.s-icon .pic img { padding: 8px; }
+.s-icon .initials { font-size: 26px; font-weight: 700; letter-spacing: 1px; color: color-mix(in oklab, var(--foreground) 60%, transparent); }
+.req .r-ico.pic { width: 28px; height: 28px; }
+.req .r-ico .initials { font-size: 9px; }
+.req .r-ico img { padding: 2px; }
+.req .r-main a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in oklab, var(--foreground) 30%, transparent); text-underline-offset: 2px; }
+.s-state .badge .lucide { width: 11px; height: 11px; }
+.hx-summary .badge .lucide { width: 11px; height: 11px; }
+.s-state { position: absolute; right: 6px; top: 6px; }
+.s-name { font-weight: 600; font-size: 13px; line-height: 1.2; min-height: 2.4em; }
+.s-level { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.s-level .lv { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 15px; }
+.s-level .lv small { font-weight: 400; color: var(--muted-foreground); font-size: 12px; }
+.s-bar { display: flex; gap: 3px; }
+.s-bar i { flex: 1; height: 4px; border-radius: 2px; background: var(--muted); }
+.s-bar i.on { background: var(--primary); }
+.badge.st-ready { color: var(--good); border-color: var(--good); }
+.badge.st-missing { color: var(--warn); border-color: var(--warn); }
+.badge.st-locked { color: var(--muted-foreground); }
+.badge.st-max { color: var(--primary); border-color: var(--primary); }
+
+/* requirements panel */
+.hx-panel .card > section { display: grid; gap: 12px; }
+.hx-panel .lv-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.req-group { display: grid; gap: 4px; }
+.req-group h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-foreground); font-weight: 600; display: flex; justify-content: space-between; }
+.req { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: var(--radius-md, 8px); background: var(--muted); font-size: 13px; }
+.req.done { opacity: .6; }
+.req .r-main { flex: 1; min-width: 0; }
+.req .r-sub { display: block; font-size: 11px; color: var(--muted-foreground); }
+.req .ok { color: var(--good); } .req .no { color: var(--bad); }
+.req .r-ico { width: 28px; height: 28px; flex: none; border-radius: 6px; background: color-mix(in oklab, var(--background) 60%, transparent); display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--muted-foreground); }
+.hx-desc { font-size: 13px; color: var(--muted-foreground); }

@@ -1,9 +1,18 @@
 {
   "title": "Icon GUI",
-  "description": "Quests by trader: portraits with loyalty, reputation and restock timers, and each trader's quest list.",
+  "description": "Quests by trader and the hideout by module: trader portraits with loyalty, reputation and restock timers; module cards with level controls and every upgrade requirement.",
   "modules": "*",
-  "views": { "quests": "views/quests.js" },
-  "styles": ["../../vendor/basecoat/basecoat.cdn.min.css", "../../ui/basecoat/style.css", "icon.css"],
-  "scripts": ["../../vendor/basecoat/basecoat.all.min.js"],
+  "views": {
+    "quests": "views/quests.js",
+    "hideout": "views/hideout.js"
+  },
+  "styles": [
+    "../../vendor/basecoat/basecoat.cdn.min.css",
+    "../../ui/basecoat/style.css",
+    "icon.css"
+  ],
+  "scripts": [
+    "../../vendor/basecoat/basecoat.all.min.js"
+  ],
   "entry": "shell.js"
 }
