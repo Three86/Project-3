@@ -1,0 +1,26 @@
+/* Compact GUI: denser spacing, smaller type and a teal accent on top of the shared Basecoat styles. */
+body.compact { font-size: 13px; }
+/* Basecoat resolves its colours on the root element, so the accent is overridden there. */
+:root:has(body.compact) { --primary: oklch(0.55 0.1 195); --primary-foreground: oklch(0.99 0 0); --ring: oklch(0.6 0.1 195); }
+:root.dark:has(body.compact) { --primary: oklch(0.78 0.1 195); --primary-foreground: oklch(0.18 0.02 195); }
+.compact .topbar { padding: 4px 10px; gap: 6px 10px; }
+.compact .brand { letter-spacing: 1px; font-size: 13px; }
+.compact .app-tabs { order: 0; flex-basis: auto; }
+.compact .global-search { width: 200px; }
+.compact main { padding: 10px; max-width: 900px; }
+.compact .toolbar { padding: 6px 8px; gap: 6px 10px; margin-bottom: 8px; }
+.compact .grid { grid-template-columns: 1fr; gap: 6px; }
+.compact details.qcard { padding-block: 8px; }
+.compact .table th, .compact .table td { padding: 4px 6px; }
+
+/* compact quest checklist */
+.cq-list { list-style: none; display: grid; gap: 6px; }
+.cq-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--border); border-radius: var(--radius-lg, 10px); padding: 6px 10px; display: grid; gap: 6px; }
+.cq-row.st-active { border-left-color: var(--info); }
+.cq-row.st-available { border-left-color: var(--warn); }
+.cq-row.st-completed { border-left-color: var(--good); opacity: .65; }
+.cq-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cq-name { font-weight: 600; }
+.cq-meta { color: var(--muted-foreground); font-size: 12px; flex: 1; }
+.cq-row ul.objs li { padding: 3px 6px; }
+.cq-row .progress { height: 4px; }
