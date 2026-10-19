@@ -105,3 +105,5 @@
 .req .ok { color: var(--good); } .req .no { color: var(--bad); }
 .req .r-ico { width: 28px; height: 28px; flex: none; border-radius: 6px; background: color-mix(in oklab, var(--background) 60%, transparent); display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--muted-foreground); }
 .hx-desc { font-size: 13px; color: var(--muted-foreground); }
+.req .r-count { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.req.item { opacity: 1; }

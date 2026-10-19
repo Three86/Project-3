@@ -1,10 +1,10 @@
 // Icon GUI hideout: one card per module (icon, status, level with − / +); clicking a module shows
-// everything a level needs, grouped (other modules, skills, traders, items). Uses the hideout module's
-// logic and the shared requirement controls (core/progress.js via objectiveActions).
+// everything a level needs, grouped (other modules, skills, traders, items). Items are only listed
+// (what and how many); they are not tracked and do not count towards Ready / N missing.
 import { S, saveUi } from '../../../core/store.js';
 import { esc } from '../../../core/util.js';
 import { hideoutReqs, levelBuilt } from '../../../core/game.js';
-import { badge, btn, checkbox, emptyState, icon, progressBar, stepperControl } from '../../../ui/basecoat/components.js';
+import { badge, btn, checkbox, emptyState, icon, progressBar } from '../../../ui/basecoat/components.js';
 import { objectiveActions, objectiveChanges } from '../../../ui/basecoat/objectives.js';
 import { stationCards, stationImage, stepLevel, setBuilt, focusStation } from '../../../modules/hideout/logic.js';
 
@@ -37,12 +37,8 @@ const GROUPS = [['station', 'Hideout'], ['skill', 'Skills'], ['trader', 'Traders
 function reqRow(r, built) {
   const done = built || r.done;
   if (r.kind === 'item') {
-    const big = r.count >= 1000; // money: one tick instead of a counter
-    const control = built ? checkbox('disabled aria-label="Built"', true)
-      : r.target > 1 && !big ? stepperControl(`data-act="step" data-sec="hideoutReqs" data-key="${esc(r.key)}"`, r.cur, r.target)
-      : checkbox(`data-act="check" data-sec="hideoutReqs" data-key="${esc(r.key)}" aria-label="Have it"`, r.done);
-    return `<div class="req ${done ? 'done' : ''}">${pic(r.item.iconLink, r.item.shortName || r.item.name, 'r-ico')}
-      <span class="r-main">${esc(r.item.name)} ${r.fir ? badge('FIR', 'primary', 'fir', 'Must be found in raid') : ''}<span class="r-sub">${built ? fmt(r.count) : `${fmt(Math.min(r.cur ?? 0, r.count))} / ${fmt(r.count)}`}</span></span>${control}</div>`;
+    return `<div class="req item${built ? ' done' : ''}">${pic(r.item.iconLink, r.item.shortName || r.item.name, 'r-ico')}
+      <span class="r-main">${esc(r.item.name)} ${r.fir ? badge('FIR', 'primary', 'fir', 'Must be found in raid') : ''}</span><span class="r-count">×${fmt(r.count)}</span></div>`;
   }
   const lead = r.kind === 'station' ? pic(stationImage(r.station?.id), r.station?.name || '', 'r-ico') : '';
   const auto = r.auto || built;
@@ -58,12 +54,14 @@ function panel(c) {
   const viewLevel = st.levels.find((l) => l.level === S.ui.hxView) || s.next || st.levels[st.levels.length - 1];
   const built = levelBuilt(st, viewLevel);
   const reqs = viewLevel ? hideoutReqs(viewLevel) : [];
-  const met = built ? reqs.length : reqs.filter((r) => r.done).length;
+  const tracked = reqs.filter((r) => r.kind !== 'item'); // items are listed, not tracked
+  const met = built ? tracked.length : tracked.filter((r) => r.done).length;
   const tabs = st.levels.length > 1 ? `<div class="lv-tabs" role="group" aria-label="Level">${st.levels.map((l) => btn(`L${l.level}${l.level <= s.built ? ' ✓' : ''}`, `data-act="hx-view" data-v="${l.level}" aria-pressed="${l.level === viewLevel.level}"`, { variant: l.level === viewLevel.level ? 'secondary' : 'ghost', size: 'xs' })).join('')}</div>` : '';
   const groups = GROUPS.map(([kind, title]) => {
     const rows = reqs.filter((r) => r.kind === kind);
     if (!rows.length) return '';
-    return `<div class="req-group"><h4><span>${title}</span><span>${built ? rows.length : rows.filter((r) => r.done).length}/${rows.length}</span></h4>${rows.map((r) => reqRow(r, built)).join('')}</div>`;
+    const tally = kind === 'item' ? `${rows.length} item${rows.length === 1 ? '' : 's'}` : `${built ? rows.length : rows.filter((r) => r.done).length}/${rows.length}`;
+    return `<div class="req-group"><h4><span>${title}</span><span>${tally}</span></h4>${rows.map((r) => reqRow(r, built)).join('')}</div>`;
   }).join('');
   const time = viewLevel?.constructionTime ? ` · ${Math.round(viewLevel.constructionTime / 360) / 10} h to build` : '';
   const isNext = viewLevel && viewLevel.level === s.built + 1;
@@ -72,7 +70,7 @@ function panel(c) {
       <div class="card-action">${badge(stateText(s), 'outline', `st-${s.key}`)}</div></header>
     <section>${tabs}
       ${viewLevel?.description ? `<p class="hx-desc">${esc(viewLevel.description)}</p>` : ''}
-      ${reqs.length ? `${progressBar(met, reqs.length, 'Requirements met')}<span class="count">${met} of ${reqs.length} requirements met${time}</span>` : `<p class="hx-desc">No requirements.${time}</p>`}
+      ${tracked.length ? `${progressBar(met, tracked.length, 'Requirements met')}<span class="count">${met} of ${tracked.length} requirements met${time}</span>` : `<p class="hx-desc">${reqs.length ? 'Only items needed.' : 'No requirements.'}${time}</p>`}
       ${groups}
     </section>
     ${isNext ? `<footer class="actions">${btn(`Mark level ${viewLevel.level} built`, `data-act="hx-build" data-id="${esc(viewLevel.id)}"`, { variant: s.key === 'ready' ? 'primary' : 'outline', size: 'sm' })}</footer>` : ''}
@@ -80,7 +78,7 @@ function panel(c) {
 }
 
 function render() {
-  const cards = stationCards();
+  const cards = stationCards({ countItems: false });
   if (!cards.length) return emptyState('No hideout data', 'Refresh game data under Settings.', '', 'database');
   const cur = current(cards);
   const counts = { ready: 0, missing: 0, locked: 0, max: 0 };

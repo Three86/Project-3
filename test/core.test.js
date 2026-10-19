@@ -222,6 +222,7 @@ test('hideout module status and automatic trader requirements', async () => {
   assert.strictEqual(st('s-btc').key, 'max');
   const gen = st('s-gen');
   assert.deepStrictEqual([gen.key, gen.missing, gen.built, gen.max], ['missing', 2, 1, 2], 'Prapor LL2 and the shotgun missing');
+  assert.deepStrictEqual([game.stationStatus(game.idx.stations.get('s-gen'), { countItems: false }).missing], [1], 'items left out: only Prapor LL2');
   const trader = gen.reqs.find((r) => r.kind === 'trader');
   assert.deepStrictEqual([trader.auto, trader.done, trader.label], [true, false, 'Prapor loyalty level 2 (yours: LL1)']);
   assert.deepStrictEqual([st('s-med').key, st('s-med').lockedBy.map((r) => r.label)], ['locked', ['Generator level 2']]);

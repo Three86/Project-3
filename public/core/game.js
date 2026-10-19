@@ -484,13 +484,14 @@ export function restockIn(traderId, now = Date.now()) {
 // { built, max, next (level object or null), key: 'max' | 'ready' | 'missing' | 'locked',
 //   reqs (of the next level), missing (unmet count), lockedBy (unmet station requirements) }
 // locked = another station is not built high enough; missing = stations fine, other things unmet.
-export function stationStatus(st) {
+// countItems: false leaves item requirements out of missing / ready (for views that only list items).
+export function stationStatus(st, { countItems = true } = {}) {
   const built = builtLevel(st);
   const max = st.levels.length ? st.levels[st.levels.length - 1].level : 0;
   const next = st.levels.find((l) => l.level === built + 1) || null;
   if (!next) return { built, max, next: null, key: 'max', reqs: [], missing: 0, lockedBy: [] };
   const reqs = hideoutReqs(next);
   const lockedBy = reqs.filter((r) => r.kind === 'station' && !r.done);
-  const missing = reqs.filter((r) => !r.done).length;
+  const missing = reqs.filter((r) => !r.done && (countItems || r.kind !== 'item')).length;
   return { built, max, next, reqs, missing, lockedBy, key: lockedBy.length ? 'locked' : missing ? 'missing' : 'ready' };
 }

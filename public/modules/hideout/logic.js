@@ -84,9 +84,9 @@ export const stations = () => (S.data?.hideout || []).filter((st) => st.levels.l
 // Icon served by the tracker (downloaded once from tarkov.dev); 404 until it has been fetched.
 export const stationImage = (id) => `/api/images/stations/${encodeURIComponent(id)}`;
 
-// Every station with levels, by name, with its status (see core/game.js stationStatus).
-export function stationCards() {
-  return stations().slice().sort((a, b) => byName(a.name, b.name)).map((st) => ({ station: st, image: stationImage(st.id), status: stationStatus(st) }));
+// Every station with levels, by name, with its status (see core/game.js stationStatus; opts are passed on).
+export function stationCards(opts) {
+  return stations().slice().sort((a, b) => byName(a.name, b.name)).map((st) => ({ station: st, image: stationImage(st.id), status: stationStatus(st, opts) }));
 }
 
 // Change a station's built level by one (−1 unbuilds the top level, +1 builds the next one).

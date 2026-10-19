@@ -587,7 +587,7 @@ async function run() {
     await page.waitForTimeout(300);
     ok(await page.locator(`${cardFor('s-btc')} img`).count() === 0 && (await page.locator(`${cardFor('s-btc')} .initials`).innerText()) === 'BF', 'missing icon falls back to initials');
     const stateOf = async (id) => (await page.locator(`${cardFor(id)} .s-state`).innerText()).trim();
-    ok(await stateOf('s-btc') === 'Max level' && await stateOf('s-gen') === '2 missing' && await stateOf('s-med') === 'Locked', `card status from what is built (${await stateOf('s-btc')}, ${await stateOf('s-gen')}, ${await stateOf('s-med')})`);
+    ok(await stateOf('s-btc') === 'Max level' && await stateOf('s-gen') === '1 missing' && await stateOf('s-med') === 'Locked', `card status from what is built (${await stateOf('s-btc')}, ${await stateOf('s-gen')}, ${await stateOf('s-med')})`);
     ok((await page.locator(`${cardFor('s-gen')} .lv`).innerText()).replace(/\s/g, '') === '1/2', 'card shows the level');
     // Panel for the Generator: every kind of requirement, trader loyalty checked automatically.
     await page.click(cardFor('s-gen')); await settle();
@@ -598,17 +598,18 @@ async function run() {
     await post([{ section: 'settings', id: 'loyaltyManual', value: true }, { section: 'settings', id: 'loyaltyOverrides', value: { p: 2 } }]);
     await page.reload(); await page.waitForSelector('.hx-grid .station');
     ok(await page.locator('.hx-panel .req-group:has(h4:has-text("Traders")) .req .ok').count() === 1, 'trader requirement met once loyalty is LL2');
+    const items = page.locator('.hx-panel .req-group:has(h4:has-text("Items"))');
+    ok((await items.innerText()).includes('MP-133 12ga pump-action shotgun') && (await items.locator('.r-count').innerText()) === '×1' && await items.locator('input, .stepper').count() === 0, 'items listed with the amount needed, no counter or tick');
+    ok((await items.locator('h4').innerText()).toLowerCase().includes('1 item'), 'items group shows how many items, not progress');
     ops = [];
-    await page.click('.hx-panel [data-act="check"][data-key="gen2|item|0"]'); await settle();
-    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'hideoutReqs', id: 'gen2|item|0', value: true }), 'item requirement saves');
-    ok(await stateOf('s-gen') === 'Ready' && await page.locator(`${cardFor('s-gen')} [data-act="hx-step"][data-d="1"][data-variant="primary"]`).count() === 1, 'all met: Ready with a highlighted +');
+    ok(await stateOf('s-gen') === 'Ready' && await page.locator(`${cardFor('s-gen')} [data-act="hx-step"][data-d="1"][data-variant="primary"]`).count() === 1, 'modules, skills and traders met: Ready with a highlighted + (items not counted)');
     // + builds the next level and unlocks the Medstation upgrade.
     await page.click(`${cardFor('s-gen')} [data-act="hx-step"][data-d="1"]`); await settle();
     ok(ops.some((o) => o.section === 'hideout' && o.id === 'gen2' && o.value === true), '+ marks the next level built');
     ok(await stateOf('s-gen') === 'Max level' && await stateOf('s-med') !== 'Locked', 'Generator maxed; Medstation no longer locked');
     // Medstation: money is one tick, reputation requirement shown.
     await page.click(cardFor('s-med')); await settle();
-    ok(await page.locator('.hx-panel [data-act="check"][data-key="med2|item|0"]').count() === 1, 'money requirement is a single tick');
+    ok((await page.locator('.hx-panel .req.item .r-count').innerText()) === '×30,000' && await page.locator('.hx-panel [data-key="med2|item|0"]').count() === 0, 'money shown as the amount needed');
     ok((await page.locator('.hx-panel .req-group:has(h4:has-text("Traders"))').innerText()).includes('Therapist reputation 0.10'), 'trader reputation requirement listed');
     await page.click('.hx-panel a[data-act="hx-select"][data-id="s-gen"]'); await settle();
     ok((await page.locator('.hx-panel h2').innerText()) === 'Generator', 'module requirement links to that module');

@@ -100,6 +100,8 @@ different one). Three come with the tracker:
     N missing, Locked, Max level), and its level with − / + buttons.
   - Clicking a module lists everything a level needs: other modules, skills, trader loyalty or
     reputation, and items.
+  - Items are only listed, with the amount needed. They are not tracked and don't count towards the
+    Ready / N missing status, which only looks at modules, skills and traders.
   - Trader requirements are checked automatically in every GUI, against the loyalty level and
     reputation worked out from your quests.
   - Module icons are cached in `data/images/stations/`, like the trader portraits. If a GUI hides its
