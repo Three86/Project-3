@@ -9,7 +9,7 @@
      "id": "gen1",
      "level": 1,
      "constructionTime": 7200,
-     "description": "d",
+     "description": "desc-gen1",
      "itemRequirements": [
       {
        "item": "i-mp133",
@@ -35,6 +35,12 @@
       {
        "trader": "54cb50c76803fa8b248b4571",
        "value": 2
+      },
+      {
+       "trader": "54cb50c76803fa8b248b4571",
+       "requirementType": "reputation",
+       "compareMethod": ">=",
+       "value": 0.2
       }
      ],
      "bonuses": [
@@ -53,7 +59,8 @@
       }
      ]
     }
-   ]
+   ],
+   "imageLink": "https://assets.tarkov.dev/station-generator.png"
   },
   "s-med": {
    "id": "s-med",

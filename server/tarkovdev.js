@@ -50,15 +50,16 @@ const tradersQuery = (args) => `{
   }
 }`;
 
-const hideoutQuery = (args, full) => `{
+// extra: station icon, level description and the kind of trader requirement (loyalty level or reputation).
+const hideoutQuery = (args, full, extra = false) => `{
   hideoutStations(${args}) {
-    id name normalizedName
+    id name normalizedName ${extra ? 'imageLink' : ''}
     levels {
-      id level constructionTime
+      id level constructionTime ${extra ? 'description' : ''}
       itemRequirements { id item { ${ITEM} } count ${full ? 'attributes { type name value }' : ''} }
       stationLevelRequirements { station { id name } level }
       skillRequirements { name level }
-      traderRequirements { trader { id name } level }
+      traderRequirements { trader { id name } level ${extra ? 'requirementType compareMethod value' : ''} }
       ${full ? 'bonuses { type name value passive production skillName }' : ''}
     }
   }
@@ -131,7 +132,7 @@ function queryVariants({ gameMode = 'regular', lang = 'en' } = {}) {
   return {
     tasks: [tasksQuery(withMode, OBJECTIVE_FULL), tasksQuery(withMode, OBJECTIVE_FULL, false), tasksQuery(noMode, OBJECTIVE_FULL, false), tasksQuery(noMode, OBJECTIVE_MIN, false)],
     traders: [tradersQuery(withMode), tradersQuery(noMode)],
-    hideoutStations: [hideoutQuery(withMode, true), hideoutQuery(noMode, true), hideoutQuery(noMode, false)],
+    hideoutStations: [hideoutQuery(withMode, true, true), hideoutQuery(withMode, true), hideoutQuery(noMode, true), hideoutQuery(noMode, false)],
     prestige: [prestigeQuery(withMode, OBJECTIVE_FULL), prestigeQuery(noMode, OBJECTIVE_FULL), prestigeQuery(noMode, OBJECTIVE_MIN)],
   };
 }

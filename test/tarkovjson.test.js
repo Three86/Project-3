@@ -58,7 +58,12 @@ test('loads and normalises the json.tarkov.dev feed', async () => {
     assert.deepStrictEqual(l1.stationLevelRequirements, [{ station: { id: 's-med', name: 'Medstation' }, level: 1 }]);
     assert.deepStrictEqual(l1.skillRequirements, [{ name: 'Endurance', level: 2 }]);
     assert.deepStrictEqual(l1.bonuses.map((b) => [b.type, b.name, b.value, b.skillName]), [['FuelConsumption', 'Fuel consumption', -0.1, undefined], ['SkillGroupLevelingBoost', 'Skill leveling', 0.05, 'Physical']]);
-    assert.deepStrictEqual(l1.traderRequirements, [{ trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, level: 2 }]);
+    assert.deepStrictEqual(l1.traderRequirements, [
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, level: 2, requirementType: 'loyaltyLevel', compareMethod: '>=', value: 2 },
+      { trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, level: 0.2, requirementType: 'reputation', compareMethod: '>=', value: 0.2 },
+    ]);
+    assert.strictEqual(gen.imageLink, 'https://assets.tarkov.dev/station-generator.png');
+    assert.strictEqual(l1.description, 'desc-gen1');
     assert.strictEqual(d.prestige[0].name, 'Prestige 1');
     const p2 = d.prestige.find((x) => x.name === 'Prestige 2');
     assert.deepStrictEqual(p2.conditions.map((c) => c.type), ['playerLevel', 'skill', 'hideoutStation', 'haveItem']);

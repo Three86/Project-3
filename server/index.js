@@ -119,7 +119,7 @@ async function refreshGameData(reason) {
       log(`game data cached: ${data.tasks.length} quests, ${data.hideout.length} hideout stations, ${data.prestige.length} prestige levels, ${(data.traders || []).length} traders`);
       const times = Object.fromEntries((data.traders || []).filter((t) => t.resetTime).map((t) => [t.id, t.resetTime]));
       if (Object.keys(times).length) traderResets = { fetchedAt: data.meta.fetchedAt, times };
-      downloadTraderImages().catch((err) => log(`trader pictures: ${err.message}`));
+      downloadAllImages();
     } catch (err) {
       lastRefreshError = err.message;
       log(`game data refresh failed: ${err.message}`);
@@ -132,7 +132,7 @@ async function refreshGameData(reason) {
 
 // Bump when the tracker starts using fields older cached game data doesn't have
 // (2: hideout bonuses, active skill list; 3: XP table). Older caches are re-downloaded automatically.
-const DATA_VERSION = 5; // 3: XP table (playerLevels); 4: hideout crafts; 5: traders, quest reputation rewards
+const DATA_VERSION = 6; // 3: XP table (playerLevels); 4: hideout crafts; 5: traders, quest reputation rewards; 6: hideout icons, level descriptions, trader requirement types
 const dataOutdated = () => !!gameData && (gameData.meta?.dataVersion || 1) < DATA_VERSION && gameData.meta?.source !== 'import';
 
 function dataIsStale() {
@@ -142,47 +142,55 @@ function dataIsStale() {
   return REFRESH_HOURS > 0 && age > REFRESH_HOURS * 3600 * 1000;
 }
 
-// ---------- traders: pictures and restock times ----------
-// Trader portraits are downloaded once into the data folder and served by the tracker itself, so they
-// work offline. Missing ones are fetched after every data refresh and at start-up.
-const TRADER_IMG_DIR = path.join(DATA_DIR, 'images', 'traders');
+// ---------- pictures (trader portraits, hideout module icons) and restock times ----------
+// Pictures are downloaded once into the data folder and served by the tracker itself, so they work
+// offline. Missing ones are fetched after every data refresh and at start-up.
+const IMG_DIRS = { traders: path.join(DATA_DIR, 'images', 'traders'), stations: path.join(DATA_DIR, 'images', 'stations') };
 const IMG_TYPES = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' };
+const IMG_EXTS = new Set(Object.values(IMG_TYPES));
 const safeId = (id) => /^[\w-]+$/.test(String(id));
 
-function traderImageFile(id) {
-  if (!safeId(id)) return null;
-  for (const ext of Object.values(IMG_TYPES)) {
-    const f = path.join(TRADER_IMG_DIR, `${id}${ext}`);
+function imageFile(kind, id) {
+  if (!IMG_DIRS[kind] || !safeId(id)) return null;
+  for (const ext of IMG_EXTS) {
+    const f = path.join(IMG_DIRS[kind], `${id}${ext}`);
     if (fs.existsSync(f)) return f;
   }
   return null;
 }
 
-let imagesBusy = false;
-async function downloadTraderImages() {
-  if (imagesBusy || !gameData?.traders?.length) return;
-  imagesBusy = true;
+const imagesBusy = {};
+async function downloadImages(kind, entries) {
+  if (imagesBusy[kind] || !entries?.length) return;
+  imagesBusy[kind] = true;
   try {
-    fs.mkdirSync(TRADER_IMG_DIR, { recursive: true });
+    fs.mkdirSync(IMG_DIRS[kind], { recursive: true });
     let got = 0;
-    for (const t of gameData.traders) {
-      const url = t.image4xLink || t.imageLink;
-      if (!url || !safeId(t.id) || traderImageFile(t.id)) continue;
+    for (const e of entries) {
+      const url = e.image4xLink || e.imageLink;
+      if (!url || !safeId(e.id) || imageFile(kind, e.id)) continue;
       try {
         const res = await fetch(url, { headers: { 'User-Agent': 'tarkov-quest-tracker/1.0 (+self-hosted)' }, signal: AbortSignal.timeout(30000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const type = (res.headers.get('content-type') || '').split(';')[0].trim();
-        const ext = IMG_TYPES[type] || (path.extname(new URL(url).pathname).toLowerCase() in { '.png': 1, '.jpg': 1, '.webp': 1, '.gif': 1 } ? path.extname(new URL(url).pathname).toLowerCase() : null);
+        const urlExt = path.extname(new URL(url).pathname).toLowerCase();
+        const ext = IMG_TYPES[type] || (IMG_EXTS.has(urlExt) ? urlExt : null);
         if (!ext) throw new Error(`not an image (${type || 'no type'})`);
-        fs.writeFileSync(path.join(TRADER_IMG_DIR, `${t.id}${ext}`), Buffer.from(await res.arrayBuffer()));
+        fs.writeFileSync(path.join(IMG_DIRS[kind], `${e.id}${ext}`), Buffer.from(await res.arrayBuffer()));
         got++;
       } catch (err) {
-        log(`trader picture for ${t.name} not downloaded: ${err.message}`);
+        log(`${kind} picture for ${e.name} not downloaded: ${err.message}`);
       }
     }
-    if (got) log(`trader pictures: ${got} downloaded`);
+    if (got) log(`${kind} pictures: ${got} downloaded`);
   } finally {
-    imagesBusy = false;
+    imagesBusy[kind] = false;
+  }
+}
+
+function downloadAllImages() {
+  for (const [kind, entries] of [['traders', gameData?.traders], ['stations', gameData?.hideout]]) {
+    downloadImages(kind, entries).catch((err) => log(`${kind} pictures: ${err.message}`));
   }
 }
 
@@ -364,10 +372,10 @@ function listUiFolders(kind, file) {
 
 async function handleApi(req, res, url) {
   const route = `${req.method} ${url.pathname}`;
-  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/traders\/([\w-]+)$/);
+  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/(traders|stations)\/([\w-]+)$/);
   if (img) {
-    const file = traderImageFile(img[1]);
-    if (!file) return send(res, 404, { error: 'no picture for this trader (yet)' });
+    const file = imageFile(img[1], img[2]);
+    if (!file) return send(res, 404, { error: 'no picture for this yet' });
     return send(res, 200, fs.readFileSync(file), MIME[path.extname(file)]);
   }
   switch (route) {
@@ -484,9 +492,9 @@ server.listen(PORT, () => {
     if (ticks % 2 === 0) refreshTraderResets();
   }, 5 * 60 * 1000).unref();
   // Restock times go stale fast; re-read them now and every 10 minutes (the tick above). Fetch any
-  // trader pictures still missing.
+  // pictures still missing.
   refreshTraderResets();
-  downloadTraderImages().catch((err) => log(`trader pictures: ${err.message}`));
+  downloadAllImages();
   if (needsLogRebuild && watcher.available) rebuildFromLogs();
   watcher.start();
 });

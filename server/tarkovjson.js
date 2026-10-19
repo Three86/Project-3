@@ -200,10 +200,12 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
     id: st.id,
     name: st.name,
     normalizedName: st.normalizedName,
+    imageLink: st.imageLink || null,
     levels: list(st.levels).map((l) => ({
       id: l.id,
       level: l.level,
       constructionTime: l.constructionTime,
+      description: l.description || '',
       itemRequirements: list(l.itemRequirements).map((r, i) => ({
         id: r.id || `${l.id}-${i}`,
         item: R.item(r.item),
@@ -212,7 +214,8 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
       })),
       stationLevelRequirements: list(l.stationLevelRequirements).map((r) => ({ station: R.station(r.station), level: r.level })),
       skillRequirements: list(l.skillRequirements).map((r) => ({ name: r.name || r.skill, level: r.level })),
-      traderRequirements: list(l.traderRequirements).map((r) => ({ trader: R.trader(r.trader), level: r.level ?? r.value })),
+      // requirementType: 'loyaltyLevel' (level = loyalty level) or 'reputation' (value = standing).
+      traderRequirements: list(l.traderRequirements).map((r) => ({ trader: R.trader(r.trader), level: r.level ?? r.value, requirementType: r.requirementType || 'loyaltyLevel', compareMethod: r.compareMethod || '>=', value: r.value ?? r.level })),
       // Percent bonuses are fractions (0.15 = 15%); slots, stash size and energy reserve are absolute.
       bonuses: list(l.bonuses).map((b) => ({ type: b.type, name: b.name, value: b.value, passive: b.passive, production: b.production, skillName: b.skillName ?? b.skill })),
     })),
