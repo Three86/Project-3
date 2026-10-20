@@ -31,7 +31,13 @@ export async function startShell({ gui, modules, brand = 'TARKOV<span>TRACKER</s
   const defaults = { tab: modules[0]?.id };
   for (const m of modules) Object.assign(defaults, m.logic.uiDefaults || {});
   initUi(uiKey, defaults);
-  if (!byId.has(S.ui.tab)) S.ui.tab = modules[0]?.id;
+  // Opening the tracker lands on the first section (Overview); a reload in the same browser tab
+  // keeps the section you were on.
+  const tabKey = `${uiKey}:tab`;
+  let lastTab = null;
+  try { lastTab = sessionStorage.getItem(tabKey); } catch { /* storage unavailable */ }
+  S.ui.tab = byId.has(lastTab) ? lastTab : modules[0]?.id;
+  const rememberTab = () => { try { sessionStorage.setItem(tabKey, S.ui.tab); } catch { /* storage unavailable */ } };
 
   document.body.className = className;
   document.body.innerHTML = `
@@ -178,6 +184,7 @@ export async function startShell({ gui, modules, brand = 'TARKOV<span>TRACKER</s
   function setTab(id) {
     if (!byId.has(id)) return false;
     S.ui.tab = id;
+    rememberTab();
     saveUi();
     render();
     return true;
@@ -188,6 +195,7 @@ export async function startShell({ gui, modules, brand = 'TARKOV<span>TRACKER</s
     const mod = byId.get(id);
     if (!mod) return;
     S.ui.tab = id;
+    rememberTab();
     const after = mod.view.goto?.(args, ctx);
     saveUi();
     render();

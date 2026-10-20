@@ -146,14 +146,38 @@ test('crafting skill shortens craft times; recipes respect locks and the pin lim
   assert.deepStrictEqual(S.progress.craftPins['s-med'], ['cr1', 'cr3', 'cr4', 'cr5'], `no more than ${recipes.MAX_PINS} pins`);
 });
 
-test('needed items add up open requirements per item', async () => {
+test('overview: weight limits, stamina, food and drain, fuel and filters at your skill levels', async () => {
   const S = await reset();
-  const items = await load('modules/items/logic.js');
-  const salewa = () => items.neededItems().find((r) => r.item.shortName === 'Salewa');
-  const before = salewa();
-  assert.ok(before.fir + before.nofir > 0 && before.sources.length > 1);
-  S.ui.items.fir = 'fir';
-  assert.ok(items.neededItems().every((r) => r.nofir === 0), 'FIR filter leaves only FIR counts');
+  const ov = await load('modules/overview/logic.js');
+  const near = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-6, `${msg}: ${a} vs ${b}`);
+  Object.assign(S.progress.skills, { Strength: 12, Endurance: 15, Metabolism: 10, Health: 8, Crafting: 20, HideoutManagement: 10 });
+  const s = ov.strength();
+  near(s.overweight.now, 26 * 1.048, 'overweight'); near(s.sprint.now, 72 * 1.048, 'sprint limit'); near(s.critical.now, 77 * 1.048, 'critical');
+  S.progress.skills.Strength = 51;
+  near(ov.strength().carryPct, 30, 'elite: 20% (capped at level 50) + 10%');
+  const e = ov.endurance();
+  near(e.sprint.base, 115 / 4, 'base sprint time'); near(e.sprint.now, 115 * 1.15 / 4, 'sprint time');
+  near(e.refill.now, 115 * 1.15 / (4.5 * 1.15 * 1.25), 'refill standing');
+  const m = ov.metabolism();
+  near(m.item50, 55, '50 energy item at Metabolism 10');
+  near(m.energy.perMin, 3.2 * (1 - 0.05 - 0.048), 'energy drain'); near(m.hydration.minutes, 100 / (2.6 * 0.902), 'hydration lasts');
+  const h = ov.hideoutResources();
+  const fuelH = 4.75 * 0.95; // Generator not built in the fixture: no fuel bonus
+  near(h.fuel.perHour, fuelH, 'fuel per hour');
+  assert.deepStrictEqual(h.tanks.map((t) => t.name), ['Metal fuel tank', 'Expeditionary fuel tank']);
+  near(h.tanks[0].hours, 100 / fuelH, 'metal tank'); near(h.tanks[1].hours, 60 / fuelH, 'expeditionary tank');
+  near(h.air.hours, 300 / (17 * 0.95), 'air filter'); near(h.air.baseHours, 300 / 17, 'air filter base');
+  near(h.water.canisters, 100 / (66 * 0.95), 'canisters per water filter'); near(h.water.seconds, 19500 * 0.85, 'time per canister');
+  const p = ov.pmc();
+  assert.deepStrictEqual([p.faction, p.level, p.image, p.fallback], ['USEC', 30, '/api/images/pmc/usec', 'img/pmc/usec.webp']);
+  S.progress.settings.faction = 'BEAR';
+  assert.strictEqual(ov.pmc().fallback, 'img/pmc/bear.webp');
+  const [kappa, lk] = ov.goals();
+  assert.strictEqual(kappa.total, S.data.tasks.filter((t) => t.kappaRequired && (!t.factionName || t.factionName === 'Any' || t.factionName === 'BEAR')).length);
+  assert.strictEqual(lk.key, 'lightkeeper');
+  S.progress.tasks['5936d90786f7742b1420ba5b'] = { status: 'completed' };
+  game.resetMemo();
+  assert.strictEqual(ov.goals()[0].done, kappa.done + 1, 'completing a Kappa quest counts');
 });
 
 test('prestige: current prestige, custom requirements, achieved mark', async () => {

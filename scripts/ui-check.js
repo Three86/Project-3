@@ -45,7 +45,7 @@ async function main() {
       try { if ((await (await fetch(`${BASE}/api/status`)).json()).hasData) break; } catch { /* starting */ }
       await new Promise((r) => setTimeout(r, 200));
     }
-    await run();
+    await run(dir);
   } finally {
     for (const d of cleanup) fs.rmSync(d, { recursive: true, force: true });
     server.kill();
@@ -53,7 +53,7 @@ async function main() {
   }
 }
 
-async function run() {
+async function run(dataDir) {
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 1300, height: 900 }, acceptDownloads: true });
   // Offline: anything not served by the tracker itself is blocked.
@@ -78,16 +78,64 @@ async function run() {
   const shot = async (name) => { if (shots) await page.screenshot({ path: path.join(shots, `${name}.png`), fullPage: false }); };
   const want = (name) => !only || only.includes(name);
   // Each section starts from default filters (saved UI state lives in localStorage 'tt-ui').
+  // Saved UI state for a GUI; the open section is kept per browser tab (sessionStorage '<key>:tab').
+  const setUiState = (key, state) => page.evaluate(([k, s]) => {
+    localStorage.setItem(k, JSON.stringify(s));
+    if (s.tab) sessionStorage.setItem(`${k}:tab`, s.tab);
+  }, [key, state]);
   const freshUi = async (tabName, extra = {}) => {
     // A <details> toggle from the previous step can still save UI state a moment later; write after it.
     await page.waitForTimeout(150);
-    await page.evaluate(([t, x]) => localStorage.setItem('tt-ui', JSON.stringify({ tab: t, ...x })), [tabName, extra]);
+    await setUiState('tt-ui', { tab: tabName, ...extra });
     await page.reload();
     await page.waitForFunction(() => document.querySelector('#view') && !document.querySelector('#view .loading-skeleton') && document.querySelector('#view').children.length > 0);
   };
 
   await page.goto(BASE);
-  await page.waitForSelector('#view .toolbar');
+  await page.waitForSelector('#view .ovw');
+
+  // ------------------------------------------------------------ overview (where the tracker opens)
+  if (want('overview')) {
+    console.log('Overview');
+    ok(await page.getAttribute('#tab-overview', 'aria-selected') === 'true' && (await page.locator('#tabs [role=tab]').first().innerText()) === 'Overview', 'the tracker opens on Overview, the first tab');
+    const tabs = await page.locator('#tabs [role=tab]').allInnerTexts();
+    ok(!tabs.includes('Needed items') && !tabs.includes('Buffs'), `Needed items and Buffs are gone (${tabs.join(', ')})`);
+    ok((await page.locator('.ovw-pmc .faction').innerText()) === 'USEC' && (await page.locator('.ovw-pmc .lvl b').innerText()) === '30', 'PMC card shows faction and level from Settings');
+    await page.waitForFunction(() => document.querySelector('.ovw-pmc img')?.complete);
+    ok(await page.locator('.ovw-pmc img').evaluate((img) => img.naturalWidth > 0 && img.src.endsWith('img/pmc/usec.webp')), 'bundled USEC picture shown (no picture of your own in data/images/pmc)');
+    const goalTxt = await page.locator('.goal[data-goal="kappa"] .meta').innerText();
+    ok(/\d+ of \d+ quests completed/.test(goalTxt) && await page.locator('.goal[data-goal="lightkeeper"]').count() === 1, `Kappa and Lightkeeper progress (${goalTxt.split('\n')[0]})`);
+    const statOf = (card, label) => page.locator(`.ovw-skill[data-skill="${card}"] .stat:has(> span:text-is("${label}")) > b`).innerText();
+    ok(await statOf('strength', 'Overweight from') === '26.0 kg' && await statOf('strength', 'Heaviest you can sprint with') === '72.0 kg', 'Strength 0: base weight limits');
+    ok(await statOf('endurance', 'Sprint from full stamina') === '28.8 s', 'Endurance 0: 28.8 s of sprinting');
+    ok(await statOf('metabolism', 'An item with 50 energy gives') === '50 energy' && await statOf('metabolism', 'Energy') === '−3.20/min', 'Metabolism 0: 50 energy, −3.20/min');
+    ok(await statOf('hideout', 'Canisters per filter') === `${(100 / (66 * 0.95)).toFixed(2)}` && await statOf('hideout', 'Time per canister') === '4h 36m', 'Hideout Management 10 / Crafting 20: water filter and canister time');
+    ok((await page.locator('.ovw-skill[data-skill="hideout"]').innerText()).includes('Expeditionary fuel tank (60) lasts'), 'both fuel tanks listed');
+    // Changing Settings updates it; the link goes to Settings.
+    await page.click('.ovw-pmc a[data-module="settings"]'); await settle();
+    ok(await page.getAttribute('#tab-settings', 'aria-selected') === 'true', 'link opens Settings');
+    await page.selectOption('[data-set="faction"]', 'BEAR'); await settle();
+    await page.click('#tab-overview'); await settle();
+    await page.waitForFunction(() => document.querySelector('.ovw-pmc img')?.complete);
+    ok((await page.locator('.ovw-pmc .faction').innerText()) === 'BEAR' && await page.locator('.ovw-pmc img').evaluate((img) => img.src.endsWith('img/pmc/bear.webp') && img.naturalWidth > 0), 'switching faction to BEAR shows the BEAR picture');
+    await shot('overview');
+    // Your own picture in data/images/pmc/ replaces the bundled one.
+    fs.mkdirSync(path.join(dataDir, 'images', 'pmc'), { recursive: true });
+    fs.copyFileSync(path.join(__dirname, '..', 'test', 'fixtures', 'ui', 'images', 'traders', 'p.png'), path.join(dataDir, 'images', 'pmc', 'bear.png'));
+    await page.reload(); await page.waitForFunction(() => document.querySelector('.ovw-pmc img')?.complete);
+    ok(await page.locator('.ovw-pmc img').evaluate((img) => img.src.endsWith('/api/images/pmc/bear') && img.naturalWidth > 0), 'picture in data/images/pmc/ replaces the bundled one');
+    fs.rmSync(path.join(dataDir, 'images', 'pmc'), { recursive: true });
+    await page.evaluate(() => fetch('/api/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: [{ section: 'settings', id: 'faction', value: 'USEC' }] }) }));
+    // Another section stays open on reload, but a new browser tab opens on Overview again.
+    await tab('hideout');
+    await page.reload(); await page.waitForSelector('#view > *');
+    ok(await page.getAttribute('#tab-hideout', 'aria-selected') === 'true', 'reload keeps the open section');
+    const fresh = await context.newPage();
+    await fresh.goto(BASE); await fresh.waitForSelector('#view .ovw');
+    ok(await fresh.getAttribute('#tab-overview', 'aria-selected') === 'true', 'opening the tracker again lands on Overview');
+    await fresh.close();
+    await tab('quests');
+  }
 
   // ------------------------------------------------------------ shell
   if (want('shell')) {
@@ -98,14 +146,14 @@ async function run() {
     ok(await page.evaluate(() => document.documentElement.classList.contains('dark')), 'dark mode by default');
     await page.click('[data-act="theme"]');
     ok(await page.evaluate(() => !document.documentElement.classList.contains('dark') && localStorage.getItem('themeMode') === 'light'), 'theme toggle switches to light and saves it');
-    await page.reload(); await page.waitForSelector('#view .toolbar');
+    await page.reload(); await page.waitForSelector('#view > *');
     ok(await page.evaluate(() => !document.documentElement.classList.contains('dark')), 'light mode remembered after reload');
     await shot('quests-light');
     await page.click('[data-act="theme"]');
     ok(await page.evaluate(() => document.documentElement.classList.contains('dark')), 'theme toggle back to dark');
     await tab('hideout');
     ok(await page.getAttribute('#tab-hideout', 'aria-selected') === 'true' && await page.locator('[data-hopen]').count() > 0, 'tab click switches view and marks the tab selected');
-    await page.reload(); await page.waitForSelector('#view .toolbar');
+    await page.reload(); await page.waitForSelector('#view > *');
     ok(await page.getAttribute('#tab-hideout', 'aria-selected') === 'true', 'selected tab remembered after reload');
     await page.focus('#tab-hideout'); await page.keyboard.press('ArrowRight'); await settle();
     ok(await page.getAttribute('#tab-recipes', 'aria-selected') === 'true' && await page.locator('.recipes-station').count() > 0, 'arrow keys move between tabs');
@@ -348,46 +396,6 @@ async function run() {
     await shot('skills');
   }
 
-  // ------------------------------------------------------------ buffs
-  if (want('buffs')) {
-    console.log('Buffs');
-    await freshUi('buffs');
-    ok(await page.locator('.info-card').count() === 4, 'four skills-in-game cards');
-    await page.click('[data-act="buff-groups"][data-v="1"]'); await settle();
-    ok(await page.locator('details.buff-group:not([open])').count() === 0, 'expand all bonus groups');
-    await page.click('[data-act="buff-groups"][data-v="0"]'); await settle();
-    ok(await page.locator('details.buff-group[open]').count() === 0, 'collapse all bonus groups');
-    await page.click('[data-buffopen="hb"] > summary'); await settle();
-    await page.reload(); await page.waitForSelector('.buffs-layout');
-    ok(await page.locator('[data-buffopen="hb"]:not([open])').count() === 1, 'hideout bonuses card collapse remembered');
-    await page.click('[data-buffopen="hb"] > summary');
-    await shot('buffs');
-  }
-
-  // ------------------------------------------------------------ needed items
-  if (want('items')) {
-    console.log('Needed items');
-    await freshUi('items');
-    const all = await page.locator('.table.items tbody tr').count();
-    await page.selectOption('[data-ui="items.fir"]', 'fir'); await settle();
-    const notFir = await page.locator('.table.items tbody tr td:nth-child(3)').allInnerTexts();
-    ok(all > 0 && notFir.length > 0 && notFir.every((t) => t.trim() === ''), 'type select: FIR only leaves no not-FIR counts');
-    await page.selectOption('[data-ui="items.fir"]', 'all'); await settle();
-    await page.selectOption('[data-ui="items.source"]', 'hideout'); await settle();
-    ok(await page.locator('.table.items tbody tr').count() >= 1, 'source select filters');
-    await page.selectOption('[data-ui="items.source"]', 'all'); await settle();
-    await page.uncheck('[data-ui="items.includeLocked"]'); await settle();
-    ok(!(await page.isChecked('[data-ui="items.includeLocked"]')), 'include-locked switch');
-    await page.check('[data-ui="items.includeLocked"]'); await settle();
-    await page.click('.table.items tbody tr:first-child .popover > button');
-    ok(await page.locator('.table.items tbody tr:first-child [data-popover]').getAttribute('aria-hidden') === 'false', 'sources popover opens');
-    await page.keyboard.press('Escape');
-    await page.fill('[data-ui="items.text"]', 'salewa'); await page.waitForTimeout(450);
-    ok(await page.locator('.table.items tbody tr').count() === 1, 'item filter');
-    await page.fill('[data-ui="items.text"]', ''); await page.waitForTimeout(450);
-    await shot('items');
-  }
-
   // ------------------------------------------------------------ search
   if (want('search')) {
     console.log('Search');
@@ -467,7 +475,7 @@ async function run() {
     await Promise.all([page.waitForNavigation(), page.selectOption('#set-gui', 'compact')]);
     await page.waitForSelector('body.compact #tabs');
     const compactTabs = await page.locator('#tabs [role=tab]').allInnerTexts();
-    ok(JSON.stringify(compactTabs) === JSON.stringify(['Quests', 'Needed items', 'Hideout', 'Settings']), `compact GUI shows only its sections (${compactTabs.join(', ')})`);
+    ok(JSON.stringify(compactTabs) === JSON.stringify(['Quests', 'Hideout', 'Settings']), `compact GUI shows only its sections (${compactTabs.join(', ')})`);
     ok(await page.evaluate(() => localStorage.getItem('tt-gui')) === 'compact', 'choice saved for this browser');
     await page.click('#tab-quests'); await settle();
     ok(await page.locator('[data-act="qstatus"]').count() === 3 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0, 'compact GUI has no Available filter');
@@ -481,7 +489,7 @@ async function run() {
     await page.click('#task-59674cd986f7744ab26e32f2 [data-act="check"][data-key="o3"]'); await settle();
     ok(lastOp()?.id === 'o3' && lastOp()?.value === true, 'objective checkbox works in the compact GUI');
     await page.reload(); await page.waitForSelector('body.compact #tabs');
-    ok(await page.locator('#tabs [role=tab]').count() === 4, 'compact GUI kept after reload');
+    ok(await page.locator('#tabs [role=tab]').count() === 3, 'compact GUI kept after reload');
     // Recovery address and switching back.
     await page.goto(`${BASE}/?gui=basecoat`); await page.waitForSelector('#tab-search');
     ok(await page.locator('#tabs [role=tab]').count() >= 9 && !(await page.evaluate(() => document.body.classList.contains('compact'))), '?gui=basecoat opens the full GUI');
@@ -510,11 +518,11 @@ async function run() {
     console.log('Icon GUI');
     // Debut and Checking open again (earlier sections start them).
     await page.evaluate(() => fetch('/api/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: [{ section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'tasks', id: '59674cd986f7744ab26e32f2', value: null }] }) }));
-    await page.evaluate(() => { localStorage.setItem('tt-gui', 'icon'); localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'quests' })); });
+    await page.evaluate(() => localStorage.setItem('tt-gui', 'icon')); await setUiState('tt-ui:icon', { tab: 'quests' });
     await page.reload(); await page.waitForSelector('.trader-strip .trader');
     ok(await page.locator('[data-act="qstatus"]').count() > 0 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0 && await page.locator('.qrow.st-available').count() === 0, 'Icon GUI: no Available filter, available quests not listed');
     // The checks below use every quest of a trader (empty status filter, as a link to a quest does).
-    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'quests', q: { statuses: [] } })));
+    await setUiState('tt-ui:icon', { tab: 'quests', q: { statuses: [] } });
     await page.reload(); await page.waitForSelector('.trader-strip .trader');
     const names = await page.locator('.trader .t-name').allInnerTexts();
     ok(JSON.stringify(names) === JSON.stringify(['Prapor', 'Therapist', 'Skier', 'Peacekeeper', 'Jaeger']), `trader cards in game order (${names.join(', ')})`);
@@ -587,12 +595,11 @@ async function run() {
     await page.reload(); await page.waitForSelector('.trader-strip .trader');
     ok(jLocked === 1 && await page.locator('.trader[data-name="Jaeger"].locked').count() === 0, 'Jaeger locked until Checking is completed');
     // Links from other sections open the quest under its trader.
-    await page.click('#tab-items'); await settle();
-    const salewaRow = '.table.items tbody tr:has(.it-tag[title^="Salewa"])';
-    await page.click(`${salewaRow} .popover > button`); await settle();
-    await page.locator(`${salewaRow} [data-popover] [data-act="goto"]`).first().click(); await settle();
+    await setUiState('tt-ui:icon', { tab: 'search', search: 'salewa' });
+    await page.reload(); await page.waitForSelector('.table.items [data-act="goto"]');
+    await page.locator('.table.items [data-act="goto"]').first().click(); await settle();
     const head = await page.locator('.trader-head .th-name').innerText();
-    ok(await page.getAttribute('#tab-quests', 'aria-selected') === 'true' && await page.locator('.qrow[open]').count() >= 1 && !!head, `needed-item link opens the quest under its trader (${head})`);
+    ok(await page.getAttribute('#tab-quests', 'aria-selected') === 'true' && await page.locator('.qrow[open]').count() >= 1 && !!head, `item search result opens the quest under its trader (${head})`);
     await shot('icon-quests');
 
     // ---------------- Icon GUI hideout
@@ -604,7 +611,7 @@ async function run() {
       { section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'tasks', id: '59674cd986f7744ab26e32f2', value: null },
       { section: 'skills', id: 'Endurance', value: 3 }, { section: 'settings', id: 'playerLevel', value: 21 }, { section: 'settings', id: 'loyaltyManual', value: false },
     ]);
-    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'hideout' })));
+    await setUiState('tt-ui:icon', { tab: 'hideout' });
     await page.reload(); await page.waitForSelector('.hx-grid .station');
     const cardFor = (id) => `.station[data-id="${id}"]`;
     ok(JSON.stringify(await page.locator('.station .s-name').allInnerTexts()) === JSON.stringify(['Bitcoin Farm', 'Generator', 'Medstation']), 'a card for every module, locked ones included');
@@ -650,7 +657,7 @@ async function run() {
     // ---------------- Icon GUI skills (in-game style)
     console.log('Icon GUI skills');
     await post([{ section: 'skills', id: 'Strength', value: 12 }, { section: 'skills', id: 'Health', value: 51 }, { section: 'skills', id: 'Immunity', value: null }]);
-    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'skills' })));
+    await setUiState('tt-ui:icon', { tab: 'skills' });
     await page.reload(); await page.waitForSelector('.ig-list .ig-row');
     const heads = await page.locator('.ig-head').allInnerTexts();
     ok(JSON.stringify(heads.map((h) => h.toUpperCase())) === JSON.stringify(['PHYSICAL', 'MENTAL', 'COMBAT', 'PRACTICAL']), `grouped by category in game order (${heads.join(', ')})`);
@@ -699,7 +706,7 @@ async function run() {
     ok(darkText !== lightText && lightText === '#2c2d28', `skills follow the light theme (${darkText} → ${lightText})`);
     await page.click('[data-act="theme"]'); await settle();
     // Links from Search open the skill here
-    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'search', search: 'metabolism' })));
+    await setUiState('tt-ui:icon', { tab: 'search', search: 'metabolism' });
     await page.reload(); await page.waitForSelector('[data-act="goto-skill"]');
     await page.click('[data-act="goto-skill"]'); await settle();
     ok(await page.getAttribute('#tab-skills', 'aria-selected') === 'true' && (await page.locator('.ig-info h3').innerText()).includes('Metabolism'), 'search result opens the skill in the info panel');
@@ -709,7 +716,7 @@ async function run() {
     console.log('Icon GUI recipes');
     // Debut open again (Checking completed implies it) so the Debut-unlocked recipe is locked.
     await post([{ section: 'craftPins', id: 's-med', value: null }, { section: 'settings', id: 'gpuCount', value: 10 }, { section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'tasks', id: '59674cd986f7744ab26e32f2', value: null }]);
-    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'recipes' })));
+    await setUiState('tt-ui:icon', { tab: 'recipes' });
     await page.reload(); await page.waitForSelector('.rx-grid .rstation');
     const rxIds = await page.locator('.rstation').evaluateAll((els) => els.map((e) => e.dataset.id));
     ok(JSON.stringify(rxIds) === JSON.stringify(['s-med', 's-btc']), `one card per crafting station, Bitcoin Farm last (${rxIds.join(', ')})`);

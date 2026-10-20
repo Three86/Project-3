@@ -4,14 +4,20 @@ A self-hosted quest, hideout and prestige tracker for Escape from Tarkov. It run
 
 ## Features
 
+- **Overview** (where the tracker opens): your faction, PMC level and a BEAR or USEC picture, Kappa and Lightkeeper progress, and what your skills mean in the game:
+  - Strength: when you become overweight, the most you can carry and still sprint, and critically overweight.
+  - Endurance: how long you can sprint from full stamina (not overweight) and how long stamina takes to refill from empty.
+  - Metabolism (and Health): what an item with 50 energy / 50 hydration gives you, and how fast energy and hydration drain in raid.
+  - Hideout (Crafting and Hideout Management): how long Metal and Expeditionary fuel tanks and an air filter last, how many purified water canisters one water filter makes and how long each takes.
+  - The game values come from the game config (as mirrored by the SPT project) and are in `server/skills.json` → `baseValues`. Filter sizes (300 / 100) are from the community wiki. Purified water time assumes the Crafting skill applies to it.
+  - To use your own pictures, put `usec.png` / `bear.png` (or .jpg / .webp) in `data/images/pmc/`.
+  - A reload keeps the section you were on; opening the tracker again starts on Overview.
 - **Quests**: shows active, locked, completed and failed quests (quests you could start but have not are not listed; starts come from the game logs). You can filter and group them by trader, map or requirement type (kills, FIR items, non-FIR items, equipment/gear, quest items, place/mark, visit, extract, skill/level). You can also sort by level, trader, map, name or progress. Every objective can be checked off, and counted objectives (kills, hand-ins) have a counter. Item objectives say whether the item must be **found in raid (FIR)**. Use the Kappa and Lightkeeper filters to show only quests needed for those.
 - **Hideout**: shows each station with its next level, or all levels. Requirements cover items (with FIR flag and a counter), trader loyalty, skills and other stations. Other-station requirements tick automatically once you mark that level built.
 - **Recipes**: shows hideout crafts you can make with the stations you've built and the quests you've completed, grouped by module. Each recipe lists its ingredients (tools marked; you get them back) and its craft time with your Crafting skill applied. Locked recipes are hidden unless you tick "Show locked", which also shows what unlocks them. Pin up to 4 recipes per module to keep them at the top. The Bitcoin Farm section takes your number of graphics cards (no more than the built level holds: 10, 25 or 50) and shows the time per bitcoin, bitcoins per day and bitcoins per fuel tank (Hideout Management and hideout fuel bonuses included).
 - **Prestige**: lists the prestige requirements. Level and quest conditions are tracked automatically and the rest have checkboxes. You can add your own requirements as checklist items.
 - **Skills**: enter your level for each skill and see its description, how it levels up, what each level gives and the elite bonus. An overview adds up the buffs on your PMC. Hideout and quest skill requirements tick automatically from these levels. Skill data is bundled in `server/skills.json` and is approximate, because tarkov.dev only publishes skill names. Copy it to `data/skills.json` and edit it to correct values.
 - **Read levels from screenshots (OCR)**: press the button on the Skills tab to read skill levels from screenshots of the in-game skills page. In-raid screenshots, which have coordinates in their file name, are skipped. Only the newest day's screenshots are used, and all of that day's screenshots are read. Two OCR engines are bundled in the Docker image. The default is an AI engine: RapidOCR, which runs PaddleOCR models on the CPU, so no graphics card is needed. Tesseract joins in when the AI read looks incomplete. You can choose the engine under **Settings**. Small text is enlarged and read again, and the readings vote on each value. Measure accuracy on your own screenshots with `scripts/ocr-bench.js`.
-- **Buffs**: adds up the bonuses of every hideout level you've built (boosted by your Hideout Management level). It also shows what your skills mean in the game: weight limits, food multiplier, fuel duration (including hideout fuel bonuses) and craft times, plus the totals of all skill buffs.
-- **Needed items**: a combined shopping list of everything your unfinished quests, hideout levels and prestige still need, split into FIR and non-FIR.
 - **Search**: search by quest name or item name. An item search shows every current or future quest, hideout level or prestige requirement that needs that item, including gear you have to wear or use.
 - **Automatic quest detection**: reads the game's own log files to find quests you start, fail or complete.
 
@@ -86,7 +92,7 @@ Settings → Appearance → **Interface** picks the GUI for this browser (so a s
 different one). Three come with the tracker:
 
 - **Basecoat (full)**: every section in tabs.
-- **Compact (second monitor)**: an active-quest checklist plus needed items, hideout and settings.
+- **Compact (second monitor)**: an active-quest checklist plus hideout and settings.
 - **Icon GUI**: every section, with quests shown per trader. A row of trader cards shows each
   trader's portrait, loyalty level and restock timer; click one to list its quests.
   - Only traders that give quests get a card. Storyline quests aren't part of tarkov.dev's quest
@@ -138,8 +144,8 @@ public/
   core/               game rules and data, no HTML: store.js (state, server API, saving, sync, events),
                       game.js (quest/hideout/skill rules), progress.js (shared progress changes),
                       gui.js + registry.js (find and load GUIs and modules)
-  modules/<id>/       one folder per section: quests, hideout, recipes, prestige, skills, buffs,
-                      items, search, settings
+  modules/<id>/       one folder per section: overview, quests, hideout, recipes, prestige, skills,
+                      search, settings
     module.json       { "title", "order", "description", "needsData" }
     logic.js          that section's filters, numbers and actions; no HTML. Exports uiDefaults.
     view.js           the default (Basecoat) view
@@ -159,7 +165,7 @@ Create `public/guis/<id>/gui.json`:
 {
   "title": "Raid overlay",
   "description": "Shown in Settings under the title.",
-  "modules": ["quests", "items"],
+  "modules": ["quests", "hideout"],
   "views": { "quests": "views/quests.js" },
   "styles": ["../../vendor/basecoat/basecoat.cdn.min.css", "../../ui/basecoat/style.css", "my.css"],
   "scripts": ["../../vendor/basecoat/basecoat.all.min.js"],

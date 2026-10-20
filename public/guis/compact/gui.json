@@ -1,7 +1,7 @@
 {
   "title": "Compact (second monitor)",
-  "description": "Tight layout for a second screen: active quests as a checklist, needed items, hideout and settings.",
-  "modules": ["quests", "items", "hideout", "settings"],
+  "description": "Tight layout for a second screen: active quests as a checklist, hideout and settings.",
+  "modules": ["quests", "hideout", "settings"],
   "views": { "quests": "views/quests.js" },
   "styles": ["../../vendor/basecoat/basecoat.cdn.min.css", "../../ui/basecoat/style.css", "compact.css"],
   "scripts": ["../../vendor/basecoat/basecoat.all.min.js"],
