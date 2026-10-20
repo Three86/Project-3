@@ -104,7 +104,15 @@ different one). Three come with the tracker:
     Ready / N missing status, which only looks at modules, skills and traders.
   - Trader requirements are checked automatically in every GUI, against the loyalty level and
     reputation worked out from your quests.
-  - Module icons are cached in `data/images/stations/`, like the trader portraits. If a GUI hides its
+  - Module icons are cached in `data/images/stations/`, like the trader portraits.
+  - Skills look like the game's Character → Skills screen: two columns of rows, each with the skill
+    icon, a category letter, the name, a level bar and "Level: N" with − / +. Elite skills are marked
+    in gold.
+  - Clicking a skill shows its description and effects (now, per level, at max) and its elite perks.
+    Levels change with − / +, by typing a level, or by reading screenshots.
+  - The skills screen follows your light / dark theme. It uses the free Rajdhani font, bundled in
+    `public/vendor/fonts/` (the game's own font can't be shipped).
+  - Skill icons are cached in `data/images/skills/`. If a GUI hides its
 switcher, open `http://localhost:3000/?gui=basecoat` to get back.
 
 `scripts/ui-check.js` clicks through every tab and both GUIs in Chromium against the sample data in

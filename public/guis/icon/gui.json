@@ -1,14 +1,16 @@
 {
   "title": "Icon GUI",
-  "description": "Quests by trader and the hideout by module: trader portraits with loyalty, reputation and restock timers; module cards with level controls and every upgrade requirement.",
+  "description": "Quests by trader, the hideout by module and skills like the in-game screen: trader portraits with loyalty, reputation and restock timers; module cards with every upgrade requirement; skill rows with effects.",
   "modules": "*",
   "views": {
     "quests": "views/quests.js",
-    "hideout": "views/hideout.js"
+    "hideout": "views/hideout.js",
+    "skills": "views/skills.js"
   },
   "styles": [
     "../../vendor/basecoat/basecoat.cdn.min.css",
     "../../ui/basecoat/style.css",
+    "../../vendor/fonts/rajdhani/rajdhani.css",
     "icon.css"
   ],
   "scripts": [

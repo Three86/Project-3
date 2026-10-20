@@ -621,6 +621,64 @@ async function run() {
     ok(ops.some((o) => o.id === 'gen2' && o.value === false) && (await page.locator(`${cardFor('s-gen')} .lv`).innerText()).replace(/\s/g, '') === '1/2', '− unbuilds the top level');
     await post([{ section: 'settings', id: 'loyaltyManual', value: false }, { section: 'settings', id: 'loyaltyOverrides', value: {} }]);
     await shot('icon-hideout');
+
+    // ---------------- Icon GUI skills (in-game style)
+    console.log('Icon GUI skills');
+    await post([{ section: 'skills', id: 'Strength', value: 12 }, { section: 'skills', id: 'Health', value: 51 }, { section: 'skills', id: 'Immunity', value: null }]);
+    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'skills' })));
+    await page.reload(); await page.waitForSelector('.ig-list .ig-row');
+    const heads = await page.locator('.ig-head').allInnerTexts();
+    ok(JSON.stringify(heads.map((h) => h.toUpperCase())) === JSON.stringify(['PHYSICAL', 'MENTAL', 'COMBAT', 'PRACTICAL']), `grouped by category in game order (${heads.join(', ')})`);
+    ok((await page.locator('.ig-row .ig-name span:last-child').first().innerText()) === 'Endurance', 'game order by default (Endurance first)');
+    ok(await page.evaluate(() => document.fonts.check('600 16px Rajdhani')), 'game-like font loaded from the tracker');
+    ok(await page.locator('.ig-row[data-id="Strength"] .ig-icon img').evaluate((img) => img.complete && img.naturalWidth > 0), 'cached skill icon is served by the tracker');
+    await page.waitForTimeout(300);
+    ok(await page.locator('.ig-row[data-id="Endurance"] .ig-icon img').count() === 0 && (await page.locator('.ig-row[data-id="Endurance"] .initials').innerText()) === 'E', 'missing icon falls back to initials');
+    ok(await page.locator('.ig-row[data-id="Health"].elite').count() === 1 && (await page.locator('.ig-row[data-id="Health"] .ig-of').innerText()) === 'ELITE', 'elite skill marked');
+    ok(await page.locator('.ig-row[data-id="Immunity"].zero').count() === 1, 'unleveled skill dimmed');
+    // Panel
+    await page.click('.ig-row[data-id="Strength"]'); await settle();
+    ok((await page.locator('.ig-info h3').innerText()).includes('Strength') && await page.locator('.ig-info .ig-fx > div').count() === 5, 'clicking a skill shows its description and effects');
+    const fx1 = await page.locator('.ig-info .ig-fx > div').first();
+    ok((await fx1.locator('b').innerText()) === '+4.80%' && (await fx1.locator('small').innerText()) === '+0.40/lvl · max +20.00%' && (await fx1.innerText()).startsWith('Carry weight'), 'effects show now, per level and at max');
+    ok(await page.locator('.ig-info .ig-elite .locked').count() === 2, 'elite perks locked below level 51');
+    // − / + on a row and in the panel, typed level
+    ops = [];
+    await page.click('.ig-row[data-id="Strength"] [data-act="skill-step"][data-d="1"]'); await settle();
+    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'skills', id: 'Strength', value: 13 }), '+ on a row saves the level');
+    ok((await page.locator('.ig-row[data-id="Strength"] .ig-lv').innerText()) === '13', 'row shows the new level');
+    await page.click('.ig-info [data-act="skill-step"][data-d="-1"]'); await settle();
+    ok(lastOp()?.value === 12, '− in the panel saves the level');
+    await page.fill('.ig-info [data-act="skill-level"]', '51'); await page.press('.ig-info [data-act="skill-level"]', 'Tab'); await settle();
+    ok(lastOp()?.value === 51 && await page.locator('.ig-info .ig-elite .locked').count() === 0, 'typed level saves; elite perks unlock at 51');
+    await post([{ section: 'skills', id: 'Strength', value: 12 }]);
+    // Categories, sort, only leveled
+    await page.click('[data-act="sk-cat"][data-v="Mental"]'); await settle();
+    const cats = await page.locator('.ig-row .ig-cat').allInnerTexts();
+    ok(cats.length > 0 && cats.every((c) => c === 'M') && await page.getAttribute('[data-act="sk-cat"][data-v="Mental"]', 'aria-pressed') === 'true', 'category tab shows only that category');
+    await page.click('[data-act="sk-cat"][data-v=""]'); await settle();
+    await page.selectOption('.ig-sel', 'name'); await settle();
+    const skillNames = await page.locator('.ig-row .ig-name span:last-child').allInnerTexts();
+    ok(skillNames.length === 35 && JSON.stringify(skillNames) === JSON.stringify([...skillNames].sort((a, b) => a.localeCompare(b))) && await page.locator('.ig-head').count() === 0, 'sort by name (no group headings)');
+    await page.selectOption('.ig-sel', 'category'); await settle();
+    await page.check('.ig-check input'); await settle();
+    ok(await page.locator('.ig-row.zero').count() === 0 && await page.locator('.ig-row').count() > 0, 'only leveled hides level-0 skills');
+    await page.uncheck('.ig-check input'); await settle();
+    // Screenshot reading is still there (no screenshots mounted in this test).
+    ok(await page.isDisabled('.ig-btn[data-act="ocr-run"]') && (await page.locator('.ig-ocr-info').innerText()).includes('Screenshot folder not found'), 'screenshot reading button with folder status');
+    // Light theme shines through
+    const bg = () => page.evaluate(() => getComputedStyle(document.querySelector('.ig')).getPropertyValue('--ig-text').trim());
+    const darkText = await bg();
+    await page.click('[data-act="theme"]'); await settle();
+    const lightText = await bg();
+    ok(darkText !== lightText && lightText === '#2c2d28', `skills follow the light theme (${darkText} → ${lightText})`);
+    await page.click('[data-act="theme"]'); await settle();
+    // Links from Search open the skill here
+    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'search', search: 'metabolism' })));
+    await page.reload(); await page.waitForSelector('[data-act="goto-skill"]');
+    await page.click('[data-act="goto-skill"]'); await settle();
+    ok(await page.getAttribute('#tab-skills', 'aria-selected') === 'true' && (await page.locator('.ig-info h3').innerText()).includes('Metabolism'), 'search result opens the skill in the info panel');
+    await shot('icon-skills');
     await page.evaluate(() => localStorage.setItem('tt-gui', 'basecoat'));
   }
 
