@@ -132,7 +132,7 @@ async function refreshGameData(reason) {
 
 // Bump when the tracker starts using fields older cached game data doesn't have
 // (2: hideout bonuses, active skill list; 3: XP table). Older caches are re-downloaded automatically.
-const DATA_VERSION = 6; // 3: XP table (playerLevels); 4: hideout crafts; 5: traders, quest reputation rewards; 6: hideout icons, level descriptions, trader requirement types
+const DATA_VERSION = 7; // 3: XP table (playerLevels); 4: hideout crafts; 5: traders, quest reputation rewards; 6: hideout icons, level descriptions, trader requirement types; 7: skill icons
 const dataOutdated = () => !!gameData && (gameData.meta?.dataVersion || 1) < DATA_VERSION && gameData.meta?.source !== 'import';
 
 function dataIsStale() {
@@ -145,7 +145,7 @@ function dataIsStale() {
 // ---------- pictures (trader portraits, hideout module icons) and restock times ----------
 // Pictures are downloaded once into the data folder and served by the tracker itself, so they work
 // offline. Missing ones are fetched after every data refresh and at start-up.
-const IMG_DIRS = { traders: path.join(DATA_DIR, 'images', 'traders'), stations: path.join(DATA_DIR, 'images', 'stations') };
+const IMG_DIRS = { traders: path.join(DATA_DIR, 'images', 'traders'), stations: path.join(DATA_DIR, 'images', 'stations'), skills: path.join(DATA_DIR, 'images', 'skills') };
 const IMG_TYPES = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' };
 const IMG_EXTS = new Set(Object.values(IMG_TYPES));
 const safeId = (id) => /^[\w-]+$/.test(String(id));
@@ -189,7 +189,7 @@ async function downloadImages(kind, entries) {
 }
 
 function downloadAllImages() {
-  for (const [kind, entries] of [['traders', gameData?.traders], ['stations', gameData?.hideout]]) {
+  for (const [kind, entries] of [['traders', gameData?.traders], ['stations', gameData?.hideout], ['skills', gameData?.skills]]) {
     downloadImages(kind, entries).catch((err) => log(`${kind} pictures: ${err.message}`));
   }
 }
@@ -311,7 +311,7 @@ async function runOcr() {
 }
 
 // ---------- http ----------
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json', '.ico': 'image/x-icon', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json', '.ico': 'image/x-icon', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2' };
 
 function send(res, status, body, type = 'application/json') {
   const payload = typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body);
@@ -372,7 +372,7 @@ function listUiFolders(kind, file) {
 
 async function handleApi(req, res, url) {
   const route = `${req.method} ${url.pathname}`;
-  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/(traders|stations)\/([\w-]+)$/);
+  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/(traders|stations|skills)\/([\w-]+)$/);
   if (img) {
     const file = imageFile(img[1], img[2]);
     if (!file) return send(res, 404, { error: 'no picture for this yet' });

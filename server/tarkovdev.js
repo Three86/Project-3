@@ -163,6 +163,11 @@ async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.
   try {
     traders = await firstWorking(q.traders, 'traders', log);
   } catch { /* optional: only the trader cards need it */ }
+  let skills = [];
+  try {
+    // Active skills (removed ones like Prone Movement are left out) with their icons.
+    skills = await firstWorking([`{ skills(lang: ${lang}) { id name imageLink } }`, `{ skills(lang: ${lang}) { id name } }`], 'skills', log);
+  } catch { /* optional: the bundled skill list is used without it */ }
   let prestige = [];
   let prestigeError = null;
   try {
@@ -178,6 +183,7 @@ async function fetchGameData({ gameMode = 'regular', lang = 'en', log = console.
     playerLevels,
     crafts,
     traders,
+    skills,
   };
 }
 

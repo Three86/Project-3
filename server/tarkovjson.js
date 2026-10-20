@@ -229,7 +229,7 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
   }));
 
   // Skills tarkov.dev considers active in the game (it filters out removed ones like Prone Movement).
-  const skills = Object.values(itemsFile.skills || {}).filter((sk) => sk?.id).map((sk) => ({ id: sk.id, name: sk.name }));
+  const skills = Object.values(itemsFile.skills || {}).filter((sk) => sk?.id).map((sk) => ({ id: sk.id, name: sk.name, imageLink: sk.imageLink || null }));
   // XP table for this game mode: exp = experience needed to reach that level from the one before.
   // Hideout crafts. Required items flagged as tools are returned when the craft finishes.
   const attr = (a) => (Array.isArray(a) ? Object.fromEntries(a.map((x) => [x.type || x.name, x.value])) : a || {});

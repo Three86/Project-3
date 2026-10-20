@@ -37,7 +37,8 @@
   "skills": [
    {
     "id": "Endurance",
-    "name": "Endurance Name"
+    "name": "Endurance Name",
+    "imageLink": "https://assets.tarkov.dev/skill-strength.png"
    },
    {
     "id": "Strength",
