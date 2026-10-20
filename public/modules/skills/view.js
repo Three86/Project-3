@@ -48,48 +48,59 @@ function renderSkills() {
 }
 
 // Screenshot OCR: button, folder status and the result of the last run.
-function ocrPanel() {
-  const { status: st, result: r, running } = ocr;
-  if (!st) loadOcrStatus();
-  let info = 'Checking screenshot folder…';
-  if (st) {
-    if (!st.tesseract && !st.ai) info = 'No OCR engine installed. Both come with the Docker image.';
-    else if (!st.available) info = `Screenshot folder not found (<code>${esc(st.dir)}</code>). Mount your Tarkov Screenshots folder, see README.`;
-    else if (!st.selected.length) info = st.total ? 'Only in-raid screenshots found (those are skipped).' : 'No screenshots in the folder yet.';
-    else info = `Will read ${st.selected.length} screenshot${st.selected.length === 1 ? '' : 's'} from <b>${esc(st.day)}</b>${st.inRaid ? ` · ${st.inRaid} in-raid skipped` : ''} · engine: ${esc(ocrEngineLabel(st))}`;
-  }
-  let result = '';
-  if (r?.error) result = `<div class="alert ocr-result" data-variant="destructive">${icon('alert')}<h2>Reading screenshots failed</h2><section>${esc(r.error)}</section><footer>${btn(icon('x'), 'data-act="ocr-dismiss" aria-label="Dismiss"', { variant: 'ghost', size: 'icon-sm' })}</footer></div>`;
-  else if (r) {
-    const changed = new Map(r.changes.map((c) => [c.id, c]));
-    const read = r.read || r.changes.map((c) => ({ id: c.id, name: c.name, level: c.to }));
-    const changes = read.length
-      ? read.map((x) => { const c = changed.get(x.id); const inf = x.inferred ? ' <span data-tooltip="Name unreadable; worked out from its position on the page">≈</span>' : ''; return c ? badge(`${esc(x.name)}${inf} ${c.from} → <b>${c.to}</b>`, 'outline', 'changed') : badge(`${esc(x.name)}${inf} ${x.level} ✓`); }).join(' ')
-        + `<div class="auto">${r.changes.length ? `${r.changes.length} changed` : 'All already matched the tracker'} · ✓ = already the same${read.some((x) => x.inferred) ? ' · ≈ = name unreadable, worked out from its position on the page' : ''}.</div>`
-      : '<span class="auto">No skill levels could be read from these screenshots. Are they of the skills page?</span>';
-    const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span class="bad">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.engines ? ` ${badge(esc(f.engines.map((e) => (e === 'ai' ? 'AI' : 'Tesseract')).join(' + ')), 'secondary')}` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
-    result = `<div class="alert ocr-result">${icon('camera')}<h2><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}</h2>
-      <section>${r.aiError ? `<p class="warn">AI OCR failed to start (${esc(r.aiError)}); Tesseract was used.</p>` : ''}<div class="ocr-changes">${changes}</div>
-      <section class="accordion"><details><summary>Screenshots${icon('chevron')}</summary><section><div class="sources">${files}</div></section></details></section></section>
-      <footer>${btn(icon('x'), 'data-act="ocr-dismiss" aria-label="Dismiss"', { variant: 'ghost', size: 'icon-sm', tip: 'Dismiss', side: 'left' })}</footer></div>`;
-  }
-  const canRun = canRunOcr();
-  return `<div class="card ocr-bar" data-size="sm"><section>${btn(running ? `${spinner()} Reading screenshots…` : `${icon('camera')} Read levels from screenshots`, 'data-act="ocr-run"', { variant: 'primary', disabled: !canRun })}
-    <span class="auto">${st ? info : `${spinner()} ${info}`}</span></section></div>${result}`;
+// Screenshot OCR, in parts other views reuse: the status line, the result panel and the bar.
+// Status text of the screenshot folder / engines ('' + spinner while checking).
+export function ocrInfo() {
+  const st = ocr.status;
+  if (!st) { loadOcrStatus(); return 'Checking screenshot folder…'; }
+  if (!st.tesseract && !st.ai) return 'No OCR engine installed. Both come with the Docker image.';
+  if (!st.available) return `Screenshot folder not found (<code>${esc(st.dir)}</code>). Mount your Tarkov Screenshots folder, see README.`;
+  if (!st.selected.length) return st.total ? 'Only in-raid screenshots found (those are skipped).' : 'No screenshots in the folder yet.';
+  return `Will read ${st.selected.length} screenshot${st.selected.length === 1 ? '' : 's'} from <b>${esc(st.day)}</b>${st.inRaid ? ` · ${st.inRaid} in-raid skipped` : ''} · engine: ${esc(ocrEngineLabel(st))}`;
 }
+
+// Result of the last run (Basecoat alert), '' when there is none.
+export function ocrResult() {
+  const r = ocr.result;
+  if (r?.error) return `<div class="alert ocr-result" data-variant="destructive">${icon('alert')}<h2>Reading screenshots failed</h2><section>${esc(r.error)}</section><footer>${btn(icon('x'), 'data-act="ocr-dismiss" aria-label="Dismiss"', { variant: 'ghost', size: 'icon-sm' })}</footer></div>`;
+  if (!r) return '';
+  const changed = new Map(r.changes.map((c) => [c.id, c]));
+  const read = r.read || r.changes.map((c) => ({ id: c.id, name: c.name, level: c.to }));
+  const changes = read.length
+    ? read.map((x) => { const c = changed.get(x.id); const inf = x.inferred ? ' <span data-tooltip="Name unreadable; worked out from its position on the page">≈</span>' : ''; return c ? badge(`${esc(x.name)}${inf} ${c.from} → <b>${c.to}</b>`, 'outline', 'changed') : badge(`${esc(x.name)}${inf} ${x.level} ✓`); }).join(' ')
+      + `<div class="auto">${r.changes.length ? `${r.changes.length} changed` : 'All already matched the tracker'} · ✓ = already the same${read.some((x) => x.inferred) ? ' · ≈ = name unreadable, worked out from its position on the page' : ''}.</div>`
+    : '<span class="auto">No skill levels could be read from these screenshots. Are they of the skills page?</span>';
+  const files = r.files.map((f) => `<div>${esc(f.name)}: ${f.error ? `<span class="bad">${esc(f.error)}</span>` : `${Object.keys(f.skills).length} skills${f.characterLevel ? `, PMC level ${f.characterLevel}` : ''}${f.levelCheck ? ` <span class="auto">(${levelCheckText(f.levelCheck)})</span>` : ''}${f.engines ? ` ${badge(esc(f.engines.map((e) => (e === 'ai' ? 'AI' : 'Tesseract')).join(' + ')), 'secondary')}` : ''}${f.unreadLevels ? ` <span class="auto">(${f.unreadLevels} level${f.unreadLevels === 1 ? '' : 's'} without a readable name)</span>` : ''}`}</div>`).join('');
+  return `<div class="alert ocr-result">${icon('camera')}<h2><b>${r.found}</b> skills read from ${r.files.length} screenshot${r.files.length === 1 ? '' : 's'} (${esc(r.day)}).${r.playerLevel ? ` PMC level ${r.playerLevel.from} → <b>${r.playerLevel.to}</b>.` : ''}</h2>
+    <section>${r.aiError ? `<p class="warn">AI OCR failed to start (${esc(r.aiError)}); Tesseract was used.</p>` : ''}<div class="ocr-changes">${changes}</div>
+    <section class="accordion"><details><summary>Screenshots${icon('chevron')}</summary><section><div class="sources">${files}</div></section></details></section></section>
+    <footer>${btn(icon('x'), 'data-act="ocr-dismiss" aria-label="Dismiss"', { variant: 'ghost', size: 'icon-sm', tip: 'Dismiss', side: 'left' })}</footer></div>`;
+}
+
+// Bar with the "Read levels from screenshots" button and status, followed by the last result.
+function ocrPanel() {
+  const info = ocrInfo();
+  return `<div class="card ocr-bar" data-size="sm"><section>${btn(ocr.running ? `${spinner()} Reading screenshots…` : `${icon('camera')} Read levels from screenshots`, 'data-act="ocr-run"', { variant: 'primary', disabled: !canRunOcr() })}
+    <span class="auto">${ocr.status ? info : `${spinner()} ${info}`}</span></section></div>${ocrResult()}`;
+}
+
+// Click handlers shared with other skills views (screenshot reading).
+export const ocrActions = {
+  async 'ocr-run'(el, ctx) {
+    if (ctx.S.ui.tab !== 'skills') ctx.ui.setTab('skills');
+    const r = await runOcr();
+    if (r?.error) ctx.ui.toast('error', 'Reading screenshots failed', r.error);
+    else if (r) ctx.ui.toast('success', `OCR: ${r.changes?.length || 0} skill${r.changes?.length === 1 ? '' : 's'} updated`, `${r.found} read from ${r.files?.length || 0} screenshot${r.files?.length === 1 ? '' : 's'}${r.playerLevel ? ` · PMC level ${r.playerLevel.to}` : ''}`);
+  },
+  'ocr-dismiss'() { dismissOcr(); },
+};
 
 export default {
   render: renderSkills,
   actions: {
     'skill-step'(el) { stepLevel(el.dataset.id, el.dataset.d); },
     'sk-cat'(el, ctx) { setCategory(el.dataset.v); ctx.ui.render(); },
-    async 'ocr-run'(el, ctx) {
-      if (ctx.S.ui.tab !== 'skills') ctx.ui.setTab('skills');
-      const r = await runOcr();
-      if (r?.error) ctx.ui.toast('error', 'Reading screenshots failed', r.error);
-      else if (r) ctx.ui.toast('success', `OCR: ${r.changes?.length || 0} skill${r.changes?.length === 1 ? '' : 's'} updated`, `${r.found} read from ${r.files?.length || 0} screenshot${r.files?.length === 1 ? '' : 's'}${r.playerLevel ? ` · PMC level ${r.playerLevel.to}` : ''}`);
-    },
-    'ocr-dismiss'() { dismissOcr(); },
+    ...ocrActions,
   },
   changes: {
     'skill-level'(el) { setLevel(el.dataset.id, el.value); },

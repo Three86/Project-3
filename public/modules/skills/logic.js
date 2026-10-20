@@ -1,7 +1,7 @@
 // Skills: the skill list with filters, setting levels, and reading levels from screenshots (OCR).
 import { S, api, on, emit, setProgress, saveUi, poll } from '../../core/store.js';
 import { norm, uniq, byName } from '../../core/util.js';
-import { activeSkillConfig, effectValue } from '../../core/game.js';
+import { activeSkillConfig, effectValue, skillKey } from '../../core/game.js';
 
 export { activeSkillConfig, effectValue };
 
@@ -96,3 +96,24 @@ export function ocrEngineLabel(st) {
   if (want === 'ai') return st.ai ? 'AI' : 'AI (not installed)';
   return st.ai ? (st.tesseract ? 'AI, Tesseract as backup' : 'AI') : 'Tesseract (AI not installed)';
 }
+
+// ---------------------------------------------------------------- skill details for views
+// Icon served by the tracker (downloaded once from tarkov.dev); 404 until it has been fetched.
+// The game data's skill ids are the game's keys, matched loosely ("Hideout Management" = "HideoutManagement").
+export function skillImage(sk) {
+  const live = (S.data?.skills || []).find((x) => skillKey(x.id) === skillKey(sk.id) || skillKey(x.name) === skillKey(sk.name));
+  return `/api/images/skills/${encodeURIComponent(live?.id || sk.id)}`;
+}
+
+// Effects of a skill at a level: [{ name, unit, now, perLevel, max }] (effects stop growing at the cap level).
+export function effectRows(sk, level = skillLevelOf(sk)) {
+  return (sk.effects || []).map((e) => ({ name: e.name, unit: e.unit || '', now: effectValue(sk, e, level), perLevel: e.perLevel, max: effectValue(sk, e, maxLevel()) }));
+}
+
+// The skill shown in detail views: picked last, else the first in the current list.
+export function selectSkill(id) { S.ui.skSel = id; saveUi(); }
+export function selectedSkill(list = skillList()) {
+  const all = activeSkillConfig().skills;
+  return all.find((sk) => sk.id === S.ui.skSel) || list[0] || all[0];
+}
+export const findSkillByName = (name) => activeSkillConfig().skills.find((sk) => skillKey(sk.name) === skillKey(name) || skillKey(sk.id) === skillKey(name));

@@ -1,0 +1,5 @@
+/* Rajdhani (latin, 500/600/700) from @fontsource/rajdhani 5.2.5, SIL Open Font License 1.1 (LICENSE).
+   Self-hosted so the tracker works offline. Closest free match to the game's own font. */
+@font-face { font-family: 'Rajdhani'; font-style: normal; font-display: swap; font-weight: 500; src: url('rajdhani-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Rajdhani'; font-style: normal; font-display: swap; font-weight: 600; src: url('rajdhani-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Rajdhani'; font-style: normal; font-display: swap; font-weight: 700; src: url('rajdhani-latin-700-normal.woff2') format('woff2'); }
