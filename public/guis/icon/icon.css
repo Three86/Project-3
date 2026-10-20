@@ -199,3 +199,64 @@
 .ig-ocr-info code { font-size: 12px; color: var(--ig-text); }
 .ig .ocr-result { margin: 0 0 12px; font-family: var(--font-sans, system-ui); }
 .ig-icon .ig-lv { z-index: 1; }
+
+/* ---------------------------------------------------------------- recipes: station cards + recipe panel */
+.rx-layout { display: grid; gap: 14px; }
+@media (min-width: 1000px) { .rx-layout { grid-template-columns: minmax(300px, 420px) minmax(0, 1fr); align-items: start; } .rx-panel { position: sticky; top: 72px; max-height: calc(100vh - 88px); overflow-y: auto; } }
+.rx-summary { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 10px; font-size: 13px; color: var(--muted-foreground); }
+.rx-summary .badge .lucide { width: 11px; height: 11px; }
+.rx-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.rstation { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px; border-radius: var(--radius-xl, 14px); background: var(--card); border: 1px solid var(--border); cursor: pointer; text-align: left; color: inherit; font: inherit; transition: border-color .15s, box-shadow .15s; }
+.rstation:hover { border-color: color-mix(in oklab, var(--primary) 50%, var(--border)); }
+.rstation:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.rstation[aria-pressed="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.rstation.unbuilt .r-icon, .rstation.unbuilt .r-name { opacity: .5; }
+.r-icon { width: 56px; height: 56px; border-radius: var(--radius-lg, 10px); background: radial-gradient(circle at 50% 40%, color-mix(in oklab, var(--primary) 14%, var(--muted)), var(--muted)); display: grid; place-items: center; overflow: hidden; position: relative; }
+.r-icon > .lucide { width: 55%; height: 55%; stroke-width: 1.5; color: color-mix(in oklab, var(--foreground) 75%, transparent); }
+.r-icon .pic img { padding: 6px; }
+.r-icon .initials { font-size: 18px; font-weight: 700; color: color-mix(in oklab, var(--foreground) 60%, transparent); }
+.r-text { display: grid; gap: 3px; min-width: 0; }
+.r-name { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r-meta { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; font-size: 12px; color: var(--muted-foreground); }
+.pin-n { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.pin-n .lucide { width: 12px; height: 12px; }
+
+.rx-panel .card > section { display: grid; gap: 10px; }
+.rx-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.rx-tools .tb-search { flex: 1; min-width: 180px; }
+.rx-speed { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: var(--muted-foreground); }
+.rx-speed .lucide { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+.rx-speed b { color: var(--foreground); }
+.recipe-list { list-style: none; display: grid; gap: 6px; margin: 0; padding: 0; }
+.rrow { display: grid; gap: 6px; padding: 8px 10px; border-radius: var(--radius-lg, 10px); background: var(--muted); border: 1px solid transparent; }
+.rrow.pinned { border-color: color-mix(in oklab, var(--primary) 60%, transparent); background: color-mix(in oklab, var(--primary) 8%, var(--muted)); }
+.rrow.locked { opacity: .6; }
+.rrow-head { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; }
+.rprod { display: flex; align-items: center; gap: 8px; font-weight: 600; min-width: 0; }
+.rprod .ico, .ing .ico { width: 32px; height: 32px; flex: none; border-radius: 6px; background: color-mix(in oklab, var(--background) 55%, transparent); overflow: hidden; }
+.rprod .ico .initials, .ing .ico .initials { font-size: 9px; font-weight: 700; color: var(--muted-foreground); }
+.rprod .pin-no { font-size: 10px; font-weight: 700; color: var(--primary-foreground); background: var(--primary); border-radius: 999px; padding: 0 6px; }
+.rtime { text-align: right; font-variant-numeric: tabular-nums; }
+.rtime b { font-size: 15px; }
+.rtime small { display: block; font-size: 11px; color: var(--muted-foreground); }
+.ings { display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.ing { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px 2px 2px; border-radius: 999px; background: color-mix(in oklab, var(--background) 45%, transparent); font-size: 12px; }
+.ing .ico { width: 22px; height: 22px; border-radius: 999px; }
+.ing .ico .initials { font-size: 8px; }
+.ing b { font-variant-numeric: tabular-nums; }
+.rlock { font-size: 12px; color: var(--muted-foreground); display: flex; gap: 4px; align-items: center; }
+.rlock .lucide { width: 12px; height: 12px; }
+
+.btc-gpu { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.btc-gpu .stepper .input { width: 64px; text-align: center; border-radius: 0; height: 32px; }
+.btc-big { display: flex; flex-wrap: wrap; gap: 10px 24px; }
+.btc-big div { display: grid; }
+.btc-big b { font-size: 22px; font-variant-numeric: tabular-nums; }
+.btc-big span { font-size: 12px; color: var(--muted-foreground); }
+.rx-sub { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted-foreground); }
+.tank-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: var(--radius-lg, 10px); background: var(--muted); }
+.tank-row .r-icon { width: 36px; height: 36px; }
+.tank-row .t-name { font-size: 14px; }
+.tank-row .t-btc { text-align: right; }
+.tank-row .t-btc b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.fuel-why { font-size: 12px; color: var(--muted-foreground); display: grid; gap: 2px; }

@@ -680,6 +680,45 @@ async function run() {
     await page.click('[data-act="goto-skill"]'); await settle();
     ok(await page.getAttribute('#tab-skills', 'aria-selected') === 'true' && (await page.locator('.ig-info h3').innerText()).includes('Metabolism'), 'search result opens the skill in the info panel');
     await shot('icon-skills');
+
+    // ---------------- Icon GUI recipes
+    console.log('Icon GUI recipes');
+    // Debut open again (Checking completed implies it) so the Debut-unlocked recipe is locked.
+    await post([{ section: 'craftPins', id: 's-med', value: null }, { section: 'settings', id: 'gpuCount', value: 10 }, { section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'tasks', id: '59674cd986f7744ab26e32f2', value: null }]);
+    await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'recipes' })));
+    await page.reload(); await page.waitForSelector('.rx-grid .rstation');
+    const rxIds = await page.locator('.rstation').evaluateAll((els) => els.map((e) => e.dataset.id));
+    ok(JSON.stringify(rxIds) === JSON.stringify(['s-med', 's-btc']), `one card per crafting station, Bitcoin Farm last (${rxIds.join(', ')})`);
+    ok((await page.locator('.rx-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length)) === 2, 'station cards in two columns');
+    ok((await page.locator('.rstation[data-id="s-med"] .r-name').innerText()) === 'Medstation' && /^Level \d\/2$/.test(await page.locator('.rstation[data-id="s-med"] .badge').innerText()) && await page.locator('.rstation[data-id="s-med"] .initials').count() === 1, 'card shows icon (initials fallback), name and level');
+    ok(await page.getAttribute('.rstation[data-id="s-med"]', 'aria-pressed') === 'true' && (await page.locator('.rx-panel h2').innerText()) === 'Medstation', 'first built station opens on the right');
+    ok((await page.locator('.rx-panel .rx-speed').innerText()).includes('Crafting 20') && (await page.locator('.rx-panel .rrow .rtime small').first().innerText()).startsWith('base '), 'craft times use the Crafting skill and show the base time');
+    ops = [];
+    await page.click('.rrow[data-craft="cr4"] [data-act="rx-pin"]'); await settle();
+    await page.click('.rrow[data-craft="cr1"] [data-act="rx-pin"]'); await settle();
+    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'craftPins', id: 's-med', value: ['cr4', 'cr1'] }), 'pins saved in pin order');
+    const rxRows = await page.locator('.rx-panel .rrow').evaluateAll((els) => els.slice(0, 2).map((e) => `${e.dataset.craft}:${e.querySelector('.pin-no')?.textContent}`));
+    ok(JSON.stringify(rxRows) === JSON.stringify(['cr4:1', 'cr1:2']), `pinned recipes on top in the order pinned (${rxRows.join(', ')})`);
+    ok((await page.locator('.rstation[data-id="s-med"] .pin-n').innerText()).trim() === '2 pinned', 'card shows how many are pinned');
+    const rxLocked = await page.locator('.rx-panel .rrow.locked').count();
+    await page.check('.rx-panel [data-ui="rec.showLocked"]'); await settle();
+    ok(await page.locator('.rx-panel .rrow.locked').count() > rxLocked && await page.locator('.rx-panel .rrow.locked .rlock').count() > 0 && await page.locator('.rx-panel .rrow.locked [data-act="rx-pin"][disabled]').count() > 0, 'show locked lists locked recipes with the reason; they cannot be pinned');
+    await shot('icon-recipes-station');
+    await page.uncheck('.rx-panel [data-ui="rec.showLocked"]'); await settle();
+    // Bitcoin Farm
+    await page.click('.rstation[data-id="s-btc"]'); await settle();
+    ok(await page.getAttribute('#rxGpu', 'max') === '10' && (await page.locator('.rx-panel header p').innerText()).includes('room for 10 graphics cards'), 'GPU field limited to the slots of the built level');
+    ops = [];
+    await page.fill('#rxGpu', '40'); await page.press('#rxGpu', 'Tab'); await settle();
+    ok(lastOp()?.value === 10 && await page.inputValue('#rxGpu') === '10' && await page.isDisabled('[data-act="rx-gpu"][data-d="1"]'), 'typing more than fit is capped; + disabled at the limit');
+    await page.click('[data-act="rx-gpu"][data-d="-1"]'); await settle();
+    ok(lastOp()?.value === 9 && (await page.locator('.btc-big div').first().innerText()).startsWith('2d 14h 39m 57s'), `− removes one card; time per bitcoin follows (${(await page.locator('.btc-big div').first().innerText()).split('\n')[0]})`);
+    const tanks = await page.locator('.tank-row').allInnerTexts();
+    ok(tanks.length === 2 && tanks[0].includes('Metal fuel tank') && tanks[1].includes('Expeditionary fuel tank') && tanks.every((x) => /\d\.\d\d\s*bitcoins/.test(x)), 'bitcoins per fuel tank for both tanks');
+    ok((await page.locator('.fuel-why').innerText()).includes('Hideout Management 10'), 'fuel use explains Hideout Management and hideout bonuses');
+    ok((await page.locator('.rstation[data-id="s-btc"] .r-meta').innerText()).includes('9 GPUs'), 'farm card shows the installed cards');
+    await post([{ section: 'craftPins', id: 's-med', value: null }]);
+    await shot('icon-recipes');
     await page.evaluate(() => localStorage.setItem('tt-gui', 'basecoat'));
   }
 

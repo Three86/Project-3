@@ -6,7 +6,7 @@ A self-hosted quest, hideout and prestige tracker for Escape from Tarkov. It run
 
 - **Quests**: shows active, locked, completed and failed quests (quests you could start but have not are not listed; starts come from the game logs). You can filter and group them by trader, map or requirement type (kills, FIR items, non-FIR items, equipment/gear, quest items, place/mark, visit, extract, skill/level). You can also sort by level, trader, map, name or progress. Every objective can be checked off, and counted objectives (kills, hand-ins) have a counter. Item objectives say whether the item must be **found in raid (FIR)**. Use the Kappa and Lightkeeper filters to show only quests needed for those.
 - **Hideout**: shows each station with its next level, or all levels. Requirements cover items (with FIR flag and a counter), trader loyalty, skills and other stations. Other-station requirements tick automatically once you mark that level built.
-- **Recipes**: shows hideout crafts you can make with the stations you've built and the quests you've completed, grouped by module. Each recipe lists its ingredients (tools marked; you get them back) and its craft time with your Crafting skill applied. Locked recipes are hidden unless you tick "Show locked", which also shows what unlocks them. Pin up to 4 recipes per module to keep them at the top. The Bitcoin Farm section takes your number of graphics cards and shows the time per bitcoin, bitcoins per day and bitcoins per fuel tank (Hideout Management and hideout fuel bonuses included).
+- **Recipes**: shows hideout crafts you can make with the stations you've built and the quests you've completed, grouped by module. Each recipe lists its ingredients (tools marked; you get them back) and its craft time with your Crafting skill applied. Locked recipes are hidden unless you tick "Show locked", which also shows what unlocks them. Pin up to 4 recipes per module to keep them at the top. The Bitcoin Farm section takes your number of graphics cards (no more than the built level holds: 10, 25 or 50) and shows the time per bitcoin, bitcoins per day and bitcoins per fuel tank (Hideout Management and hideout fuel bonuses included).
 - **Prestige**: lists the prestige requirements. Level and quest conditions are tracked automatically and the rest have checkboxes. You can add your own requirements as checklist items.
 - **Skills**: enter your level for each skill and see its description, how it levels up, what each level gives and the elite bonus. An overview adds up the buffs on your PMC. Hideout and quest skill requirements tick automatically from these levels. Skill data is bundled in `server/skills.json` and is approximate, because tarkov.dev only publishes skill names. Copy it to `data/skills.json` and edit it to correct values.
 - **Read levels from screenshots (OCR)**: press the button on the Skills tab to read skill levels from screenshots of the in-game skills page. In-raid screenshots, which have coordinates in their file name, are skipped. Only the newest day's screenshots are used, and all of that day's screenshots are read. Two OCR engines are bundled in the Docker image. The default is an AI engine: RapidOCR, which runs PaddleOCR models on the CPU, so no graphics card is needed. Tesseract joins in when the AI read looks incomplete. You can choose the engine under **Settings**. Small text is enlarged and read again, and the readings vote on each value. Measure accuracy on your own screenshots with `scripts/ocr-bench.js`.
@@ -112,8 +112,17 @@ different one). Three come with the tracker:
     Levels change with − / +, by typing a level, or by reading screenshots.
   - The skills screen follows your light / dark theme. It uses the free Rajdhani font, bundled in
     `public/vendor/fonts/` (the game's own font can't be shipped).
-  - Skill icons are cached in `data/images/skills/`. If a GUI hides its
-switcher, open `http://localhost:3000/?gui=basecoat` to get back.
+  - Skill icons are cached in `data/images/skills/`.
+  - Recipes shows a card per station that crafts (icon, name, level) in two columns. Clicking one
+    lists its recipes on the right: ingredients (tools marked), and the craft time with your Crafting
+    skill applied next to the base time. Hideout Management doesn't change craft times in the game,
+    so it only counts towards fuel use.
+  - Pinned recipes (up to 4 per station) stay at the top in the order you pinned them.
+  - The Bitcoin Farm card takes the number of graphics cards installed, up to what the built level
+    holds (10 / 25 / 50). It shows the time per bitcoin, bitcoins per day, and bitcoins per Metal
+    and Expeditionary fuel tank, with Hideout Management and hideout fuel bonuses applied.
+
+If a GUI hides its switcher, open `http://localhost:3000/?gui=basecoat` to get back.
 
 `scripts/ui-check.js` clicks through every tab and both GUIs in Chromium against the sample data in
 `test/fixtures/ui` and checks what gets saved (needs Playwright: `NODE_PATH=$(npm root -g) node scripts/ui-check.js`).
