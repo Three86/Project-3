@@ -27,18 +27,17 @@ const OBJECTIVE_FULL = `
 `;
 const OBJECTIVE_MIN = `__typename id type description optional maps { id name }`;
 
-// Trader reputation changes per quest (start, finish, failure) and traders a quest unlocks.
-const REWARDS = `
-    startRewards { traderStanding { trader { id name } standing } }
-    finishRewards { traderStanding { trader { id name } standing } traderUnlock { id name } }
-    failureOutcome { traderStanding { trader { id name } standing } }`;
+// Loyalty levels a quest needs and traders it unlocks (left out by the fallback queries).
+const EXTRA = `
+    traderRequirements { trader { id name } requirementType compareMethod value }
+    finishRewards { traderUnlock { id name } }`;
 
-const tasksQuery = (args, obj, rewards = true) => `{
+const tasksQuery = (args, obj, extra = true) => `{
   tasks(${args}) {
     id name wikiLink minPlayerLevel kappaRequired lightkeeperRequired factionName
     trader { id name } map { id name }
     taskRequirements { task { id name } status }
-    objectives { ${obj} }${rewards ? REWARDS : ''}
+    objectives { ${obj} }${extra ? EXTRA : ''}
   }
 }`;
 

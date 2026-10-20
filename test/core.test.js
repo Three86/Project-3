@@ -197,35 +197,25 @@ test('every module folder has module.json, logic.js (uiDefaults) and a default v
   }
 });
 
-test('trader reputation from quests: start, finish, failure and implied completion', async () => {
-  const S = await reset();
-  assert.strictEqual(game.traderStanding('p'), 0);
-  S.progress.tasks[DEBUT] = { status: 'completed' };
-  game.resetMemo();
-  assert.strictEqual(game.traderStanding('p'), 0.02);
-  // Checking active implies Debut completed; failing Debut instead costs reputation.
-  S.progress.tasks = { [CHECKING]: { status: 'completed' } };
-  game.resetMemo();
-  assert.strictEqual(game.traderStanding('p'), 0.05, 'Debut (implied) + Checking');
-  S.progress.tasks = { [DEBUT]: { status: 'failed' } };
-  game.resetMemo();
-  assert.strictEqual(game.traderStanding('p'), -0.05);
-  assert.ok(game.hasStandingData());
-});
-
-test('loyalty level: limited by PMC level or reputation, manual override only when switched on', async () => {
+test('loyalty level from quests: the highest level an active or completed quest needs; manual override', async () => {
   const S = await reset();
   const prapor = S.data.traders.find((t) => t.id === 'p');
   const pk = S.data.traders.find((t) => t.id === 'pk');
-  S.progress.settings.playerLevel = 21;
   let L = game.loyaltyLevel(prapor);
-  assert.strictEqual(L.level, 1, 'rep 0 < 0.20 needed');
-  assert.deepStrictEqual([L.next.level, L.next.repMissing, L.next.playerLevelMissing], [2, 0.2, 0]);
-  assert.strictEqual(game.loyaltyLevel(pk).level, 2, 'Peacekeeper LL2 needs no reputation');
-  S.progress.settings.playerLevel = 10;
-  L = game.loyaltyLevel(pk);
-  assert.strictEqual(L.level, 1, 'level 10 < 14 needed');
-  assert.strictEqual(L.next.playerLevelMissing, 4);
+  assert.deepStrictEqual([L.level, L.from, L.next.level, L.next.task.name], [1, null, 2, 'Checking'], 'no quest started: LL1, Checking needs LL2');
+  S.progress.tasks[CHECKING] = { status: 'active' };
+  game.resetMemo();
+  L = game.loyaltyLevel(prapor);
+  assert.deepStrictEqual([L.level, L.from.name, L.next.level, L.next.task.name], [2, 'Checking', 3, 'Quest number 4'], 'an active LL2 quest means LL2');
+  S.progress.tasks.x4 = { status: 'completed' };
+  game.resetMemo();
+  assert.strictEqual(game.loyaltyLevel(prapor).level, 3, 'a completed LL3 quest means LL3');
+  S.progress.tasks.x4 = { status: 'failed' };
+  game.resetMemo();
+  assert.strictEqual(game.loyaltyLevel(prapor).level, 2, 'failed quests do not count');
+  assert.strictEqual(game.loyaltyLevel(pk).level, 1, 'each trader on its own quests');
+  S.progress.settings.playerLevel = 70;
+  assert.strictEqual(game.loyaltyLevel(pk).level, 1, 'PMC level does not change it');
   S.progress.settings.loyaltyOverrides = { pk: 4 };
   assert.strictEqual(game.loyaltyLevel(pk).level, 1, 'override ignored while manual levels are off');
   S.progress.settings.loyaltyManual = true;
@@ -234,6 +224,7 @@ test('loyalty level: limited by PMC level or reputation, manual override only wh
   const quests = await load('modules/quests/logic.js');
   await quests.setLoyaltyOverride('pk', 'auto');
   assert.deepStrictEqual(S.progress.settings.loyaltyOverrides, {});
+  assert.strictEqual(game.traderStanding, undefined, 'reputation is not worked out any more');
 });
 
 test('trader unlock, restock countdown and trader cards', async () => {
@@ -250,11 +241,12 @@ test('trader unlock, restock countdown and trader cards', async () => {
   assert.strictEqual(game.restockIn('s', now), null);
   const quests = await load('modules/quests/logic.js');
   const cards = quests.traderCards();
-  assert.deepStrictEqual(cards.map((c) => c.trader.name), ['Prapor', 'Therapist', 'Skier', 'Peacekeeper', 'Jaeger'], 'in-game order');
+  assert.deepStrictEqual(cards.map((c) => c.trader.name), ['Prapor', 'Therapist', 'Skier', 'Peacekeeper', 'Jaeger'], 'in-game order, traders without quests (Mr. Kerman) left out');
+  assert.ok(game.traderList().some((t) => t.name === 'Mr. Kerman'));
   const p = cards[0];
   assert.strictEqual(p.image, '/api/images/traders/p');
   assert.strictEqual(p.counts.total, 17);
-  assert.strictEqual(p.rep, 0.05);
+  assert.strictEqual(p.rep, undefined);
 });
 
 test('hideout module status and automatic trader requirements', async () => {
@@ -276,14 +268,14 @@ test('hideout module status and automatic trader requirements', async () => {
   S.progress.settings.loyaltyOverrides = { p: 2 };
   S.progress.hideoutReqs['gen2|item|0'] = true;
   assert.strictEqual(st('s-gen').key, 'ready');
-  // Build it: Medstation level 2 is no longer locked; its reputation requirement is checked against quests.
+  // Build it: Medstation level 2 is no longer locked; its reputation requirement is a tick of your own.
   const hideout = await load('modules/hideout/logic.js');
   await hideout.stepLevel('s-gen', 1);
   assert.strictEqual(st('s-gen').key, 'max');
   const med = st('s-med');
   assert.strictEqual(med.key, 'missing');
   const rep = med.reqs.find((r) => r.kind === 'trader');
-  assert.deepStrictEqual([rep.auto, rep.done, rep.label], [true, false, 'Therapist reputation 0.10 (yours: 0.00)']);
+  assert.deepStrictEqual([!!rep.auto, rep.done, rep.label], [false, false, 'Therapist reputation 0.10']);
   await hideout.stepLevel('s-gen', -1);
   assert.strictEqual(S.progress.hideout.gen2, undefined, '− unbuilds the top level');
   assert.strictEqual(await hideout.stepLevel('s-btc', 1), null, 'no level above the max');

@@ -132,7 +132,7 @@ async function refreshGameData(reason) {
 
 // Bump when the tracker starts using fields older cached game data doesn't have
 // (2: hideout bonuses, active skill list; 3: XP table). Older caches are re-downloaded automatically.
-const DATA_VERSION = 7; // 3: XP table (playerLevels); 4: hideout crafts; 5: traders, quest reputation rewards; 6: hideout icons, level descriptions, trader requirement types; 7: skill icons
+const DATA_VERSION = 8; // 3: XP table (playerLevels); 4: hideout crafts; 5: traders, quest reputation rewards; 6: hideout icons, level descriptions, trader requirement types; 7: skill icons; 8: quest loyalty requirements
 const dataOutdated = () => !!gameData && (gameData.meta?.dataVersion || 1) < DATA_VERSION && gameData.meta?.source !== 'import';
 
 function dataIsStale() {

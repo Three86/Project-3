@@ -1,6 +1,6 @@
 {
   "title": "Icon GUI",
-  "description": "Quests by trader, the hideout by module and skills like the in-game screen: trader portraits with loyalty, reputation and restock timers; module cards with every upgrade requirement; crafting stations with pinned recipes and the Bitcoin Farm; skill rows with effects.",
+  "description": "Quests by trader, the hideout by module and skills like the in-game screen: trader portraits with loyalty levels and restock timers; module cards with every upgrade requirement; crafting stations with pinned recipes and the Bitcoin Farm; skill rows with effects.",
   "modules": "*",
   "views": {
     "quests": "views/quests.js",

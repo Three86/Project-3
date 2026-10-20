@@ -22,7 +22,7 @@ function renderSettings(ctx) {
         ${field('set-gameMode', 'Game mode', sel('gameMode', s.gameMode, [['regular', 'PvP'], ['pve', 'PvE']]))}
       </section>
       <section>${toggleSwitch('Manual loyalty levels', 'data-set="loyaltyManual" id="set-loyaltyManual"', !!s.loyaltyManual)}
-        <p class="kv">Trader loyalty is worked out from your level and quest reputation (money spent is not tracked). Turn this on to set a trader's level by hand where the interface offers it.</p></section>
+        <p class="kv">Trader loyalty is worked out from your quests: the highest loyalty level an active or completed quest needs with that trader. Reputation and money spent are not tracked. Turn this on to set a trader's level by hand where the interface offers it.</p></section>
     </div>
     <div class="card" data-size="sm"><header><h2>Appearance</h2><p>Dark is the default. Also toggled with the moon/sun button in the top bar. The interface decides the layout and which sections are shown.</p></header>
       <section class="field-row">${field('set-theme', 'Theme', `<select class="select" id="set-theme" data-act="theme-select">${[['dark', 'Dark'], ['light', 'Light']].map(([v, t]) => `<option value="${v}" ${theme === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`)}

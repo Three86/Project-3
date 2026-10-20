@@ -2,7 +2,7 @@
 // Quest status and objective changes are in core/progress.js (shared with other sections).
 import { S, saveUi, setProgress } from '../../core/store.js';
 import { norm, uniq, byName } from '../../core/util.js';
-import { idx, NEEDS, STATUS_LABEL, objItems, objNeeds, taskMaps, taskProgress, taskStatus, traderList, traderStanding, traderUnlock, loyaltyLevel, restockIn } from '../../core/game.js';
+import { idx, NEEDS, STATUS_LABEL, objItems, objNeeds, taskMaps, taskProgress, taskStatus, traderList, traderUnlock, loyaltyLevel, restockIn } from '../../core/game.js';
 
 export { setTaskStatus, startWithPrereqs, stepRequirement, setRequirement } from '../../core/progress.js';
 
@@ -111,12 +111,12 @@ export function focusTask(id) {
 
 
 // ---------------------------------------------------------------- traders
-export { traderList, traderStanding, traderUnlock, loyaltyLevel, restockIn, hasStandingData } from '../../core/game.js';
+export { traderList, traderUnlock, loyaltyLevel, restockIn } from '../../core/game.js';
 
 // Portrait served by the tracker (downloaded once from tarkov.dev); 404 until it has been fetched.
 export const traderImage = (id) => `/api/images/traders/${encodeURIComponent(id)}`;
 
-// One entry per trader for trader cards: { trader, image, rep, loyalty, unlock, restock, counts }.
+// One entry per trader that gives quests: { trader, image, loyalty, unlock, restock, counts }.
 // counts: quests per status for that trader.
 export function traderCards() {
   const counts = new Map();
@@ -129,10 +129,10 @@ export function traderCards() {
     c.total++;
     counts.set(id, c);
   }
-  return traderList().map((trader) => ({
+  // Only traders that give quests (storyline quests are not in the quest data).
+  return traderList().filter((trader) => counts.has(trader.id)).map((trader) => ({
     trader,
     image: traderImage(trader.id),
-    rep: traderStanding(trader.id),
     loyalty: loyaltyLevel(trader),
     unlock: traderUnlock(trader.id),
     restock: restockIn(trader.id),

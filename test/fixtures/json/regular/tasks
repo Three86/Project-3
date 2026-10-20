@@ -138,7 +138,15 @@
      "traderUnlock": [
       "5c0647fdd443bc2504c2d371"
      ]
-    }
+    },
+    "traderRequirements": [
+     {
+      "trader": "54cb50c76803fa8b248b4571",
+      "requirementType": "level",
+      "compareMethod": ">=",
+      "value": 2
+     }
+    ]
    }
   },
   "questItems": {

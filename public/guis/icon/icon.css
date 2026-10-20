@@ -2,8 +2,10 @@
 .icon-gui main { max-width: 1400px; }
 
 /* trader strip */
-.trader-strip { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 12px; scroll-snap-type: x proximity; scrollbar-width: thin; }
-.trader { flex: 0 0 132px; scroll-snap-align: start; display: grid; gap: 6px; padding: 8px; border-radius: var(--radius-xl, 14px); background: var(--card); border: 1px solid var(--border); text-align: left; cursor: pointer; color: inherit; font: inherit; transition: border-color .15s, box-shadow .15s, transform .15s; }
+/* Every trader in one row: cards share the width (--n = number of traders) and only scroll sideways
+   once they would get narrower than 92px (phones). */
+.trader-strip { display: grid; grid-template-columns: repeat(var(--n, 10), minmax(92px, 1fr)); gap: 8px; overflow-x: auto; padding: 4px 2px 12px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.trader { min-width: 0; scroll-snap-align: start; display: grid; gap: 6px; padding: 8px; border-radius: var(--radius-xl, 14px); background: var(--card); border: 1px solid var(--border); text-align: left; cursor: pointer; color: inherit; font: inherit; transition: border-color .15s, box-shadow .15s, transform .15s; }
 .trader:hover { border-color: color-mix(in oklab, var(--primary) 50%, var(--border)); }
 .trader:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 .trader[aria-pressed="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
@@ -13,7 +15,7 @@
 .portrait .initials { font-size: 34px; font-weight: 700; letter-spacing: 1px; color: color-mix(in oklab, var(--foreground) 70%, transparent); }
 .portrait .ll-chip { position: absolute; left: 6px; top: 6px; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: color-mix(in oklab, var(--background) 80%, transparent); backdrop-filter: blur(4px); }
 .portrait .active-chip { position: absolute; right: 6px; top: 6px; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--info); color: var(--background); }
-.trader .t-name { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.trader .t-name { font-weight: 600; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pips { display: flex; gap: 3px; }
 .pips i { width: 100%; height: 5px; border-radius: 3px; background: var(--muted); }
 .pips i.on { background: var(--primary); }
@@ -21,7 +23,6 @@
 .t-stats { display: grid; grid-template-columns: auto 1fr; gap: 1px 6px; font-size: 12px; color: var(--muted-foreground); }
 .t-stats b { color: var(--foreground); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .t-stats .lucide { width: 12px; height: 12px; align-self: center; }
-.rep-neg { color: var(--bad) !important; }
 
 /* selected trader summary */
 .trader-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 4px 0 12px; padding: 10px 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl, 14px); }
@@ -38,11 +39,10 @@
 .qrow.st-available { border-left-color: var(--warn); }
 .qrow.st-completed { border-left-color: var(--good); opacity: .7; }
 .qrow.st-locked { opacity: .75; }
-.qrow > summary { display: grid; grid-template-columns: 18px minmax(0, 1fr) 150px 90px 74px 96px; align-items: center; gap: 10px; padding: 8px 10px; list-style: none; }
+.qrow > summary { display: grid; grid-template-columns: 18px minmax(0, 1fr) 150px 90px 96px; align-items: center; gap: 10px; padding: 8px 10px; list-style: none; }
 .qrow > summary .q-name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
 .qrow > summary .q-sub { display: block; font-weight: 400; font-size: 12px; color: var(--muted-foreground); }
 .qrow > summary .q-prog { display: grid; gap: 2px; font-size: 11px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
-.qrow > summary .q-rep { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--good); text-align: right; }
 .qrow > summary .q-act { justify-self: end; }
 .qrow .caret { color: var(--muted-foreground); transition: transform .15s; }
 .qrow[open] > summary .caret { transform: rotate(90deg); }
@@ -51,13 +51,11 @@
 .q-tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 @media (max-width: 760px) {
   .qrow > summary { grid-template-columns: 18px minmax(0, 1fr) auto; }
-  .qrow > summary .q-map, .qrow > summary .q-prog, .qrow > summary .q-rep { display: none; }
+  .qrow > summary .q-map, .qrow > summary .q-prog { display: none; }
   .qrow > .q-body { padding-left: 12px; }
-  .trader { flex-basis: 112px; }
 }
 
 .trader-head .tb-field .select { min-width: 130px; }
-.qrow > summary .q-rep.none { visibility: hidden; }
 
 /* ---------------------------------------------------------------- hideout: module cards + requirements panel */
 .hx-layout { display: grid; gap: 14px; }

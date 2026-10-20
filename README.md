@@ -88,10 +88,13 @@ different one). Three come with the tracker:
 - **Basecoat (full)**: every section in tabs.
 - **Compact (second monitor)**: an active-quest checklist plus needed items, hideout and settings.
 - **Icon GUI**: every section, with quests shown per trader. A row of trader cards shows each
-  trader's portrait, loyalty level, reputation and restock timer; click one to list its quests.
-  - Reputation is the sum of the reputation your started, completed and failed quests give.
-  - Loyalty level comes from your PMC level and that reputation. Money spent with traders is not
-    tracked, so it is assumed to be met.
+  trader's portrait, loyalty level and restock timer; click one to list its quests.
+  - Only traders that give quests get a card. Storyline quests aren't part of tarkov.dev's quest
+    list, so they never count.
+  - All cards share one row and shrink to fit (11 traders fit at 1920 wide); on narrow screens the
+    row scrolls sideways.
+  - Loyalty level comes from your quests: the highest loyalty level any active or completed quest
+    needs with that trader (LL1 if none). Reputation and money spent are not tracked.
   - Settings → Character → *Manual loyalty levels* lets you set a trader's level by hand instead.
   - Trader portraits are downloaded once into the data folder (`data/images/traders/`), so they work
     offline.
@@ -99,11 +102,11 @@ different one). Three come with the tracker:
   - Hideout shows a card per module, locked ones included. Each card has its icon, a status (Ready,
     N missing, Locked, Max level), and its level with − / + buttons.
   - Clicking a module lists everything a level needs: other modules, skills, trader loyalty or
-    reputation, and items.
+    reputation, and items. Reputation requirements are ticked by hand.
   - Items are only listed, with the amount needed. They are not tracked and don't count towards the
     Ready / N missing status, which only looks at modules, skills and traders.
-  - Trader requirements are checked automatically in every GUI, against the loyalty level and
-    reputation worked out from your quests.
+  - Trader loyalty requirements are checked automatically in every GUI, against the loyalty level
+    worked out from your quests.
   - Module icons are cached in `data/images/stations/`, like the trader portraits.
   - Skills look like the game's Character → Skills screen: two columns of rows, each with the skill
     icon, a category letter, the name, a level bar and "Level: N" with − / +. Elite skills are marked

@@ -128,13 +128,10 @@ function normObjective(o, R) {
   return out;
 }
 
-// Trader reputation changes of a quest's start / finish / failure, and traders it unlocks.
+// Traders a quest unlocks when completed.
 function normRewards(r, R) {
   if (!r) return undefined;
-  return {
-    traderStanding: list(r.traderStanding).map((s) => ({ trader: R.trader(s.trader), standing: Number(s.standing) || 0 })).filter((s) => s.trader),
-    traderUnlock: list(r.traderUnlock).map(R.trader).filter(Boolean),
-  };
+  return { traderUnlock: list(r.traderUnlock).map(R.trader).filter(Boolean) };
 }
 
 // Traders with portraits, loyalty requirements and the next restock time. The feed's traders file
@@ -191,9 +188,9 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
     map: t.map ? R.map(t.map) : null,
     taskRequirements: list(t.taskRequirements).map((r) => ({ task: R.task(r.task), status: r.status })),
     objectives: list(t.objectives).map((o) => normObjective(o, R)),
-    startRewards: normRewards(t.startRewards, R),
+    // Loyalty levels the quest needs (requirementType 'level'; 'reputation' ones are kept but unused).
+    traderRequirements: list(t.traderRequirements).map((r) => ({ trader: R.trader(r.trader ?? r.trader_id), requirementType: r.requirementType || 'level', compareMethod: r.compareMethod || '>=', value: Number(r.value ?? r.level) })).filter((r) => r.trader),
     finishRewards: normRewards(t.finishRewards, R),
-    failureOutcome: normRewards(t.failureOutcome, R),
   }));
 
   const hideout = Object.values(hideoutFile || {}).map((st) => ({

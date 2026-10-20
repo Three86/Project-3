@@ -81,10 +81,11 @@ test('loads and normalises the json.tarkov.dev feed', async () => {
     assert.deepStrictEqual(c2.taskUnlock, { id: '5936d90786f7742b1420ba5b', name: 'Debut' });
     assert.ok(!d.skills.some((sk) => sk.id === 'Melee'));
     assert.strictEqual(d.prestige[0].conditions[1].items[0].shortName, 'MP-133');
-    // Trader reputation rewards and unlocks per quest; traders with loyalty levels and restock time.
-    assert.deepStrictEqual(debut.finishRewards.traderStanding, [{ trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, standing: 0.02 }]);
-    assert.strictEqual(debut.failureOutcome.traderStanding[0].standing, -0.05);
-    assert.strictEqual(debut.startRewards, undefined);
+    // Loyalty levels a quest needs and traders it unlocks (reputation rewards are not kept); traders
+    // with loyalty levels and restock time.
+    assert.deepStrictEqual(debut.traderRequirements, []);
+    assert.deepStrictEqual(checking.traderRequirements, [{ trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, requirementType: 'level', compareMethod: '>=', value: 2 }]);
+    assert.strictEqual(debut.finishRewards.traderStanding, undefined);
     assert.deepStrictEqual(checking.finishRewards.traderUnlock, [{ id: '5c0647fdd443bc2504c2d371', name: 'Jaeger' }]);
     const prapor = d.traders.find((t) => t.name === 'Prapor');
     assert.strictEqual(prapor.image4xLink, 'https://assets.tarkov.dev/prapor-4x.webp');

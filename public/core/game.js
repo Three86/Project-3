@@ -236,21 +236,15 @@ export function hideoutReqs(level) {
     const key = `${level.id}|trader|${i}`;
     const trader = (S.data?.traders || []).find((t) => t.id === r.trader?.id);
     if (r.requirementType === 'reputation') {
-      // Checked against the reputation your quests give (needs quest reward data).
+      // Reputation is not tracked: tick it yourself.
       const need = Number(r.value ?? r.level);
-      if (hasStandingData()) {
-        const rep = traderStanding(r.trader.id);
-        reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} reputation ${need.toFixed(2)} (yours: ${rep.toFixed(2)})`, auto: true, done: rep >= need });
-      } else reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} reputation ${need.toFixed(2)}` });
+      reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} reputation ${need.toFixed(2)}` });
       return;
     }
-    // Loyalty level: checked against the level worked out from your PMC level and quest reputation
-    // (or set by hand in Settings) once the game data has the trader's loyalty levels.
+    // Loyalty level: checked against the level your quests show (or the one set by hand in Settings).
     const need = Number(r.level ?? r.value);
-    if (trader?.levels?.length) {
-      const ll = loyaltyLevel(trader).level;
-      reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} loyalty level ${need} (yours: LL${ll})`, auto: true, done: ll >= need });
-    } else reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} loyalty level ${need}` });
+    const ll = loyaltyLevel(trader || { id: r.trader?.id, levels: [] }).level;
+    reqs.push({ kind: 'trader', key, trader: r.trader, need, label: `${r.trader?.name} loyalty level ${need} (yours: LL${ll})`, auto: true, done: ll >= need });
   });
   (level.skillRequirements || []).forEach((r, i) => {
     const lvl = skillLevel(r.name);
@@ -428,25 +422,6 @@ export function traderList() {
   return [...byId.values()].sort((a, b) => rank(a) - rank(b) || byName(a.name, b.name));
 }
 
-// Whether the game data has quest reputation rewards at all (older cached data does not).
-export const hasStandingData = () => (S.data?.tasks || []).some((t) => t.finishRewards || t.startRewards);
-
-// Reputation with a trader from quests: start rewards of started quests, finish rewards of completed
-// ones (also those implied by later quests) and the outcome of failed ones.
-export function traderStanding(traderId) {
-  const key = `rep:${traderId}`;
-  if (key in memo) return memo[key];
-  let rep = 0;
-  const add = (r) => { for (const s of r?.traderStanding || []) if (s.trader?.id === traderId) rep += Number(s.standing) || 0; };
-  for (const t of S.data?.tasks || []) {
-    const st = taskStatus(t.id);
-    if (st === 'active' || st === 'completed' || st === 'failed') add(t.startRewards);
-    if (st === 'completed') add(t.finishRewards);
-    if (st === 'failed') add(t.failureOutcome);
-  }
-  return (memo[key] = Math.round(rep * 10000) / 10000);
-}
-
 // A trader some quest unlocks (e.g. Jaeger) is locked until that quest is completed.
 // { unlocked, by: quest or null }
 export function traderUnlock(traderId) {
@@ -456,29 +431,37 @@ export function traderUnlock(traderId) {
   return { unlocked: !!done, by: done || by[0] };
 }
 
-// Loyalty level from your PMC level and quest reputation. Money spent with the trader is not tracked
-// and assumed to be met. With "Manual loyalty levels" on in Settings, a level set by hand wins.
-// { level, auto, manual, max, next: { level, requiredPlayerLevel, requiredReputation, requiredCommerce,
-//   repMissing, playerLevelMissing } | null }
+// Loyalty levels a quest needs: [{ trader, value }] (requirement type 'level').
+const loyaltyReqs = (t) => (t.traderRequirements || []).filter((r) => (r.requirementType === 'level' || r.requirementType === 'loyaltyLevel') && r.trader?.id);
+
+// Loyalty level from your quests: the highest loyalty level an active or completed quest needs with
+// this trader (at least 1). Reputation and money spent are not tracked. With "Manual loyalty levels"
+// on in Settings, a level set by hand wins.
+// { level, auto, manual, max, from (quest that shows the level, or null), next: { level, task } | null }
 export function loyaltyLevel(trader) {
-  const levels = (trader.levels || []).slice().sort((a, b) => a.level - b.level);
-  const rep = traderStanding(trader.id);
-  const pl = Number(S.progress?.settings?.playerLevel || 1);
-  let auto = levels[0]?.level ?? 1;
-  for (const l of levels) {
-    if (pl >= (l.requiredPlayerLevel ?? 1) && rep >= (l.requiredReputation ?? 0)) auto = Math.max(auto, l.level);
-    else break;
+  const key = `ll:${trader.id}`;
+  let calc = memo[key];
+  if (!calc) {
+    let auto = 1, from = null;
+    const ahead = new Map(); // loyalty level -> first quest that needs it
+    for (const t of S.data?.tasks || []) {
+      for (const r of loyaltyReqs(t)) {
+        if (r.trader.id !== trader.id) continue;
+        const v = Number(r.value ?? r.level) || 1;
+        const st = taskStatus(t.id);
+        if (st === 'active' || st === 'completed') { if (v > auto) { auto = v; from = t; } }
+        else if (!ahead.has(v) || (t.minPlayerLevel || 0) < (ahead.get(v).minPlayerLevel || 0)) ahead.set(v, t);
+      }
+    }
+    calc = memo[key] = { auto, from, ahead };
   }
+  const levels = trader.levels || [];
+  const max = levels.length ? Math.max(...levels.map((l) => l.level)) : 4;
   const s = S.progress?.settings || {};
   const override = s.loyaltyManual ? s.loyaltyOverrides?.[trader.id] : null;
-  const level = Number.isFinite(Number(override)) && override != null ? Number(override) : auto;
-  const n = levels.find((l) => l.level === auto + 1);
-  const next = n ? {
-    ...n,
-    repMissing: Math.max(0, Math.round(((n.requiredReputation ?? 0) - rep) * 100) / 100),
-    playerLevelMissing: Math.max(0, (n.requiredPlayerLevel ?? 1) - pl),
-  } : null;
-  return { level, auto, manual: level !== auto || override != null, max: levels.length ? levels[levels.length - 1].level : 4, next };
+  const level = Number.isFinite(Number(override)) && override != null ? Number(override) : calc.auto;
+  const n = calc.auto < max ? calc.auto + 1 : null;
+  return { level, auto: calc.auto, manual: level !== calc.auto || override != null, max, from: calc.from, next: n ? { level: n, task: calc.ahead.get(n) || null } : null };
 }
 
 // Seconds until the trader's next restock (from the server's 10-minute snapshot), 0 when due, or

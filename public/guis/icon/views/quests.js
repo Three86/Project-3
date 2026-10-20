@@ -1,4 +1,4 @@
-// Icon GUI quest overview: a row of trader cards (portrait, loyalty, reputation, restock timer);
+// Icon GUI quest overview: a row of trader cards (portrait, loyalty level, restock timer);
 // clicking one lists that trader's quests underneath. Uses the quests module's logic and the shared
 // objective rows; quest and objective changes go through core/progress.js.
 import { S } from '../../../core/store.js';
@@ -8,13 +8,12 @@ import { badge, btn, emptyState, icon } from '../../../ui/basecoat/components.js
 import { objRow, objectiveActions, objectiveChanges } from '../../../ui/basecoat/objectives.js';
 import { questCardToggle } from '../../../ui/basecoat/quest-card.js';
 import defaultView from '../../../modules/quests/view.js';
-import { filteredTasks, sortTasks, toggleStatusFilter, focusTask, setTaskStatus, startWithPrereqs, traderCards, selectTrader, setLoyaltyOverride, hasStandingData, restockIn } from '../../../modules/quests/logic.js';
+import { filteredTasks, sortTasks, toggleStatusFilter, focusTask, setTaskStatus, startWithPrereqs, traderCards, selectTrader, setLoyaltyOverride, restockIn } from '../../../modules/quests/logic.js';
 
 const STATUSES = ['active', 'locked', 'completed', 'failed'];
 const CLOCK = '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>';
 const clock = `<svg class="lucide" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CLOCK}</svg>`;
 
-const fmtRep = (r) => `${r > 0 ? '+' : ''}${r.toFixed(2)}`;
 function fmtRestock(s) {
   if (s == null) return 'unknown';
   if (s <= 0) return 'due now';
@@ -44,7 +43,6 @@ function currentTrader(cards) {
 function traderCard(c, selected) {
   const { trader: t, loyalty: L, unlock, counts } = c;
   const locked = !unlock.unlocked;
-  const repKnown = hasStandingData();
   return `<button type="button" class="trader${locked ? ' locked' : ''}" data-act="trader" data-name="${esc(t.name)}" aria-pressed="${selected}">
     <span class="portrait" style="background:linear-gradient(160deg, oklch(0.45 0.06 ${hue(t.name)}), oklch(0.25 0.03 ${hue(t.name)}))">
       <span class="initials">${esc(initials(t.name))}</span>
@@ -53,23 +51,20 @@ function traderCard(c, selected) {
     </span>
     <span class="t-name">${esc(t.name)}</span>
     ${pips(locked ? 0 : L.level, L.max, L.manual)}
-    <span class="t-stats"><span>Rep</span><b class="${c.rep < 0 ? 'rep-neg' : ''}">${repKnown ? fmtRep(c.rep) : '–'}</b>
-      ${locked ? `<span>${icon('lock')}</span><b title="Unlocked by ${esc(unlock.by?.name || '')}">${esc(unlock.by?.name || 'locked')}</b>`
+    <span class="t-stats">${locked ? `<span>${icon('lock')}</span><b title="Unlocked by ${esc(unlock.by?.name || '')}">${esc(unlock.by?.name || 'locked')}</b>`
         : `<span>${clock}</span><b data-restock="${esc(t.id)}" title="Time to restock">${fmtRestock(c.restock)}</b>`}</span>
   </button>`;
 }
 
 function traderHead(c, ctx) {
   const { trader: t, loyalty: L, unlock } = c;
-  const pl = S.progress.settings.playerLevel;
+  const quest = (q) => `<a href="#" data-act="goto" data-module="quests" data-id="${esc(q.id)}">${esc(q.name)}</a>`;
   let next;
-  if (!unlock.unlocked) next = `Unlocked by completing <a href="#" data-act="goto" data-module="quests" data-id="${esc(unlock.by.id)}">${esc(unlock.by.name)}</a>.`;
-  else if (!t.levels?.length) next = 'No loyalty data for this trader yet (refresh game data).';
-  else if (!L.next) next = 'Max loyalty.';
+  if (!unlock.unlocked) next = `Unlocked by completing ${quest(unlock.by)}.`;
   else {
-    const rep = L.next.repMissing > 0 ? `<b>${L.next.repMissing.toFixed(2)}</b> more rep` : 'rep ✓';
-    const lvl = L.next.playerLevelMissing > 0 ? `level <b>${L.next.requiredPlayerLevel}</b> (you ${pl})` : 'level ✓';
-    next = `Next: <b>LL${L.next.level}</b> needs ${rep}, ${lvl} · money spent not tracked`;
+    const why = L.from ? `LL${L.auto} from ${quest(L.from)} (active or completed)` : 'LL1: no started quest needs a higher level';
+    const ahead = !L.next ? 'max loyalty' : L.next.task ? `next: <b>LL${L.next.level}</b> with ${quest(L.next.task)}` : '';
+    next = [why, ahead].filter(Boolean).join(' · ');
   }
   const manual = S.progress.settings.loyaltyManual && unlock.unlocked && t.levels?.length
     ? `<label class="label tb-field"><span>Loyalty</span><select class="select" data-size="sm" data-act="ll-set" data-id="${esc(t.id)}" aria-label="${esc(t.name)} loyalty level">
@@ -78,14 +73,10 @@ function traderHead(c, ctx) {
   return `<div class="trader-head">
     <span class="th-name">${esc(t.name)}</span>
     <span class="th-ll">${pips(unlock.unlocked ? L.level : 0, L.max, L.manual)}${badge(`LL${L.level}${L.manual ? ' · manual' : ''}`, 'secondary')}</span>
-    ${hasStandingData() ? badge(`Rep ${fmtRep(c.rep)}`) : badge('Rep unknown', 'outline', '', 'Refresh game data to get quest reputation rewards')}
     <span class="th-next">${next}</span>
     <span class="spacer"></span>${manual}
   </div>`;
 }
-
-// Reputation this quest gives its own trader when completed.
-const repReward = (t) => (t.finishRewards?.traderStanding || []).filter((s) => s.trader?.id === t.trader?.id).reduce((a, s) => a + s.standing, 0);
 
 function whyLocked(t) {
   const missing = t.taskRequirements.filter((r) => r.task && taskStatus(r.task.id) !== 'completed').map((r) => r.task.name);
@@ -99,7 +90,6 @@ function questRow(t) {
   const req = t.objectives.filter((o) => !o.optional);
   const done = req.filter((o) => objValue('objectives', o.id, o).done).length;
   const pct = req.length ? Math.round((done / req.length) * 100) : 0;
-  const rep = repReward(t);
   const p = S.progress.tasks[t.id];
   const action = st === 'active' ? btn('Complete', `data-act="quest-set" data-id="${esc(t.id)}" data-v="completed"`, { size: 'xs' })
     : st === 'available' ? btn('Start', `data-act="quest-set" data-id="${esc(t.id)}" data-v="active"`, { variant: 'outline', size: 'xs' })
@@ -116,7 +106,6 @@ function questRow(t) {
       <span class="q-name">${esc(t.name)}<span class="q-sub">${st === 'locked' ? esc(whyLocked(t)) : `Level ${t.minPlayerLevel || 1}${t.kappaRequired ? ' · Kappa' : ''}`}</span></span>
       <span class="q-map count">${esc(taskMaps(t).join(', '))}</span>
       <span class="q-prog">${req.length ? `${done}/${req.length} objectives<div class="progress" role="progressbar" aria-label="Objectives done" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>` : ''}</span>
-      <span class="q-rep${rep ? '' : ' none'}">${rep ? `${fmtRep(rep)} rep` : ''}</span>
       <span class="q-act">${action}</span></summary>
     <div class="q-body"><ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
       ${tools ? `<div class="q-tools">${tools}</div>` : ''}</div>
@@ -140,7 +129,7 @@ function render(ctx) {
     <input type="search" class="input tb-search" data-ui="q.text" value="${esc(f.text)}" placeholder="Filter ${esc(cur.trader.name)}'s quests…" aria-label="Filter quests">
     <span class="count">${list.length} of ${cur.counts.total} quests</span>
   </div>`;
-  return `<div class="trader-strip" role="group" aria-label="Traders">${cards.map((c) => traderCard(c, c === cur)).join('')}</div>
+  return `<div class="trader-strip" role="group" aria-label="Traders" style="--n:${cards.length}">${cards.map((c) => traderCard(c, c === cur)).join('')}</div>
     ${traderHead(cur, ctx)}
     ${toolbar}
     ${list.length ? `<ul class="qlist">${list.map(questRow).join('')}</ul>` : emptyState('', cur.counts.total ? 'No quests with these statuses. Pick more above.' : `${esc(cur.trader.name)} has no quests.`, '', 'search')}`;

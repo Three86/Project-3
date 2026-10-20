@@ -508,6 +508,8 @@ async function run() {
   // ------------------------------------------------------------ Icon GUI (quests by trader)
   if (want('icon')) {
     console.log('Icon GUI');
+    // Debut and Checking open again (earlier sections start them).
+    await page.evaluate(() => fetch('/api/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: [{ section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'tasks', id: '59674cd986f7744ab26e32f2', value: null }] }) }));
     await page.evaluate(() => { localStorage.setItem('tt-gui', 'icon'); localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'quests' })); });
     await page.reload(); await page.waitForSelector('.trader-strip .trader');
     ok(await page.locator('[data-act="qstatus"]').count() > 0 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0 && await page.locator('.qrow.st-available').count() === 0, 'Icon GUI: no Available filter, available quests not listed');
@@ -528,17 +530,38 @@ async function run() {
     const rows = await page.locator('.qlist .qrow .q-name').allInnerTexts();
     const therapistQuests = await page.evaluate(() => fetch('/api/data').then((r) => r.json()).then((d) => d.tasks.filter((t) => t.trader.name === 'Therapist').map((t) => t.name)));
     ok(rows.length > 0 && rows.every((r) => therapistQuests.some((n) => r.startsWith(n))), `quest list shows only that trader's quests (${rows.length})`);
-    // Completing a quest raises that trader's reputation on its card.
+    // Only traders that give quests get a card; no reputation is shown.
+    ok(await page.locator('.trader[data-name="Mr. Kerman"]').count() === 0, 'trader without quests left out');
+    ok(!/rep/i.test(await page.locator('.trader-strip').innerText()) && !/rep/i.test(await page.locator('.trader-head').innerText()) && await page.locator('.q-rep').count() === 0, 'no reputation on cards, summary or quest rows');
+    // Every trader fits in one row at 1920×1080 (11 cards, as many as the game has quest givers).
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    const fit = await page.evaluate(() => {
+      const strip = document.querySelector('.trader-strip');
+      const copy = strip.cloneNode(true);
+      while (copy.children.length < 11) copy.append(copy.children[0].cloneNode(true));
+      copy.style.setProperty('--n', copy.children.length);
+      strip.after(copy);
+      const r = { overflow: copy.scrollWidth - copy.clientWidth, width: Math.round(copy.children[10].getBoundingClientRect().width), rows: new Set([...copy.children].map((c) => Math.round(c.getBoundingClientRect().top))).size };
+      copy.remove();
+      return r;
+    });
+    ok(fit.overflow <= 0 && fit.rows === 1 && fit.width >= 92, `11 traders fit in one row at 1920 wide without scrolling (cards ${fit.width}px)`);
+    await page.setViewportSize({ width: 1300, height: 900 });
+    // Loyalty level comes from the quests: an active quest that needs Prapor LL2 means LL2.
+    await page.click('.trader[data-name="Prapor"]'); await settle();
+    ok((await page.locator('.trader[data-name="Prapor"] .ll-chip').innerText()) === 'LL1' && (await page.locator('.trader-head .th-next').innerText()).includes('next: LL2 with Checking'), 'LL1 until a quest needing LL2 is started; summary names the next one');
+    ops = [];
+    await page.click('#task-59674cd986f7744ab26e32f2 > summary'); await settle();
+    await page.click('#task-59674cd986f7744ab26e32f2 [data-act="quest-chain"]'); await settle();
+    ok(ops.some((o) => o.id === '59674cd986f7744ab26e32f2' && o.value === 'active'), 'Checking started');
+    ok((await page.locator('.trader[data-name="Prapor"] .ll-chip').innerText()) === 'LL2' && (await page.locator('.trader-head .th-next').innerText()).includes('LL2 from Checking'), 'active LL2 quest sets Prapor to LL2');
     await page.click('.trader[data-name="Skier"]'); await settle();
-    const repBefore = Number(await page.locator('.trader[data-name="Skier"] .t-stats b').first().innerText());
     const first = page.locator('.qlist .qrow.st-available').first();
     const qid = (await first.getAttribute('id')).replace('task-', '');
     ops = [];
     await first.locator('[data-act="quest-set"][data-v="active"]').click(); await settle();
     await page.click(`#task-${qid} [data-act="quest-set"][data-v="completed"]`); await settle();
     ok(JSON.stringify(ops.map((o) => o.value)) === JSON.stringify(['active', 'completed']), 'Start then Complete save the quest status');
-    const repAfter = Number(await page.locator('.trader[data-name="Skier"] .t-stats b').first().innerText());
-    ok(Math.abs(repAfter - repBefore - 0.02) < 1e-9, `completing a quest adds its reputation (${repBefore} → ${repAfter})`);
     // Objectives inside a row work like elsewhere.
     await page.click('[data-act="qstatus"][data-s="completed"]'); await settle();
     await page.click(`#task-${qid} > summary`); await settle();
@@ -578,6 +601,7 @@ async function run() {
     await post([
       { section: 'hideout', id: 'gen1', value: true }, { section: 'hideout', id: 'gen2', value: null }, { section: 'hideout', id: 'med1', value: true }, { section: 'hideout', id: 'med2', value: null }, { section: 'hideout', id: 'btc1', value: true },
       { section: 'hideoutReqs', id: 'gen2|item|0', value: null }, { section: 'hideoutReqs', id: 'med2|item|0', value: null },
+      { section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'tasks', id: '59674cd986f7744ab26e32f2', value: null },
       { section: 'skills', id: 'Endurance', value: 3 }, { section: 'settings', id: 'playerLevel', value: 21 }, { section: 'settings', id: 'loyaltyManual', value: false },
     ]);
     await page.evaluate(() => localStorage.setItem('tt-ui:icon', JSON.stringify({ tab: 'hideout' })));
