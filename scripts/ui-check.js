@@ -108,7 +108,7 @@ async function run(dataDir) {
     const statOf = (card, label) => page.locator(`.ovw-skill[data-skill="${card}"] .stat:has(> span:text-is("${label}")) > b`).innerText();
     ok(await statOf('strength', 'Overweight from') === '26.0 kg' && await statOf('strength', 'Heaviest you can sprint with') === '72.0 kg', 'Strength 0: base weight limits');
     ok(await statOf('endurance', 'Sprint from full stamina') === '28.8 s', 'Endurance 0: 28.8 s of sprinting');
-    ok(await statOf('metabolism', 'An item with 50 energy gives') === '50 energy' && await statOf('metabolism', 'Energy') === '−3.20/min', 'Metabolism 0: 50 energy, −3.20/min');
+    ok(await statOf('metabolism', 'An item with 50 energy gives') === '50 energy' && await statOf('metabolism', 'Energy') === '−3.80/min' && await statOf('metabolism', 'Hydration') === '−3.20/min', 'Metabolism / Health 0: 50 energy, −3.80 energy and −3.20 hydration per minute');
     ok(await statOf('hideout', 'Canisters per filter') === `${(100 / (66 * 0.95)).toFixed(2)}` && await statOf('hideout', 'Time per canister') === '4h 36m', 'Hideout Management 10 / Crafting 20: water filter and canister time');
     ok((await page.locator('.ovw-skill[data-skill="hideout"]').innerText()).includes('Expeditionary fuel tank (60) lasts'), 'both fuel tanks listed');
     // Changing Settings updates it; the link goes to Settings.

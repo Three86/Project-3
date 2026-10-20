@@ -7,7 +7,7 @@ A self-hosted quest, hideout and prestige tracker for Escape from Tarkov. It run
 - **Overview** (where the tracker opens): your faction, PMC level and a BEAR or USEC picture, Kappa and Lightkeeper progress, and what your skills mean in the game:
   - Strength: when you become overweight, the most you can carry and still sprint, and critically overweight.
   - Endurance: how long you can sprint from full stamina (not overweight) and how long stamina takes to refill from empty.
-  - Metabolism (and Health): what an item with 50 energy / 50 hydration gives you, and how fast energy and hydration drain in raid.
+  - Metabolism and Health: what an item with 50 energy / 50 hydration gives you (Metabolism), and how fast energy and hydration drain in raid (base 3.8 / 3.2 per minute, measured in game; only Health lowers it).
   - Hideout (Crafting and Hideout Management): how long Metal and Expeditionary fuel tanks and an air filter last, how many purified water canisters one water filter makes and how long each takes.
   - The game values come from the game config (as mirrored by the SPT project) and are in `server/skills.json` → `baseValues`. Filter sizes (300 / 100) are from the community wiki. Purified water time assumes the Crafting skill applies to it.
   - To use your own pictures, put `usec.png` / `bear.png` (or .jpg / .webp) in `data/images/pmc/`.

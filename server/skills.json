@@ -155,21 +155,16 @@
    "id": "Metabolism",
    "name": "Metabolism",
    "category": "Physical",
-   "description": "Improves the energy and hydration you get from food and drinks and slows how fast they drain.",
+   "description": "Improves and extends the effects of eating and drinking, and sustains the physical skills longer.",
    "levelUp": "Eating and drinking.",
    "effects": [
     {
-     "name": "Energy and hydration from food and drink",
+     "name": "Food and drink positive effects",
      "perLevel": 1,
      "unit": "%"
     },
     {
-     "name": "Energy and hydration drain",
-     "perLevel": -0.5,
-     "unit": "%"
-    },
-    {
-     "name": "Negative effect duration of food/drink",
+     "name": "Negative effect time of stimulants, food and drink",
      "perLevel": -1,
      "unit": "%"
     }
@@ -911,11 +906,11 @@
    "restoreCrouched": 1.45,
    "source": "game config Stamina (Capacity, SprintDrainRate, BaseRestorationRate, RestorationMultiplierByPose), SPT mirror"
   },
-  "energyDrainPerMinute": 3.2,
-  "hydrationDrainPerMinute": 2.6,
+  "energyDrainPerMinute": 3.8,
+  "hydrationDrainPerMinute": 3.2,
   "maxEnergy": 100,
   "maxHydration": 100,
-  "drainSource": "game config Health.Effects.Existence (EnergyDamage / HydrationDamage per 60 s loop), SPT mirror",
+  "drainSource": "measured in game (Oct 2026): −3.69 energy / −3.10 hydration per minute at Health 5 (−3%); the SPT mirror's 3.2 / 2.6 is outdated",
   "strengthEliteCarryPercent": 10,
   "airFilter": {
    "resource": 300,

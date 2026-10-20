@@ -59,7 +59,7 @@ function metabolismCard() {
     ${stat('An item with 50 hydration gives', `${Math.round(m.item50)} hydration`, `${signed(m.gainPct)} from Metabolism`)}
     <div class="stat-sub">Drain in raid</div>
     ${drain('Energy', m.energy)}${drain('Hydration', m.hydration)}
-    <p class="ovw-note">Drain is lowered by Metabolism (${signed(m.drainMet)}) and Health (${signed(m.drainHealth)}).</p>`);
+    <p class="ovw-note">Drain is lowered by Health (${signed(m.drainHealth)}); Metabolism doesn't change it.</p>`);
 }
 
 function hideoutCard() {

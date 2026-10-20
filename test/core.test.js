@@ -160,7 +160,10 @@ test('overview: weight limits, stamina, food and drain, fuel and filters at your
   near(e.refill.now, 115 * 1.15 / (4.5 * 1.15 * 1.25), 'refill standing');
   const m = ov.metabolism();
   near(m.item50, 55, '50 energy item at Metabolism 10');
-  near(m.energy.perMin, 3.2 * (1 - 0.05 - 0.048), 'energy drain'); near(m.hydration.minutes, 100 / (2.6 * 0.902), 'hydration lasts');
+  near(m.energy.perMin, 3.8 * (1 - 0.048), 'energy drain: Health only'); near(m.hydration.minutes, 100 / (3.2 * 0.952), 'hydration lasts');
+  // As measured in game: Health 5 → −3.69 energy and −3.10 hydration per minute.
+  Object.assign(S.progress.skills, { Health: 5, Metabolism: 11 });
+  assert.deepStrictEqual([ov.metabolism().energy.perMin.toFixed(2), ov.metabolism().hydration.perMin.toFixed(2)], ['3.69', '3.10']);
   const h = ov.hideoutResources();
   const fuelH = 4.75 * 0.95; // Generator not built in the fixture: no fuel bonus
   near(h.fuel.perHour, fuelH, 'fuel per hour');
