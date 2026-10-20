@@ -266,3 +266,44 @@ ul.ingredients .num { color: var(--muted-foreground); }
 #cmdk .cmd-hint { margin-left: auto; font-size: 12px; color: var(--muted-foreground); }
 #cmdk .command > footer { display: flex; gap: 14px; padding: 8px 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted-foreground); }
 #cmdk .command > footer span { display: inline-flex; gap: 4px; align-items: center; }
+
+/* ---------------------------------------------------------------- overview */
+.ovw { display: grid; gap: 14px; }
+.ovw-top { display: grid; gap: 14px; }
+@media (min-width: 900px) { .ovw-top { grid-template-columns: minmax(400px, 440px) minmax(0, 1fr); } }
+.ovw-pmc { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 16px; align-items: center; padding: 14px; }
+.ovw-pmc .art { width: 180px; aspect-ratio: 420 / 744; border-radius: var(--radius-lg, 10px); overflow: hidden; border: 1px solid var(--border); background: #111; }
+.ovw-pmc .art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ovw-pmc .who { display: grid; gap: 8px; align-content: center; min-width: 0; }
+.ovw-pmc .faction { font-size: 28px; font-weight: 800; letter-spacing: 3px; }
+.ovw-pmc .lvl { display: flex; align-items: baseline; gap: 8px; }
+.ovw-pmc .lvl b { font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+.ovw-pmc .lvl span, .ovw-pmc .hint { color: var(--muted-foreground); font-size: 13px; }
+.ovw-pmc .hint { font-size: 12px; }
+.ovw-pmc .hint a { color: var(--primary); }
+.ovw-goals { display: grid; gap: 12px; padding: 14px; align-content: center; }
+.goal { display: grid; gap: 6px; }
+.goal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.goal-head h3 { font-size: 16px; font-weight: 700; display: flex; gap: 8px; align-items: center; }
+.goal-head h3 .lucide { width: 16px; height: 16px; }
+.goal-head .pct { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.goal .bar { height: 10px; border-radius: 999px; background: var(--muted); overflow: hidden; display: flex; }
+.goal .bar .done, .goal .sw.done { background: var(--primary); }
+.goal .bar .act, .goal .sw.act { background: color-mix(in oklab, var(--primary) 40%, transparent); }
+.goal .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted-foreground); }
+.goal .meta b { color: var(--foreground); font-variant-numeric: tabular-nums; }
+.goal .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.ovw-skills { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); align-items: start; }
+.ovw-skill > header { display: flex; align-items: center; gap: 10px; }
+.ovw-skill .sk-ico { width: 36px; height: 36px; border-radius: 8px; background: var(--muted); display: grid; place-items: center; flex: none; }
+.ovw-skill .sk-ico .lucide { width: 20px; height: 20px; }
+.ovw-skill h2 { font-size: 15px; font-weight: 700; }
+.ovw-skill .sk-lv { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.ovw-skill .stat { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 8px 0; border-top: 1px solid var(--border); align-items: baseline; }
+.ovw-skill .stat:first-child { border-top: 0; }
+.ovw-skill .stat > span { font-size: 13px; color: var(--muted-foreground); }
+.ovw-skill .stat > b { font-size: 18px; font-variant-numeric: tabular-nums; text-align: right; }
+.ovw-skill .stat > small { grid-column: 1 / -1; font-size: 11px; color: var(--muted-foreground); }
+.ovw-skill .stat-sub { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted-foreground); margin-top: 6px; }
+.ovw-note { font-size: 12px; color: var(--muted-foreground); }
+@media (max-width: 520px) { .ovw-pmc { grid-template-columns: 130px minmax(0, 1fr); } .ovw-pmc .art { width: 130px; } .ovw-pmc .faction { font-size: 22px; } .ovw-pmc .lvl b { font-size: 32px; } }

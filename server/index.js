@@ -145,7 +145,8 @@ function dataIsStale() {
 // ---------- pictures (trader portraits, hideout module icons) and restock times ----------
 // Pictures are downloaded once into the data folder and served by the tracker itself, so they work
 // offline. Missing ones are fetched after every data refresh and at start-up.
-const IMG_DIRS = { traders: path.join(DATA_DIR, 'images', 'traders'), stations: path.join(DATA_DIR, 'images', 'stations'), skills: path.join(DATA_DIR, 'images', 'skills') };
+const IMG_DIRS = { traders: path.join(DATA_DIR, 'images', 'traders'), stations: path.join(DATA_DIR, 'images', 'stations'), skills: path.join(DATA_DIR, 'images', 'skills'),
+  pmc: path.join(DATA_DIR, 'images', 'pmc') }; // pmc: your own usec / bear pictures (never downloaded)
 const IMG_TYPES = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' };
 const IMG_EXTS = new Set(Object.values(IMG_TYPES));
 const safeId = (id) => /^[\w-]+$/.test(String(id));
@@ -372,7 +373,7 @@ function listUiFolders(kind, file) {
 
 async function handleApi(req, res, url) {
   const route = `${req.method} ${url.pathname}`;
-  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/(traders|stations|skills)\/([\w-]+)$/);
+  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/(traders|stations|skills|pmc)\/([\w-]+)$/);
   if (img) {
     const file = imageFile(img[1], img[2]);
     if (!file) return send(res, 404, { error: 'no picture for this yet' });

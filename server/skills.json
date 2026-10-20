@@ -903,6 +903,32 @@
   "overweightStartKg": 26,
   "sprintLimitKg": 72,
   "criticalOverweightKg": 77,
+  "stamina": {
+   "capacity": 115,
+   "sprintDrainPerSecond": 4,
+   "restorePerSecond": 4.5,
+   "restoreStanding": 1.25,
+   "restoreCrouched": 1.45,
+   "source": "game config Stamina (Capacity, SprintDrainRate, BaseRestorationRate, RestorationMultiplierByPose), SPT mirror"
+  },
+  "energyDrainPerMinute": 3.2,
+  "hydrationDrainPerMinute": 2.6,
+  "maxEnergy": 100,
+  "maxHydration": 100,
+  "drainSource": "game config Health.Effects.Existence (EnergyDamage / HydrationDamage per 60 s loop), SPT mirror",
+  "strengthEliteCarryPercent": 10,
+  "airFilter": {
+   "resource": 300,
+   "perHour": 17,
+   "source": "game config airFilterUnitFlowRate 0.0047222/s (SPT mirror); filter size 300 from the community wiki"
+  },
+  "waterFilter": {
+   "resource": 100,
+   "perCanister": 66,
+   "canisterSeconds": 19500,
+   "collectorLevel": 3,
+   "source": "game production config (Water Collector, purified water: 66 filter resource, 19500 s), SPT mirror; filter size 100 from the community wiki"
+  },
   "generatorFuelPerHour": 4.75,
   "fuelTanks": [
    {
