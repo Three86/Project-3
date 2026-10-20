@@ -331,16 +331,19 @@ export function hideoutBonusTotals() {
 }
 
 // ---------------------------------------------------------------- crafting
-// Fuel the generator burns per hour after Hideout Management and hideout fuel bonuses.
-export function generatorFuelPerHour() {
+// Fuel the generator burns per hour after Hideout Management and hideout fuel bonuses, with the parts:
+// { base, hmLevel, hmPct, bonus (FuelConsumption hideout bonus or null), perHour }.
+export function generatorFuel() {
   const cfg = activeSkillConfig();
-  const base = cfg.baseValues || {};
+  const base = (cfg.baseValues || {}).generatorFuelPerHour || 4.75;
+  const hmLevel = Number(S.progress.skills?.HideoutManagement || 0);
   const hm = cfg.skills.find((sk) => sk.id === 'HideoutManagement');
   const e = (hm?.effects || []).find((x) => /consumption/i.test(x.name));
-  const cons = 1 + (e ? effectValue(hm, e, Number(S.progress.skills?.HideoutManagement || 0)) : 0) / 100;
-  const fuelBonus = hideoutBonusTotals().find((b) => b.type === 'FuelConsumption');
-  return (base.generatorFuelPerHour || 4.75) * cons * (fuelBonus ? 1 + fuelBonus.boosted / 100 : 1);
+  const hmPct = e ? effectValue(hm, e, hmLevel) : 0;
+  const bonus = hideoutBonusTotals().find((b) => b.type === 'FuelConsumption') || null;
+  return { base, hmLevel, hmPct, bonus, perHour: base * (1 + hmPct / 100) * (bonus ? 1 + bonus.boosted / 100 : 1) };
 }
+export const generatorFuelPerHour = () => generatorFuel().perHour;
 
 // Crafting skill: production time multiplier (e.g. 0.85 at level 20).
 export function craftTimeFactor() {
@@ -358,6 +361,14 @@ export const isBitcoinFarm = (st) => /bitcoin/i.test(st?.name || '');
 export function bitcoinSeconds(gpus) {
   const b = activeSkillConfig().baseValues?.bitcoin || {};
   return (b.baseSeconds || 300000) / (1 + Math.max(0, gpus - 1) * (b.gpuBoostRate ?? 0.041225));
+}
+
+// Graphics card slots in the Bitcoin Farm at its built level (10 / 25 / 50 in game); 0 when not built.
+export function maxGpus() {
+  const slots = activeSkillConfig().baseValues?.bitcoin?.gpuSlots || [10, 25, 50];
+  const farm = (S.data?.hideout || []).find(isBitcoinFarm);
+  const lv = farm ? builtLevel(farm) : 0;
+  return lv ? slots[Math.min(lv, slots.length) - 1] : 0;
 }
 
 // ---------------------------------------------------------------- needed items

@@ -8,7 +8,7 @@
 //   toast    ({ category, title, description }) short notification
 //   setting  ({ key, value }) a settings value was saved
 import { esc } from './util.js';
-import { buildIndex, resetMemo } from './game.js';
+import { buildIndex, maxGpus, resetMemo } from './game.js';
 
 export const S = {
   data: null, // game data (/api/data)
@@ -64,7 +64,8 @@ export async function setProgress(ops) {
 export async function setSetting(key, raw) {
   let value = raw;
   if (key === 'playerLevel') value = Math.max(1, Number(raw) || 1);
-  else if (key === 'gpuCount') value = Math.min(50, Math.max(1, Math.round(Number(raw) || 1)));
+  // Graphics cards: no more than the built Bitcoin Farm level has slots for.
+  else if (key === 'gpuCount') value = Math.min(Math.max(1, maxGpus()), Math.max(1, Math.round(Number(raw) || 1)));
   // datetime-local is in the viewer's local time; store an absolute timestamp.
   else if (key === 'logsSince') value = raw ? new Date(raw).toISOString() : '';
   await setProgress({ section: 'settings', id: key, value });

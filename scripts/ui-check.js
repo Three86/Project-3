@@ -280,8 +280,9 @@ async function run() {
     ok(lockedNow > locked && await page.locator('.lock-badge').count() > 0, `show-locked switch shows locked recipes with the reason (${locked} → ${lockedNow})`);
     await page.uncheck('[data-ui="rec.showLocked"]'); await settle();
     await page.fill('[data-set="gpuCount"]', '25'); await page.press('[data-set="gpuCount"]', 'Tab'); await settle();
-    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'settings', id: 'gpuCount', value: 25 }), 'GPU count saves');
-    ok((await page.locator('.btc-table tr.mine').innerText()).startsWith('25'), 'bitcoin table marks 25 GPUs as yours');
+    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'settings', id: 'gpuCount', value: 10 }), 'GPU count capped at the 10 slots of Bitcoin Farm level 1');
+    await page.fill('[data-set="gpuCount"]', '6'); await page.press('[data-set="gpuCount"]', 'Tab'); await settle();
+    ok(lastOp()?.value === 6 && (await page.locator('.btc-table tr.mine').innerText()).startsWith('6'), 'GPU count saves; bitcoin table marks 6 GPUs as yours');
     ok((await page.locator('.btc-panel').innerText()).includes('bitcoins per tank'), 'bitcoins per fuel tank shown');
     await page.fill('[data-ui="rec.text"]', 'zzzz'); await page.waitForTimeout(450);
     ok(await page.locator('.empty').count() === 1, 'recipe search with no match shows the empty state');

@@ -90,6 +90,51 @@ test('bitcoin farm times match the game (1 and 50 graphics cards)', async () => 
   assert.strictEqual(fmtDurationSec(game.bitcoinSeconds(1)), '3d 11h 20m 00s');
 });
 
+test('bitcoin farm: graphics card slots follow the built level and the setting is clamped to them', async () => {
+  const S = await reset();
+  const farm = S.data.hideout.find((st) => st.id === 's-btc');
+  farm.levels.push({ ...farm.levels[0], id: 'btc2', level: 2 }, { ...farm.levels[0], id: 'btc3', level: 3 });
+  game.buildIndex();
+  const recipes = await load('modules/recipes/logic.js');
+  assert.strictEqual(game.maxGpus(), 10);
+  await store.setSetting('gpuCount', 40);
+  assert.strictEqual(S.progress.settings.gpuCount, 10, 'level 1 holds 10 cards');
+  S.progress.hideout.btc2 = true;
+  assert.strictEqual(game.maxGpus(), 25);
+  await store.setSetting('gpuCount', 40);
+  assert.strictEqual(S.progress.settings.gpuCount, 25);
+  S.progress.hideout.btc3 = true;
+  await store.setSetting('gpuCount', 40);
+  assert.strictEqual(recipes.bitcoinInfo().gpus, 40);
+  assert.strictEqual(recipes.bitcoinInfo().maxGpus, 50);
+  // Unbuilding a level caps the cards used in the numbers without losing the saved count.
+  delete S.progress.hideout.btc3;
+  assert.strictEqual(recipes.bitcoinInfo().gpus, 25);
+  assert.strictEqual(S.progress.settings.gpuCount, 40);
+  // Fuel breakdown: Hideout Management 10 (−5%) and Generator level 1 (−10%, ×1.10 from Hideout Management).
+  S.progress.hideout.gen1 = true;
+  const fuel = recipes.bitcoinInfo().fuel;
+  assert.strictEqual(fuel.hmPct, -5);
+  assert.ok(Math.abs(fuel.perHour - 4.75 * 0.95 * (1 - 0.1 * 1.1)) < 1e-9, `fuel per hour ${fuel.perHour}`);
+  assert.deepStrictEqual(fuel.bonus.from, ['Generator']);
+  for (const t of recipes.bitcoinInfo().tanks) assert.ok(Math.abs(t.bitcoins - (t.resource / fuel.perHour) / (recipes.bitcoinInfo().secs / 3600)) < 1e-9);
+});
+
+test('recipe stations: pinned recipes first in pin order, the Bitcoin Farm card last', async () => {
+  const S = await reset();
+  const recipes = await load('modules/recipes/logic.js');
+  const cards = recipes.craftStations();
+  assert.deepStrictEqual(cards.map((c) => c.st.id), ['s-med', 's-btc']);
+  assert.ok(cards[1].farm);
+  await recipes.togglePin('s-med', 'cr4');
+  await recipes.togglePin('s-med', 'cr1');
+  const med = S.data.hideout.find((st) => st.id === 's-med');
+  const g = recipes.stationRecipes(med, '', false);
+  assert.deepStrictEqual(g.pinned.map((c) => c.id), ['cr4', 'cr1']);
+  assert.ok(!g.rest.some((c) => ['cr4', 'cr1'].includes(c.id)), 'pinned recipes are not listed twice');
+  assert.strictEqual(recipes.craftStations()[0].pins, 2);
+});
+
 test('crafting skill shortens craft times; recipes respect locks and the pin limit', async () => {
   const S = await reset();
   S.progress.skills.Crafting = 20;
