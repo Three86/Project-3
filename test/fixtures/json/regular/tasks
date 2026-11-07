@@ -97,6 +97,11 @@
         "id": "z",
         "name": "zoneKey"
        }
+      ],
+      "requiredKeys": [
+       [
+        "i-mp133"
+       ]
       ]
      },
      {

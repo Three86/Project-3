@@ -2,7 +2,7 @@
 // default views of quests, hideout, prestige, needed items and search.
 import { setRequirement, stepRequirement } from '../../core/progress.js';
 import { esc, readableType } from '../../core/util.js';
-import { NEEDS, STATUS_LABEL, objItems, objNeeds, objTarget, objTitle, objValue } from '../../core/game.js';
+import { NEEDS, STATUS_LABEL, objItems, objKeys, objNeeds, objTarget, objTitle, objValue } from '../../core/game.js';
 import { badge, checkbox, stepperControl } from './components.js';
 
 export function itemTag(it) {
@@ -27,6 +27,7 @@ export function objTags(o) {
   if (o.usingWeapon?.length) tags.push(`<span class="badge" data-variant="outline">weapon:</span> ${o.usingWeapon.slice(0, 6).map(itemTag).join(' ')}${o.usingWeapon.length > 6 ? ` +${o.usingWeapon.length - 6}` : ''}`);
   for (const set of o.wearing || []) if (set?.length) tags.push(`<span class="badge" data-variant="outline">wearing:</span> ${set.map(itemTag).join(' + ')}`);
   if (o.notWearing?.length) tags.push(`<span class="badge" data-variant="outline">not wearing: ${esc(o.notWearing.map((i) => i.shortName || i.name).join(', '))}</span>`);
+  for (const set of objKeys(o)) tags.push(`<span class="badge" data-variant="outline">${set.length > 1 ? 'key, any of:' : 'key:'}</span> ${set.map(itemTag).join(' ')}`);
   if (o.skillLevel) tags.push(`<span class="badge" data-variant="outline">${esc(o.skillLevel.name)} ${o.skillLevel.level}</span>`);
   if (o.exitStatus?.length) tags.push(`<span class="badge" data-variant="outline">${esc(o.exitStatus.join('/'))}</span>`);
   if (o.maps?.length) tags.push(`<span class="badge" data-variant="outline">${esc(o.maps.map((m) => m.name).join(', '))}</span>`);

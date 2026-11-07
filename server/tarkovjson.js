@@ -117,6 +117,7 @@ function normObjective(o, R) {
   if (o.wearing) out.wearing = list(o.wearing).map((set) => R.items(set));
   if (o.notWearing) out.notWearing = R.items(o.notWearing);
   if (o.containsAll) out.containsAll = R.items(o.containsAll);
+  if (o.requiredKeys) out.requiredKeys = list(o.requiredKeys).map((set) => R.items(set)).filter((set) => set.length); // [[key]]: any key of a set
   if (o.questItem) out.questItem = R.questItem(o.questItem);
   if (o.trader) out.trader = R.trader(o.trader);
   if (o.task) out.task = R.task(o.task);

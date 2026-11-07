@@ -65,6 +65,9 @@ export function objEquipment(o) {
   return [...(o.usingWeapon || []), ...(o.wearing || []).flat()].filter(Boolean);
 }
 
+// Keys an objective needs: [[item]], any key of a set opens that lock (tarkov.dev requiredKeys).
+export const objKeys = (o) => (o.requiredKeys || []).filter((set) => Array.isArray(set) && set.length);
+
 export function objNeeds(o) {
   const n = new Set();
   switch (o.type) {
