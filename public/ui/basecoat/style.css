@@ -354,3 +354,6 @@ ul.ingredients .num { color: var(--muted-foreground); }
 .rp-line .ct { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
 .rp-line .ct small { display: block; font-weight: 400; font-size: 11px; color: var(--muted-foreground); }
 @media (max-width: 760px) { .rp-q > summary { grid-template-columns: 16px 30px minmax(0, 1fr) 34px; } .rp-q .q-map, .rp-q .q-prog { display: none; } .rp-q > .q-body { padding-left: 12px; } }
+.rp-note { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 11px; font-weight: 500; border: 1px solid var(--border); color: var(--muted-foreground); white-space: nowrap; }
+.rp-note.dark { background: color-mix(in oklab, var(--info) 18%, transparent); border-color: color-mix(in oklab, var(--info) 40%, transparent); color: var(--foreground); }
+.rp-note .lucide { width: 11px; height: 11px; }

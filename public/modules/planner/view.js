@@ -2,7 +2,7 @@
 // pins, and on the right what the pinned quests still need in total.
 import { S, saveUi } from '../../core/store.js';
 import { esc } from '../../core/util.js';
-import { STATUS_LABEL, objValue, taskMaps, taskStatus } from '../../core/game.js';
+import { STATUS_LABEL, objValue, taskMapNotes, taskMaps, taskStatus } from '../../core/game.js';
 import { badge, btn, emptyState, icon, toggleSwitch } from '../../ui/basecoat/components.js';
 import { objRow, objectiveActions, objectiveChanges } from '../../ui/basecoat/objectives.js';
 import { questCardToggle } from '../../ui/basecoat/quest-card.js';
@@ -14,6 +14,12 @@ const mapLabel = (m) => (m === ANY_MAP ? 'Any map' : m);
 const initials = (n) => String(n || '?').replace(/["'()]/g, '').split(/[\s-]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase();
 const pic = (src, name, cls = '') => `<span class="pic ${cls}"><span class="initials">${esc(initials(name))}</span>${src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span>`;
 const names = (items) => items.map((i) => esc(i.name)).join(', ');
+// Map conditions of a quest ("Factory: night", "21:00–04:00", "event: Infected"); the map is left out
+// when the planner already shows that map.
+const DARK = /night|dark|\d\d:00/;
+function mapNotes(t) {
+  return taskMapNotes(t).map(({ map, note }) => `<span class="rp-note${DARK.test(note) ? ' dark' : ''}">${DARK.test(note) ? icon('moon') : ''}${esc(map && map !== S.ui.rp.map ? `${mapLabel(map)}: ${note}` : note)}</span>`).join('');
+}
 
 function questRow(t, pins) {
   const st = taskStatus(t.id);
@@ -24,7 +30,7 @@ function questRow(t, pins) {
   const action = st === 'active' ? btn('Complete', `data-act="rp-status" data-id="${esc(t.id)}" data-v="completed"`, { size: 'xs' }) : badge(`${icon('lock')} ${STATUS_LABEL[st]}`);
   return `<li><details class="rp-q st-${st}${pinned ? ' pinned' : ''}" id="rp-${esc(t.id)}" data-open="${esc(t.id)}" ${S.ui.open?.[t.id] ? 'open' : ''}>
     <summary>${icon('chevron', 'caret')}${pic(traderImage(t.trader?.id), t.trader?.name, 'tr')}
-      <span class="q-name">${esc(t.name)}<span class="q-sub">${esc(t.trader?.name || '')}${st === 'locked' ? ' · locked' : ''}</span></span>
+      <span class="q-name">${esc(t.name)}<span class="q-sub">${esc(t.trader?.name || '')}${st === 'locked' ? ' · locked' : ''}${mapNotes(t)}</span></span>
       <span class="q-map">${esc(taskMaps(t).map(mapLabel).join(', '))}</span>
       <span class="q-prog">${req.length ? `${done}/${req.length} objectives<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span>
       ${btn(icon('star', pinned ? 'filled' : ''), `data-act="rp-pin" data-id="${esc(t.id)}" aria-pressed="${pinned}" aria-label="${pinned ? 'Unpin' : 'Pin'} ${esc(t.name)}"`, { variant: pinned ? 'secondary' : 'ghost', size: 'icon-sm', cls: 'pin', tip: pinned ? 'Unpin' : 'Pin: add to the totals', side: 'left' })}</summary>
@@ -51,7 +57,7 @@ function totalsPanel() {
   const gear = T.gear.map((e) => line(ico(e.items), `${HOW[e.how]}: ${e.how === 'wear' ? e.items.map((i) => esc(i.name)).join(' + ') : anyOf(e.items)}`, esc(e.from.join(', ')))).join('');
   const group = (title, count, body, none) => `<div class="rp-sum" data-group="${title.toLowerCase().split(' ')[0]}"><h4><span>${title}</span><span>${count}</span></h4>${body || `<p class="count">${none}</p>`}</div>`;
   return `<div class="card" data-size="sm"><header><h2>Pinned quests (${T.tasks.length})</h2><p>Everything they still need, added up</p></header><section>
-    <div class="rp-pins">${T.tasks.map((t) => `<div class="rp-pin" data-id="${esc(t.id)}"><span><a href="#" data-act="rp-show" data-id="${esc(t.id)}">${esc(t.name)}</a> <small>· ${esc(t.trader?.name || '')}</small></span><small>${esc(taskMaps(t).map(mapLabel).join(', '))}</small>${btn(icon('x'), `data-act="rp-pin" data-id="${esc(t.id)}" aria-label="Unpin ${esc(t.name)}"`, { variant: 'ghost', size: 'icon-sm' })}</div>`).join('')}</div>
+    <div class="rp-pins">${T.tasks.map((t) => `<div class="rp-pin" data-id="${esc(t.id)}"><span><a href="#" data-act="rp-show" data-id="${esc(t.id)}">${esc(t.name)}</a> <small>· ${esc(t.trader?.name || '')}</small>${mapNotes(t)}</span><small>${esc(taskMaps(t).map(mapLabel).join(', '))}</small>${btn(icon('x'), `data-act="rp-pin" data-id="${esc(t.id)}" aria-label="Unpin ${esc(t.name)}"`, { variant: 'ghost', size: 'icon-sm' })}</div>`).join('')}</div>
     <p class="rp-maps-sum">On ${T.maps.map(({ map, count }) => `<b>${esc(mapLabel(map))}</b> (${count})`).join(', ')}. Completed quests unpin themselves.</p>
     ${group('Items', T.items.length + T.questItems.length, items, 'Nothing to hand in.')}
     ${group('Keys', T.keys.length, keys, 'No keys needed.')}

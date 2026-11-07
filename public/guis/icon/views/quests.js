@@ -3,7 +3,7 @@
 // objective rows; quest and objective changes go through core/progress.js.
 import { S } from '../../../core/store.js';
 import { esc } from '../../../core/util.js';
-import { STATUS_LABEL, idx, objValue, taskMaps, taskStatus } from '../../../core/game.js';
+import { STATUS_LABEL, idx, objValue, taskMapText, taskStatus } from '../../../core/game.js';
 import { badge, btn, emptyState, icon } from '../../../ui/basecoat/components.js';
 import { objRow, objectiveActions, objectiveChanges } from '../../../ui/basecoat/objectives.js';
 import { questCardToggle } from '../../../ui/basecoat/quest-card.js';
@@ -104,7 +104,7 @@ function questRow(t) {
   return `<li><details class="qrow st-${st}" id="task-${esc(t.id)}" data-open="${esc(t.id)}" ${S.ui.open[t.id] ? 'open' : ''}>
     <summary>${icon('chevron', 'caret').replace('<path d="m6 9 6 6 6-6"/>', '<path d="m9 18 6-6-6-6"/>')}
       <span class="q-name">${esc(t.name)}<span class="q-sub">${st === 'locked' ? esc(whyLocked(t)) : `Level ${t.minPlayerLevel || 1}${t.kappaRequired ? ' · Kappa' : ''}`}</span></span>
-      <span class="q-map count">${esc(taskMaps(t).join(', '))}</span>
+      <span class="q-map count">${esc(taskMapText(t))}</span>
       <span class="q-prog">${req.length ? `${done}/${req.length} objectives<div class="progress" role="progressbar" aria-label="Objectives done" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>` : ''}</span>
       <span class="q-act">${action}</span></summary>
     <div class="q-body"><ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>

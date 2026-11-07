@@ -224,6 +224,50 @@ test('raid planner: map counts across traders, pins in order, totals of items, k
   assert.deepStrictEqual(posted.filter((o) => o.section === 'questPins').map((o) => [o.id, o.value === null ? null : 'time']), [['x0', 'time'], [CHECKING, 'time'], ['t3', 'time'], ['x0', null]]);
 });
 
+test('maps: variants fold into their base map with a note; objectives on 6+ maps count as any map', async () => {
+  const S = await reset();
+  const names = ['Customs', 'Factory', 'Ground Zero', 'Ground Zero 21+', 'Ground Zero Tutorial', 'Icebreaker', 'Infected Factory', 'Infected Lab', 'Interchange', 'Lighthouse',
+    'Night Factory', 'Reserve', 'Shoreline', 'Streets of Tarkov', 'The Lab', 'The Lab (Dark)', 'The Labyrinth', 'Woods'];
+  assert.deepStrictEqual(game.idx && [...new Set(names.map((n) => game.baseMap(n).base))].sort(), ['Customs', 'Factory', 'Ground Zero', 'Icebreaker', 'Interchange', 'Lighthouse', 'Reserve', 'Shoreline', 'Streets of Tarkov', 'The Lab', 'The Labyrinth', 'Woods']);
+  assert.deepStrictEqual(['Night Factory', 'Infected Lab', 'The Lab (Dark)', 'Ground Zero 21+', 'Ground Zero Tutorial', 'Woods'].map((n) => game.baseMap(n).note), ['night', 'Infected event', 'dark', 'level 21+', 'tutorial', '']);
+  const map = (name) => ({ id: name, name });
+  const all = ['Customs', 'Factory', 'Interchange', 'Lighthouse', 'Reserve', 'Shoreline', 'Streets of Tarkov', 'Woods'].map(map);
+  const T = (id, objectives, m = null) => ({ id, name: id, trader: { id: 'p', name: 'Prapor' }, map: m, taskRequirements: [], objectives });
+  S.data.tasks.push(
+    T('anyKill', [{ id: 'a1', type: 'shoot', maps: all }, { id: 'a2', type: 'giveItem', maps: [] }]),
+    T('mixed', [{ id: 'm1', type: 'shoot', maps: all }, { id: 'm2', type: 'visit', maps: [map('Woods')] }]),
+    T('few', [{ id: 'f1', type: 'shoot', maps: [map('Customs'), map('Woods'), map('Shoreline')] }]),
+    T('night', [{ id: 'n1', type: 'shoot', maps: [map('Night Factory')] }]),
+    T('dark', [{ id: 'd1', type: 'shoot', maps: [map('Woods')], timeFromHour: 21, timeUntilHour: 4 }]),
+    T('infected', [], map('Infected Lab')),
+  );
+  game.buildIndex();
+  const tm = (id) => game.taskMaps(S.data.tasks.find((t) => t.id === id));
+  assert.deepStrictEqual(tm('anyKill'), ['Any'], 'kill on any location: Any map only');
+  assert.deepStrictEqual(tm('mixed'), ['Woods', 'Any'], 'map-specific objective keeps its map');
+  assert.deepStrictEqual(tm('few'), ['Customs', 'Woods', 'Shoreline'], 'a few named maps stay');
+  assert.deepStrictEqual(tm('night'), ['Factory']);
+  assert.deepStrictEqual(tm('infected'), ['The Lab']);
+  const notes = (id) => game.taskMapNotes(S.data.tasks.find((t) => t.id === id));
+  assert.deepStrictEqual(notes('night'), [{ map: 'Factory', note: 'night' }]);
+  assert.deepStrictEqual(notes('dark'), [{ map: 'Woods', note: '21:00–04:00' }]);
+  assert.deepStrictEqual(notes('anyKill'), [], 'no notes from any-map objectives');
+  assert.strictEqual(game.taskMapText(S.data.tasks.find((t) => t.id === 'night')), 'Factory (night)');
+  // Raid planner: The Labyrinth and Icebreaker only with an active quest there.
+  const locked = (task) => ({ ...task, taskRequirements: [{ task: { id: '5936d90786f7742b1420ba5b', name: 'Debut' }, status: ['complete'] }] });
+  S.data.tasks.push(locked(T('laby', [{ id: 'l1', type: 'visit', maps: [map('The Labyrinth')] }])), locked(T('ice', [{ id: 'i1', type: 'visit', maps: [map('Icebreaker')] }])));
+  game.buildIndex();
+  const rp = await load('modules/planner/logic.js');
+  S.ui.rp.locked = true;
+  const chips = () => rp.mapCounts().maps.map((m) => m.map);
+  assert.strictEqual(game.taskStatus('laby'), 'locked');
+  assert.ok(!chips().includes('The Labyrinth') && !chips().includes('Icebreaker'), 'locked quests alone do not show them');
+  S.progress.tasks.laby = { status: 'active' };
+  game.resetMemo();
+  assert.ok(chips().includes('The Labyrinth') && !chips().includes('Icebreaker'), 'an active quest shows the map');
+  assert.ok(!chips().some((m) => /Night|Infected|21\+|Tutorial|\(Dark\)/.test(m)), 'no variant chips');
+});
+
 test('prestige: current prestige, custom requirements, achieved mark', async () => {
   const S = await reset();
   const prestige = await load('modules/prestige/logic.js');

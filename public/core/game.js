@@ -35,10 +35,71 @@ export function buildIndex() {
 
 export const reqStatuses = (r) => (Array.isArray(r.status) ? r.status : [r.status || 'complete']).map(norm);
 
+// Map variants share a chip with their base map and leave a note on the quest instead.
+const MAP_VARIANTS = [
+  [/^Night (.+)$/, 'night'],
+  [/^Infected (.+)$/, 'Infected event'],
+  [/^(.+) \(Dark\)$/, 'dark'],
+  [/^(.+) 21\+$/, 'level 21+'],
+  [/^(.+) Tutorial$/, 'tutorial'],
+];
+const MAP_ALIASES = { Lab: 'The Lab', Labs: 'The Lab' };
+// 'Night Factory' -> { base: 'Factory', note: 'night' }; a plain map -> { base: name, note: '' }.
+export function baseMap(name) {
+  for (const [re, note] of MAP_VARIANTS) {
+    const m = re.exec(name || '');
+    if (m) return { base: MAP_ALIASES[m[1]] || m[1], note };
+  }
+  return { base: MAP_ALIASES[name] || name, note: '' };
+}
+// An objective listing this many base maps counts as "any map".
+export const ANY_MAP_FROM = 6;
+const objBaseMaps = (o) => uniq((o.maps || []).map((x) => baseMap(x.name).base).filter(Boolean));
+
+// The base maps a quest is played on, or ['Any'] when it isn't tied to a map. Objectives that list
+// ANY_MAP_FROM or more maps count as "any map" (a quest with those and a map-specific objective is
+// on that map and on 'Any').
 export function taskMaps(t) {
-  if (t.map?.name) return [t.map.name];
-  const m = uniq(t.objectives.flatMap((o) => (o.maps || []).map((x) => x.name)));
-  return m.length ? m : ['Any'];
+  const key = `maps:${t.id}`;
+  if (key in memo) return memo[key];
+  let out;
+  if (t.map?.name) out = [baseMap(t.map.name).base];
+  else {
+    const maps = new Set();
+    let any = false;
+    for (const o of t.objectives) {
+      const m = objBaseMaps(o);
+      if (!m.length) continue;
+      if (m.length >= ANY_MAP_FROM) any = true;
+      else m.forEach((x) => maps.add(x));
+    }
+    out = maps.size ? [...maps, ...(any ? ['Any'] : [])] : ['Any'];
+  }
+  return (memo[key] = out);
+}
+
+// Notes for a quest's map conditions: variants ("night", "Infected event", "level 21+", "dark")
+// and time windows of kill objectives ("21:00–04:00"). [{ map, note }], each once.
+export function taskMapNotes(t) {
+  const out = [];
+  const add = (map, note) => { if (note && !out.some((n) => n.map === map && n.note === note)) out.push({ map, note }); };
+  const named = (x) => { const b = baseMap(x?.name); add(b.base, b.note); };
+  if (t.map?.name) named(t.map);
+  const hh = (h) => `${String(h).padStart(2, '0')}:00`;
+  for (const o of t.objectives) {
+    if (objBaseMaps(o).length < ANY_MAP_FROM) (o.maps || []).forEach(named);
+    if (o.timeFromHour != null && o.timeUntilHour != null) add(objBaseMaps(o).length === 1 ? objBaseMaps(o)[0] : (t.map ? baseMap(t.map.name).base : ''), `${hh(o.timeFromHour)}–${hh(o.timeUntilHour)}`);
+  }
+  return out;
+}
+
+// One line for list views: "Factory (night)", "Customs, Any", "Woods (21:00–04:00)".
+export function taskMapText(t) {
+  const notes = taskMapNotes(t);
+  return taskMaps(t).map((m) => {
+    const n = notes.filter((x) => x.map === m || (!x.map && m !== 'Any')).map((x) => x.note);
+    return n.length ? `${m} (${n.join(', ')})` : m;
+  }).join(', ');
 }
 
 // ---------------------------------------------------------------- objectives

@@ -13,17 +13,25 @@ export const uiDefaults = {
 export const ANY_MAP = 'Any';
 const listed = (st) => st === 'active' || (S.ui.rp.locked && st === 'locked');
 
+// Maps with no base map to share a chip with: shown only while you have an active quest there.
+export const ACTIVE_ONLY_MAPS = new Set(['The Labyrinth', 'Icebreaker']);
+
 // Map chips: [{ map, count }] for the listed quests (a quest on several maps counts on each).
 // 'Any' (quests not tied to a map) last.
 export function mapCounts() {
-  const counts = new Map();
+  const counts = new Map(), active = new Set();
   let all = 0;
   for (const t of S.data.tasks) {
-    if (!listed(taskStatus(t.id))) continue;
+    const st = taskStatus(t.id);
+    if (!listed(st)) continue;
     all++;
-    for (const m of taskMaps(t)) counts.set(m, (counts.get(m) || 0) + 1);
+    for (const m of taskMaps(t)) {
+      counts.set(m, (counts.get(m) || 0) + 1);
+      if (st === 'active') active.add(m);
+    }
   }
-  const maps = [...counts].map(([map, count]) => ({ map, count })).sort((a, b) => (a.map === ANY_MAP) - (b.map === ANY_MAP) || byName(a.map, b.map));
+  const maps = [...counts].filter(([map]) => !ACTIVE_ONLY_MAPS.has(map) || active.has(map)).map(([map, count]) => ({ map, count }))
+    .sort((a, b) => (a.map === ANY_MAP) - (b.map === ANY_MAP) || byName(a.map, b.map));
   return { all, maps };
 }
 

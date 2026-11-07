@@ -2,7 +2,7 @@
 // module's logic (filters, status changes) and the shared objective rows.
 import { S } from '../../../core/store.js';
 import { esc } from '../../../core/util.js';
-import { STATUS_LABEL, objValue, taskMaps, taskStatus } from '../../../core/game.js';
+import { STATUS_LABEL, objValue, taskMapText, taskStatus } from '../../../core/game.js';
 import { badge, btn, checkbox, emptyState, progressBar } from '../../../ui/basecoat/components.js';
 import { objRow, objectiveActions, objectiveChanges } from '../../../ui/basecoat/objectives.js';
 import { filteredTasks, sortTasks, toggleStatusFilter, focusTask, setTaskStatus } from '../../../modules/quests/logic.js';
@@ -16,7 +16,7 @@ function questRow(t) {
   return `<li class="cq-row st-${st}" id="task-${t.id}">
     <div class="cq-head">
       <span class="cq-name">${esc(t.name)}</span>
-      <span class="cq-meta">${esc(t.trader?.name || '?')} · ${esc(taskMaps(t).join(', '))}</span>
+      <span class="cq-meta">${esc(t.trader?.name || '?')} · ${esc(taskMapText(t))}</span>
       ${badge(STATUS_LABEL[st], 'outline', `status-${st}`)}
       <span class="cq-actions">${st === 'active'
         ? btn('Complete', `data-act="task-set" data-id="${esc(t.id)}" data-v="completed"`, { variant: 'primary', size: 'xs' })

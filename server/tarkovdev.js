@@ -25,10 +25,12 @@ const OBJECTIVE_FULL = `
   ... on TaskObjectiveUseItem { useAny { ${ITEM} } count }
   ... on TaskObjectiveHideoutStation { hideoutStation { id name } stationLevel }
 `;
-// Keys an objective needs ([[Item]]: any item of a set opens that lock). Asked for first; if the live
-// schema does not have them, the queries without keys below are used.
+// Asked for first; if the live schema does not have these, the queries without them below are used:
+// keys an objective needs ([[Item]]: any item of a set opens that lock) and the time window of kill
+// objectives (e.g. 21–4: at night).
 const KEY_TYPES = ['TaskObjectiveBasic', 'TaskObjectiveExtract', 'TaskObjectiveItem', 'TaskObjectiveMark', 'TaskObjectiveQuestItem', 'TaskObjectiveShoot', 'TaskObjectiveUseItem'];
-const OBJECTIVE_KEYS = `${OBJECTIVE_FULL}${KEY_TYPES.map((ty) => `  ... on ${ty} { requiredKeys { ${ITEM} } }`).join('\n')}
+const OBJECTIVE_EXTRA = `${OBJECTIVE_FULL}${KEY_TYPES.map((ty) => `  ... on ${ty} { requiredKeys { ${ITEM} } }`).join('\n')}
+  ... on TaskObjectiveShoot { timeFromHour timeUntilHour }
 `;
 const OBJECTIVE_MIN = `__typename id type description optional maps { id name }`;
 
@@ -134,7 +136,7 @@ function queryVariants({ gameMode = 'regular', lang = 'en' } = {}) {
   const withMode = `lang: ${lang}, gameMode: ${gameMode}`;
   const noMode = `lang: ${lang}`;
   return {
-    tasks: [tasksQuery(withMode, OBJECTIVE_KEYS), tasksQuery(withMode, OBJECTIVE_FULL), tasksQuery(withMode, OBJECTIVE_FULL, false), tasksQuery(noMode, OBJECTIVE_FULL, false), tasksQuery(noMode, OBJECTIVE_MIN, false)],
+    tasks: [tasksQuery(withMode, OBJECTIVE_EXTRA), tasksQuery(withMode, OBJECTIVE_FULL), tasksQuery(withMode, OBJECTIVE_FULL, false), tasksQuery(noMode, OBJECTIVE_FULL, false), tasksQuery(noMode, OBJECTIVE_MIN, false)],
     traders: [tradersQuery(withMode), tradersQuery(noMode)],
     hideoutStations: [hideoutQuery(withMode, true, true), hideoutQuery(withMode, true), hideoutQuery(noMode, true), hideoutQuery(noMode, false)],
     prestige: [prestigeQuery(withMode, OBJECTIVE_FULL), prestigeQuery(noMode, OBJECTIVE_FULL), prestigeQuery(noMode, OBJECTIVE_MIN)],

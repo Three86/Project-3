@@ -2,7 +2,7 @@
 import { S } from '../../core/store.js';
 import { setTaskStatus, startWithPrereqs } from '../../core/progress.js';
 import { esc } from '../../core/util.js';
-import { STATUS_LABEL, autoValue, objValue, reqStatuses, taskMaps, taskProgress, taskStatus } from '../../core/game.js';
+import { STATUS_LABEL, autoValue, objValue, reqStatuses, taskMapText, taskProgress, taskStatus } from '../../core/game.js';
 import { badge, btn, dropdownMenu, icon, popover, progressBar } from './components.js';
 import { objRow } from './objectives.js';
 
@@ -34,7 +34,7 @@ export function taskCard(t) {
     <summary>
       <div class="qhead"><span class="title">${esc(t.name)}</span>
         ${p?.source === 'log' ? badge('log', 'secondary', 'log', 'Detected from game logs') : ''}${badge(STATUS_LABEL[st], 'outline', `status-${st}`)}${icon('chevron', 'caret')}</div>
-      <div class="meta"><span>${esc(t.trader?.name || '?')}</span>·<span>${esc(taskMaps(t).join(', '))}</span>·<span>Lvl ${t.minPlayerLevel || 1}</span>
+      <div class="meta"><span>${esc(t.trader?.name || '?')}</span>·<span>${esc(taskMapText(t))}</span>·<span>Lvl ${t.minPlayerLevel || 1}</span>
         ${t.objectives.length ? `·<span>${pending ? `${pending} left` : 'all objectives done'} (${pct}%)</span>` : ''}
         ${t.kappaRequired ? badge('Kappa', 'outline', 'kappa') : ''}${t.lightkeeperRequired ? badge('Lightkeeper', 'outline', 'kappa') : ''}
         ${t.factionName && t.factionName !== 'Any' ? badge(esc(t.factionName)) : ''}</div>
