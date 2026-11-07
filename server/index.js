@@ -50,6 +50,7 @@ const emptyProgress = () => ({
   custom: {}, // id -> { text, done, prestigeId }
   skills: {}, // skill id -> level
   craftPins: {}, // station id -> [craft id] (max 4)
+  questPins: {}, // taskId -> time pinned (Raid planner); dropped once the quest is completed
 });
 const savedProgress = readJson(PROGRESS_FILE, {});
 let progress = Object.assign(emptyProgress(), savedProgress);
@@ -73,11 +74,13 @@ let lastRefreshError = null;
 let traderResets = { fetchedAt: gameData?.meta?.fetchedAt || null, times: Object.fromEntries((gameData?.traders || []).filter((t) => t.resetTime).map((t) => [t.id, t.resetTime])) };
 
 function saveProgress() {
+  // A pinned quest unpins itself once it is completed (by hand or from the game logs).
+  for (const id of Object.keys(progress.questPins || {})) if (progress.tasks[id]?.status === 'completed') delete progress.questPins[id];
   progress.rev += 1;
   writeJson(PROGRESS_FILE, progress);
 }
 
-const SECTIONS = ['tasks', 'objectives', 'hideout', 'hideoutReqs', 'prestige', 'custom', 'settings', 'skills', 'craftPins'];
+const SECTIONS = ['tasks', 'objectives', 'hideout', 'hideoutReqs', 'prestige', 'custom', 'settings', 'skills', 'craftPins', 'questPins'];
 function applyOp({ section, id, value }) {
   if (!SECTIONS.includes(section) || typeof id !== 'string' || !id) throw new Error(`bad op ${section}/${id}`);
   const target = progress[section];

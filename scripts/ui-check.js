@@ -396,6 +396,62 @@ async function run(dataDir) {
     await shot('skills');
   }
 
+  // ------------------------------------------------------------ raid planner
+  if (want('planner')) {
+    console.log('Raid planner');
+    const CHECKING = '59674cd986f7744ab26e32f2';
+    const ops = (o) => page.evaluate((x) => fetch('/api/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: x }) }), o);
+    await ops([{ section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'tasks', id: CHECKING, value: 'active' }, { section: 'tasks', id: 'x0', value: 'active' }, { section: 'tasks', id: 'x1', value: 'active' }, { section: 'tasks', id: 't3', value: 'active' },
+      { section: 'objectives', id: 'o3', value: null }, { section: 'objectives', id: 'xo0b', value: null }, ...['x0', CHECKING, 't3', 'x1'].map((id) => ({ section: 'questPins', id, value: null }))]);
+    await freshUi('planner');
+    const chips = await page.locator('[data-act="rp-map"]').allInnerTexts();
+    ok(chips[0].startsWith('All maps') && chips.some((c) => /^Customs\s*2$/.test(c.trim())) && chips.some((c) => /^Woods\s*2$/.test(c.trim())), `map chips with quest counts (${chips.map((c) => c.replace(/\s+/g, ' ')).join(' | ')})`);
+    await page.click('[data-act="rp-map"][data-map="Woods"]'); await settle();
+    const woods = await page.locator('.rp-q .q-sub').allInnerTexts();
+    ok(woods.length === 2 && woods.some((s) => s.startsWith('Jaeger')) && woods.some((s) => s.startsWith('Therapist')), `Woods lists quests from every trader (${woods.join(', ')})`);
+    ok(await page.locator('.rp-panel .empty').count() === 1, 'nothing pinned: the panel says so');
+    await page.click('#rp-t3 [data-act="rp-pin"]'); await settle();
+    await page.click('[data-act="rp-map"][data-map="Customs"]'); await settle();
+    await page.click(`#rp-${CHECKING} [data-act="rp-pin"]`); await settle();
+    await page.click('#rp-x0 [data-act="rp-pin"]'); await settle();
+    ok(lastOp()?.section === 'questPins' && lastOp()?.id === 'x0' && typeof lastOp()?.value === 'number', 'pin saved');
+    const pins = await page.locator('.rp-pin a').allInnerTexts();
+    ok(JSON.stringify(pins) === JSON.stringify(['Shooting Cans', 'Checking', 'Quest number 0']), `pinned quests in pin order, from any map (${pins.join(', ')})`);
+    ok(await page.locator('.rp-list > li:first-child .rp-q.pinned').count() === 1, 'pinned quests on top of the list');
+    const group = (g) => page.locator(`.rp-sum[data-group="${g}"]`).innerText();
+    const items = await group('items');
+    ok(/Salewa[\s\S]*×3/.test(items) && items.includes('Bronze pocket watch') && items.includes('quest item'), 'items: Salewa ×3 (twice: FIR and not) and the quest item');
+    const keys = await group('keys');
+    ok(keys.includes("Tarcone Director's office key") && keys.includes('any one of: Dorm room 303 key, Dorm room 206 key'), 'keys, with "any one of" for alternatives');
+    const gear = await group('gear');
+    ok(gear.includes('Wear: 6B43 6A Zabralo-Sh body armor') && gear.includes('Use: SV-98'), 'gear to wear or use');
+    // Handing in counts down; a done objective's key drops out; completing unpins.
+    await page.click('#rp-x0 > summary'); await settle();
+    await page.click('#rp-x0 [data-act="step"][data-key="xo0b"][data-d="1"]'); await settle();
+    ok((await group('items')).includes('of 3 · 1 done'), 'handed-in item counted down');
+    await page.click(`#rp-${CHECKING} > summary`); await settle();
+    await page.click(`#rp-${CHECKING} [data-act="check"][data-key="o3"]`); await settle();
+    ok(!(await group('keys')).includes('Tarcone'), 'key of a done objective dropped');
+    await page.click(`#rp-${CHECKING} [data-act="rp-status"][data-v="completed"]`); await settle();
+    await page.reload(); await page.waitForSelector('.rp-panel');
+    const after = await page.locator('.rp-pin a').allInnerTexts();
+    ok(!after.includes('Checking') && after.length === 2, `completing a pinned quest unpins it (${after.join(', ')})`);
+    ok(await page.evaluate((id) => fetch('/api/progress').then((r) => r.json()).then((p) => !(id in p.questPins)), CHECKING), 'server dropped the pin of the completed quest');
+    // Locked switch (Checking reset: locked again until Debut is done), unpin from the panel, Open in Quests.
+    await ops([{ section: 'tasks', id: CHECKING, value: null }]);
+    await page.reload(); await page.waitForSelector('.rp-panel');
+    const before = await page.locator('[data-act="rp-map"][data-map=""] .badge').innerText();
+    await page.check('[data-ui="rp.locked"]'); await settle();
+    ok(Number(await page.locator('[data-act="rp-map"][data-map=""] .badge').innerText()) > Number(before) && await page.locator(`#rp-${CHECKING}.st-locked`).count() === 1, 'include locked quests adds them');
+    await page.uncheck('[data-ui="rp.locked"]'); await settle();
+    await page.click('.rp-pin [data-act="rp-pin"][data-id="t3"]'); await settle();
+    ok(!(await page.locator('.rp-pin a').allInnerTexts()).includes('Shooting Cans'), 'unpin from the panel');
+    await shot('planner');
+    await page.click('#rp-x0 [data-act="goto"]'); await settle();
+    ok(await page.getAttribute('#tab-quests', 'aria-selected') === 'true' && await page.locator('details[data-open="x0"][open]').count() === 1, 'Open in Quests shows the quest');
+    await ops([{ section: 'questPins', id: 'x0', value: null }, ...['x0', 'x1', 't3'].map((id) => ({ section: 'tasks', id, value: null })), { section: 'tasks', id: CHECKING, value: null }, { section: 'objectives', id: 'o3', value: null }, { section: 'objectives', id: 'xo0b', value: null }]);
+  }
+
   // ------------------------------------------------------------ search
   if (want('search')) {
     console.log('Search');

@@ -44,7 +44,7 @@ export async function api(path, opts = {}) {
 export async function setProgress(ops) {
   if (!Array.isArray(ops)) ops = [ops];
   for (const { section, id, value } of ops) {
-    const t = S.progress[section];
+    const t = (S.progress[section] ||= {});
     if (section === 'tasks') value == null ? delete t[id] : (t[id] = { status: value, updatedAt: Date.now(), source: 'manual' });
     else if (section === 'settings') t[id] = value;
     else if (value == null || value === false || value === 0) delete t[id];

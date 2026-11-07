@@ -183,6 +183,47 @@ test('overview: weight limits, stamina, food and drain, fuel and filters at your
   assert.strictEqual(ov.goals()[0].done, kappa.done + 1, 'completing a Kappa quest counts');
 });
 
+test('raid planner: map counts across traders, pins in order, totals of items, keys and gear', async () => {
+  const S = await reset();
+  const rp = await load('modules/planner/logic.js');
+  const DEBUT = '5936d90786f7742b1420ba5b', CHECKING = '59674cd986f7744ab26e32f2';
+  // Nothing active yet: only locked quests, shown with the switch.
+  assert.strictEqual(rp.mapCounts().all, 0);
+  S.ui.rp.locked = true;
+  const all = rp.mapCounts();
+  assert.ok(all.all > 0 && all.maps.length > 0, 'locked quests listed with the switch on');
+  S.ui.rp.locked = false;
+  S.progress.tasks = { [CHECKING]: { status: 'active' }, x0: { status: 'active' }, x1: { status: 'active' }, t3: { status: 'active' } };
+  game.resetMemo();
+  const counts = Object.fromEntries(rp.mapCounts().maps.map((m) => [m.map, m.count]));
+  assert.deepStrictEqual([counts.Customs, counts.Woods], [2, 2], 'Checking (Prapor) + Quest number 0 on Customs; Quest number 1 + Shooting Cans (Jaeger) on Woods');
+  rp.setMap('Customs');
+  assert.deepStrictEqual(rp.plannerTasks().map((t) => t.name), ['Checking', 'Quest number 0']);
+  // Pins keep their order and come first.
+  await rp.togglePin('x0');
+  await rp.togglePin(CHECKING);
+  await rp.togglePin('t3');
+  assert.deepStrictEqual(rp.pinnedTasks().map((t) => t.id), ['x0', CHECKING, 't3']);
+  assert.strictEqual(rp.plannerTasks()[0].id, 'x0', 'pinned quest first');
+  S.progress.objectives.xo0b = 1; // one Salewa handed in for Quest number 0
+  const T = rp.pinnedTotals();
+  const salewa = T.items.filter((e) => e.items[0].shortName === 'Salewa').sort((a, b) => a.fir - b.fir);
+  assert.deepStrictEqual(salewa.map((e) => [e.fir, e.count, e.have]), [[false, 3, 0], [true, 3, 1]], 'FIR and not-FIR counted apart; handed-in subtracted');
+  assert.deepStrictEqual(T.questItems.map((e) => e.item.name), ['Bronze pocket watch'], 'quest item once for find + hand over');
+  assert.deepStrictEqual(T.keys.map((e) => [e.keys.map((k) => k.name), e.maps]), [[['Dorm room 303 key', 'Dorm room 206 key'], ['Customs']], [["Tarcone Director's office key"], ['Customs']]]);
+  assert.deepStrictEqual(T.gear.map((e) => [e.how, e.items.map((i) => i.shortName)]), [['wear', ['6B43']], ['use', ['SV-98']]]);
+  assert.deepStrictEqual(T.maps.map((m) => m.map), ['Customs', 'Woods']);
+  // Done objectives and completed quests drop out (also completed by implication).
+  S.progress.objectives.o3 = true;
+  assert.ok(!rp.pinnedTotals().keys.some((e) => e.keys[0].name.startsWith('Tarcone')), 'key of a done objective dropped');
+  S.progress.tasks[CHECKING] = { status: 'completed' };
+  game.resetMemo();
+  assert.deepStrictEqual(rp.pinnedTasks().map((t) => t.id), ['x0', 't3'], 'completed quest no longer pinned');
+  await rp.togglePin('x0');
+  assert.ok(!('x0' in S.progress.questPins), 'unpin');
+  assert.deepStrictEqual(posted.filter((o) => o.section === 'questPins').map((o) => [o.id, o.value === null ? null : 'time']), [['x0', 'time'], [CHECKING, 'time'], ['t3', 'time'], ['x0', null]]);
+});
+
 test('prestige: current prestige, custom requirements, achieved mark', async () => {
   const S = await reset();
   const prestige = await load('modules/prestige/logic.js');

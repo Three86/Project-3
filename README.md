@@ -13,6 +13,11 @@ A self-hosted quest, hideout and prestige tracker for Escape from Tarkov. It run
   - To use your own pictures, put `usec.png` / `bear.png` (or .jpg / .webp) in `data/images/pmc/`.
   - A reload keeps the section you were on; opening the tracker again starts on Overview.
 - **Quests**: shows active, locked, completed and failed quests (quests you could start but have not are not listed; starts come from the game logs). You can filter and group them by trader, map or requirement type (kills, FIR items, non-FIR items, equipment/gear, quest items, place/mark, visit, extract, skill/level). You can also sort by level, trader, map, name or progress. Every objective can be checked off, and counted objectives (kills, hand-ins) have a counter. Item objectives say whether the item must be **found in raid (FIR)**. Use the Kappa and Lightkeeper filters to show only quests needed for those.
+- **Raid planner**: pick a map and see your active quests there from every trader (switch on "Include locked quests" to plan ahead). Pin quests with the star, from any map; the panel adds up what the pinned quests still need:
+  - Items to hand in or place, combined across quests, with FIR shown, "any of" when several items are accepted, and what you've already handed in subtracted. Quest items are listed too.
+  - Keys, with the map and the quests that need them ("any one of" when several keys fit). Keys come from tarkov.dev's per-objective key data.
+  - Gear to wear or use (and weapons to build).
+  - Pins are saved in your progress (every GUI and browser sees them). Completing a pinned quest unpins it, and objectives you've finished drop out of the totals.
 - **Hideout**: shows each station with its next level, or all levels. Requirements cover items (with FIR flag and a counter), trader loyalty, skills and other stations. Other-station requirements tick automatically once you mark that level built.
 - **Recipes**: shows hideout crafts you can make with the stations you've built and the quests you've completed, grouped by module. Each recipe lists its ingredients (tools marked; you get them back) and its craft time with your Crafting skill applied. Locked recipes are hidden unless you tick "Show locked", which also shows what unlocks them. Pin up to 4 recipes per module to keep them at the top. The Bitcoin Farm section takes your number of graphics cards (no more than the built level holds: 10, 25 or 50) and shows the time per bitcoin, bitcoins per day and bitcoins per fuel tank (Hideout Management and hideout fuel bonuses included).
 - **Prestige**: lists the prestige requirements. Level and quest conditions are tracked automatically and the rest have checkboxes. You can add your own requirements as checklist items.
@@ -144,7 +149,7 @@ public/
   core/               game rules and data, no HTML: store.js (state, server API, saving, sync, events),
                       game.js (quest/hideout/skill rules), progress.js (shared progress changes),
                       gui.js + registry.js (find and load GUIs and modules)
-  modules/<id>/       one folder per section: overview, quests, hideout, recipes, prestige, skills,
+  modules/<id>/       one folder per section: overview, quests, planner, hideout, recipes, prestige, skills,
                       search, settings
     module.json       { "title", "order", "description", "needsData" }
     logic.js          that section's filters, numbers and actions; no HTML. Exports uiDefaults.
