@@ -1,7 +1,9 @@
 // Raid planner: quests filtered by map across every trader, pinned quests, and what the pinned
 // quests still need in total (items, keys, gear). Pins live in progress.questPins (taskId -> time
-// pinned); the server drops a pin when the quest is saved as completed, and completed quests
-// (also those implied by later quests) are left out here.
+// pinned, or -1: unpinned by hand although auto-pin would add it); the server drops a pin when the
+// quest is saved as completed, and completed quests (also those implied by later quests) are left out
+// here. With settings.autoPinGoals on, every unlocked (active or available) Kappa / Lightkeeper quest
+// counts as pinned too, so locked ones join as soon as they unlock.
 import { S, setProgress, saveUi } from '../../core/store.js';
 import { norm, byName } from '../../core/util.js';
 import { idx, objItems, objKeys, objValue, taskMaps, taskStatus, traderList } from '../../core/game.js';
@@ -12,6 +14,10 @@ export const uiDefaults = {
 
 export const ANY_MAP = 'Any';
 const listed = (st) => st === 'active' || (S.ui.rp.locked && st === 'locked');
+const UNLOCKED = new Set(['active', 'available']);
+export const isGoalQuest = (t) => !!(t.kappaRequired || t.lightkeeperRequired);
+// In the list: listed statuses, plus pinned quests you could start (auto-pin adds those).
+const inList = (t, st, pins) => listed(st) || (st === 'available' && pins.has(t.id));
 
 // Maps with no base map to share a chip with: shown only while you have an active quest there.
 export const ACTIVE_ONLY_MAPS = new Set(['The Labyrinth', 'Icebreaker']);
@@ -21,9 +27,10 @@ export const ACTIVE_ONLY_MAPS = new Set(['The Labyrinth', 'Icebreaker']);
 export function mapCounts() {
   const counts = new Map(), active = new Set();
   let all = 0;
+  const pins = pinState();
   for (const t of S.data.tasks) {
     const st = taskStatus(t.id);
-    if (!listed(st)) continue;
+    if (!inList(t, st, pins)) continue;
     all++;
     for (const m of taskMaps(t)) {
       counts.set(m, (counts.get(m) || 0) + 1);
@@ -35,27 +42,43 @@ export function mapCounts() {
   return { all, maps };
 }
 
-// Pinned quests in the order they were pinned, without completed ones.
-export function pinnedTasks() {
-  return Object.entries(S.progress.questPins || {}).sort((a, b) => a[1] - b[1])
-    .map(([id]) => idx.tasks.get(id)).filter((t) => t && taskStatus(t.id) !== 'completed');
+const byTraderLevel = (rank) => (a, b) => (rank.get(a.trader?.id) ?? 99) - (rank.get(b.trader?.id) ?? 99) || (a.minPlayerLevel || 0) - (b.minPlayerLevel || 0) || byName(a.name, b.name);
+
+// Pinned quests: Map taskId -> 'manual' | 'auto', in pin order (by hand in the order pinned, then the
+// auto-pinned ones by trader and level). Completed quests are left out.
+export function pinState() {
+  const pins = S.progress.questPins || {};
+  const out = new Map();
+  for (const [id] of Object.entries(pins).filter(([, v]) => v > 0).sort((a, b) => a[1] - b[1])) {
+    if (idx.tasks.has(id) && taskStatus(id) !== 'completed') out.set(id, 'manual');
+  }
+  if (S.progress.settings?.autoPinGoals) {
+    const rank = new Map(traderList().map((t, i) => [t.id, i]));
+    S.data.tasks.filter((t) => isGoalQuest(t) && !out.has(t.id) && !(pins[t.id] < 0) && UNLOCKED.has(taskStatus(t.id)))
+      .sort(byTraderLevel(rank)).forEach((t) => out.set(t.id, 'auto'));
+  }
+  return out;
 }
 
-// Quests for the chosen map and filters, every trader: pinned first, then by trader and level.
+export const pinnedTasks = () => [...pinState().keys()].map((id) => idx.tasks.get(id));
+
+// Quests for the chosen map and filters, every trader: pinned first (in pin order), then by trader and level.
 export function plannerTasks() {
   const f = S.ui.rp;
   const text = norm(f.text);
-  const pins = S.progress.questPins || {};
+  const pins = pinState();
+  const order = new Map([...pins.keys()].map((id, i) => [id, i]));
   const rank = new Map(traderList().map((t, i) => [t.id, i]));
-  return S.data.tasks.filter((t) => listed(taskStatus(t.id)) && (!f.map || taskMaps(t).includes(f.map)) && (!text || norm(t.name).includes(text)))
-    .sort((a, b) => (b.id in pins) - (a.id in pins) || (pins[a.id] || 0) - (pins[b.id] || 0)
-      || (rank.get(a.trader?.id) ?? 99) - (rank.get(b.trader?.id) ?? 99) || (a.minPlayerLevel || 0) - (b.minPlayerLevel || 0) || byName(a.name, b.name));
+  return S.data.tasks.filter((t) => inList(t, taskStatus(t.id), pins) && (!f.map || taskMaps(t).includes(f.map)) && (!text || norm(t.name).includes(text)))
+    .sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9) || byTraderLevel(rank)(a, b));
 }
 
-// Pin (stamped later than every other pin, so the order holds) or unpin a quest.
+// Pin a quest (stamped later than every other pin, so the order holds) or unpin it. Unpinning an
+// auto-pinned quest stores -1 so auto-pin leaves it out; pinning it again by hand clears that.
 export function togglePin(id) {
   const pins = S.progress.questPins || {};
-  const value = id in pins ? null : Math.max(Date.now(), ...Object.values(pins).map((v) => v + 1));
+  const kind = pinState().get(id);
+  const value = kind === 'manual' ? null : kind === 'auto' ? -1 : Math.max(Date.now(), ...Object.values(pins).map((v) => v + 1));
   return setProgress({ section: 'questPins', id, value });
 }
 

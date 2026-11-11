@@ -224,6 +224,34 @@ test('raid planner: map counts across traders, pins in order, totals of items, k
   assert.deepStrictEqual(posted.filter((o) => o.section === 'questPins').map((o) => [o.id, o.value === null ? null : 'time']), [['x0', 'time'], [CHECKING, 'time'], ['t3', 'time'], ['x0', null]]);
 });
 
+test('raid planner: auto-pin unlocked Kappa / Lightkeeper quests; locked ones join when they unlock', async () => {
+  const S = await reset();
+  const rp = await load('modules/planner/logic.js');
+  const DEBUT = '5936d90786f7742b1420ba5b', CHECKING = '59674cd986f7744ab26e32f2';
+  S.data.tasks.find((t) => t.id === 'x2').lightkeeperRequired = true;
+  S.ui.rp = { map: '', locked: false, text: '' };
+  await rp.togglePin('x0');
+  const pinned = () => [...rp.pinState()].map(([id, kind]) => `${id}:${kind}`);
+  assert.deepStrictEqual(pinned(), ['x0:manual'], 'off: only pins made by hand');
+  S.progress.settings.autoPinGoals = true;
+  assert.deepStrictEqual(pinned(), ['x0:manual', `${DEBUT}:auto`, 'x2:auto'], 'Debut (Kappa) and Quest number 2 (Lightkeeper) are unlocked; Checking is locked');
+  assert.strictEqual(game.taskStatus(CHECKING), 'locked');
+  assert.ok(rp.plannerTasks().some((t) => t.id === DEBUT), 'an auto-pinned quest you have not started is listed');
+  // Debut done: Checking unlocks and is pinned; Debut drops out.
+  S.progress.tasks[DEBUT] = { status: 'completed' };
+  game.resetMemo();
+  assert.deepStrictEqual(pinned(), ['x0:manual', `${CHECKING}:auto`, 'x2:auto']);
+  // Unpinning an auto-pinned quest keeps it out; pinning it by hand brings it back as a normal pin.
+  await rp.togglePin(CHECKING);
+  assert.strictEqual(S.progress.questPins[CHECKING], -1);
+  assert.deepStrictEqual(pinned(), ['x0:manual', 'x2:auto']);
+  await rp.togglePin(CHECKING);
+  assert.deepStrictEqual(pinned(), ['x0:manual', `${CHECKING}:manual`, 'x2:auto']);
+  // Off again: auto pins go, pins made by hand stay.
+  S.progress.settings.autoPinGoals = false;
+  assert.deepStrictEqual(pinned(), ['x0:manual', `${CHECKING}:manual`]);
+});
+
 test('maps: variants fold into their base map with a note; objectives on 6+ maps count as any map', async () => {
   const S = await reset();
   const names = ['Customs', 'Factory', 'Ground Zero', 'Ground Zero 21+', 'Ground Zero Tutorial', 'Icebreaker', 'Infected Factory', 'Infected Lab', 'Interchange', 'Lighthouse',

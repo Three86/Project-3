@@ -446,6 +446,22 @@ async function run(dataDir) {
     await page.uncheck('[data-ui="rp.locked"]'); await settle();
     await page.click('.rp-pin [data-act="rp-pin"][data-id="t3"]'); await settle();
     ok(!(await page.locator('.rp-pin a').allInnerTexts()).includes('Shooting Cans'), 'unpin from the panel');
+    // Auto-pin Kappa & Lightkeeper: Debut (Kappa) is unlocked, Checking (Kappa) is locked until Debut is done.
+    await page.click('[data-act="rp-map"][data-map=""]'); await settle();
+    await page.check('[data-set="autoPinGoals"]'); await settle();
+    ok(JSON.stringify(lastOp()) === JSON.stringify({ section: 'settings', id: 'autoPinGoals', value: true }), 'auto-pin switch saves');
+    let autoPins = await page.locator('.rp-pin:has(.rp-note.auto) a').allInnerTexts();
+    ok(JSON.stringify(autoPins) === JSON.stringify(['Debut']), `auto-pin adds unlocked Kappa quests only (${autoPins.join(', ')})`);
+    ok(await page.locator('#rp-5936d90786f7742b1420ba5b [data-act="rp-status"][data-v="active"]').count() === 1, 'auto-pinned quest you have not started is listed with Start');
+    await ops([{ section: 'tasks', id: '5936d90786f7742b1420ba5b', value: 'completed' }]);
+    await page.reload(); await page.waitForSelector('.rp-panel');
+    autoPins = await page.locator('.rp-pin:has(.rp-note.auto) a').allInnerTexts();
+    ok(JSON.stringify(autoPins) === JSON.stringify(['Checking']), `a locked Kappa quest is pinned once it unlocks (${autoPins.join(', ')})`);
+    await page.click(`.rp-pin [data-act="rp-pin"][data-id="${CHECKING}"]`); await settle();
+    ok(lastOp()?.id === CHECKING && lastOp()?.value === -1 && !(await page.locator('.rp-pin a').allInnerTexts()).includes('Checking'), 'unpinning an auto-pinned quest keeps it out');
+    await page.uncheck('[data-set="autoPinGoals"]'); await settle();
+    ok(await page.locator('.rp-pin .rp-note.auto').count() === 0, 'switching auto-pin off removes the auto pins');
+    await ops([{ section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'questPins', id: CHECKING, value: null }]);
     await shot('planner');
     await page.click('#rp-x0 [data-act="goto"]'); await settle();
     ok(await page.getAttribute('#tab-quests', 'aria-selected') === 'true' && await page.locator('details[data-open="x0"][open]').count() === 1, 'Open in Quests shows the quest');
