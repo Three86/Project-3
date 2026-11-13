@@ -158,7 +158,10 @@ test('overview: weight limits, stamina, food and drain, fuel and filters at your
   assert.strictEqual(Math.round(ov.strength().critical.now), 100, 'as the wiki says: 100 kg at elite');
   const e = ov.endurance();
   near(e.sprint.base, 115 / 4, 'base sprint time'); near(e.sprint.now, 115 * 1.15 / 4, 'sprint time');
-  near(e.refill.now, 115 * 1.15 / (4.5 * 1.15 * 1.25), 'refill standing');
+  near(e.refill.now, 115 * 1.15 / (4.5 * 1.25), 'refill standing: Endurance adds stamina, not refill speed');
+  S.progress.skills.Endurance = 51;
+  near(ov.endurance().staminaPct, 70, 'elite: +50% (capped at level 50) + 20%');
+  S.progress.skills.Endurance = 15;
   const m = ov.metabolism();
   near(m.item50, 55, '50 energy item at Metabolism 10');
   near(m.energy.perMin, 3.8 * (1 - 0.048), 'energy drain: Health only'); near(m.hydration.minutes, 100 / (3.2 * 0.952), 'hydration lasts');

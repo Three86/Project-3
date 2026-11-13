@@ -47,8 +47,8 @@ function strengthCard() {
 function enduranceCard() {
   const e = endurance();
   return skillCard('endurance', 'Endurance', 'run', lv('Endurance', e.level), `
-    ${stat('Sprint from full stamina', sec(e.sprint.now), `base ${sec(e.sprint.base)} · not overweight · ${Math.round(e.capacity)} stamina`)}
-    ${stat('Stamina refills from empty in', sec(e.refill.now), `standing still · base ${sec(e.refill.base)} · crouching is faster`)}`);
+    ${stat('Sprint from full stamina', sec(e.sprint.now), `base ${sec(e.sprint.base)} · not overweight · ${Math.round(e.capacity)} stamina (+${e.staminaPct.toFixed(0)}%)`)}
+    ${stat('Stamina refills from empty in', sec(e.refill.now), `standing still · base ${sec(e.refill.base)} · more stamina takes longer to fill; crouching is faster`)}`);
 }
 
 function metabolismCard() {
@@ -59,7 +59,7 @@ function metabolismCard() {
     ${stat('An item with 50 hydration gives', `${Math.round(m.item50)} hydration`, `${signed(m.gainPct)} from Metabolism`)}
     <div class="stat-sub">Drain in raid</div>
     ${drain('Energy', m.energy)}${drain('Hydration', m.hydration)}
-    <p class="ovw-note">Drain is lowered by Health (${signed(m.drainHealth)}); Metabolism doesn't change it.</p>`);
+    <p class="ovw-note">Drain is lowered by Health (energy ${signed(m.energy.pct)}, hydration ${signed(m.hydration.pct)}); Metabolism doesn't change it.</p>`);
 }
 
 function hideoutCard() {

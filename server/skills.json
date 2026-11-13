@@ -1,5 +1,5 @@
 {
- "note": "Skill descriptions and per-level effects compiled from the Escape from Tarkov community wiki, except where marked 'source: game config' (taken from the game's globals/hideout settings as mirrored by the SPT project, Aug 2026). BSG changes skills between patches and does not publish the client-side effects, so treat the rest as approximate. When game data is loaded, only skills tarkov.dev lists as active in the game are shown. To correct values, copy this file to data/skills.json and edit it; the tracker prefers that copy.",
+ "note": "Skill descriptions and per-level effects from the Escape from Tarkov wiki's Character skills pages (Nov 2026), except where marked 'source: game config' or 'measured in game'. BSG changes skills between patches and does not publish the client-side effects, so check the wiki or the in-game skill tooltips if something looks off. When game data is loaded, only skills tarkov.dev lists as active in the game are shown. To correct values, copy this file to data/skills.json and edit it; the tracker prefers that copy.",
  "maxLevel": 51,
  "eliteLevel": 51,
  "effectCapLevel": 50,
@@ -8,7 +8,7 @@
    "id": "Endurance",
    "name": "Endurance",
    "category": "Physical",
-   "description": "Increases stamina and how fast it recovers, and reduces breathlessness.",
+   "description": "Endurance influences the amount of stamina and the rate of exhaustion while running or jumping, as well as holding and recovering breath.",
    "levelUp": "Running, sprinting and moving while overweight.",
    "effects": [
     {
@@ -17,17 +17,24 @@
      "unit": "%"
     },
     {
-     "name": "Stamina recovery",
-     "perLevel": 1,
+     "name": "Jump stamina drain",
+     "perLevel": -0.6,
      "unit": "%"
     },
     {
-     "name": "Hands (arm) stamina",
-     "perLevel": 0.5,
+     "name": "Breath holding",
+     "perLevel": 2,
+     "unit": "%"
+    },
+    {
+     "name": "Breath recovery time",
+     "perLevel": -1,
      "unit": "%"
     }
    ],
    "elite": [
+    "Stamina +20% more (+70% in total)",
+    "Increased arm endurance",
     "Breathing no longer depends on energy"
    ]
   },
@@ -35,7 +42,7 @@
    "id": "Strength",
    "name": "Strength",
    "category": "Physical",
-   "description": "Increases carry weight, movement and sprint speed, jump height, throw distance and melee power, and lowers stamina drain while aiming.",
+   "description": "Increasing strength allows you to jump higher, sprint faster, hit harder, throw farther, and carry more weight.",
    "levelUp": "Sprinting, jumping and moving while overweight, throwing grenades, melee hits.",
    "effects": [
     {
@@ -78,89 +85,79 @@
    "id": "Vitality",
    "name": "Vitality",
    "category": "Physical",
-   "description": "Reduces the chance of bleeding and of limbs being destroyed by damage.",
+   "description": "Vitality improves your chances of surviving a wound by decreasing the possibility of bleeding and instant death through critical damage to a body part.",
    "levelUp": "Taking damage, having a bleeding or a destroyed limb.",
    "effects": [
     {
-     "name": "Bleeding chance on hit",
-     "perLevel": -1,
+     "name": "Bleeding chance",
+     "perLevel": -1.2,
      "unit": "%"
     },
     {
-     "name": "Chance of limb destruction",
-     "perLevel": -1,
-     "unit": "%"
-    },
-    {
-     "name": "Survival chance from blacked limb damage",
-     "perLevel": 0.5,
+     "name": "Chance of death from losing a limb",
+     "perLevel": -0.4,
      "unit": "%"
     }
    ],
    "elite": [
-    "No more damage from bleedings"
+    "Faster health regeneration in combat",
+    "All bleedings stop on their own (light after 20 s, heavy after 30 s)"
    ]
   },
   {
    "id": "Health",
    "name": "Health",
    "category": "Physical",
-   "description": "Reduces fracture chance, slows energy and hydration drain, speeds up recovery.",
+   "description": "Good health speeds up the recovery from the damage sustained in the raids, decreases the probability of fractures and lowers the energy and dehydration rate.",
    "levelUp": "Leveling Strength, Endurance and Vitality.",
    "effects": [
     {
      "name": "Fracture chance",
-     "perLevel": -1,
+     "perLevel": -1.2,
      "unit": "%"
     },
     {
-     "name": "Energy and hydration drain",
+     "name": "Energy consumption",
      "perLevel": -0.6,
      "unit": "%"
     },
     {
-     "name": "Offline (hideout) regeneration",
-     "perLevel": 1,
+     "name": "Dehydration rate",
+     "perLevel": -0.6,
      "unit": "%"
     }
    ],
    "elite": [
-    "Damage to an already destroyed limb is reduced",
-    "Energy and hydration drain while overweight is reduced"
+    "Damage absorption"
    ]
   },
   {
    "id": "StressResistance",
    "name": "Stress Resistance",
    "category": "Physical",
-   "description": "Reduces pain, tremor and the effects of stress on aim.",
+   "description": "Stress resistance improves the chances of withstanding injury shock, shaking hands, and tremors.",
    "levelUp": "Receiving damage and being in pain.",
    "effects": [
     {
-     "name": "Pain sensitivity",
+     "name": "Pain shock chance",
      "perLevel": -1,
      "unit": "%"
     },
     {
-     "name": "Hand tremor",
-     "perLevel": -1,
-     "unit": "%"
-    },
-    {
-     "name": "Berserk effect duration",
-     "perLevel": 1,
+     "name": "Tremor",
+     "perLevel": -1.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Pain no longer causes tremor"
+    "Access to Berserk mode"
    ]
   },
   {
    "id": "Metabolism",
    "name": "Metabolism",
    "category": "Physical",
-   "description": "Improves and extends the effects of eating and drinking, and sustains the physical skills longer.",
+   "description": "Healthy metabolism improves and extends the effects of eating and drinking, and sustains the physical skills longer.",
    "levelUp": "Eating and drinking.",
    "effects": [
     {
@@ -175,424 +172,490 @@
     }
    ],
    "elite": [
-    "Physical skills no longer degrade"
+    "No damage from exhaustion and dehydration"
    ]
   },
   {
    "id": "Immunity",
    "name": "Immunity",
    "category": "Physical",
-   "description": "Reduces poisoning and negative stimulant effects.",
+   "description": "Immunity affects the susceptibility to illnesses and the effectiveness of their treatment.",
    "levelUp": "Being poisoned and taking stimulants with negative effects.",
    "effects": [
     {
-     "name": "Chance of being poisoned",
+     "name": "Negative effects of stimulants, food and drink",
      "perLevel": -1,
      "unit": "%"
     },
     {
-     "name": "Poison and toxin effect strength",
+     "name": "Poison effect strength",
      "perLevel": -1,
      "unit": "%"
     },
     {
-     "name": "Stimulant side-effect strength",
-     "perLevel": -1,
+     "name": "Painkiller duration",
+     "perLevel": 0.6,
      "unit": "%"
     }
    ],
    "elite": [
-    "Immune to some negative stimulant effects"
+    "+90% chance to be immune to negative effects of stimulants, food and drink",
+    "+90% chance to be immune to poisons"
    ]
   },
   {
    "id": "Perception",
    "name": "Perception",
    "category": "Mental",
-   "description": "Increases hearing distance and how far you hear loot.",
+   "description": "Improves aiming concentration and makes detection of nearby loot easier.",
    "levelUp": "Hearing and looting items.",
    "effects": [
     {
-     "name": "Audible range",
+     "name": "Loot detection radius",
      "perLevel": 2,
-     "unit": "%"
-    },
-    {
-     "name": "Aiming focus",
-     "perLevel": 0.5,
-     "unit": "%"
-    },
-    {
-     "name": "Loot sound radius",
-     "perLevel": 1,
      "unit": "%"
     }
    ],
    "elite": [
-    "Loot items around you are highlighted when searching"
+    "Loot proximity notification"
    ]
   },
   {
    "id": "Intellect",
    "name": "Intellect",
    "category": "Mental",
-   "description": "Speeds up learning, item examination and reduces weapon wear when repairing.",
+   "description": "High intellect boosts the speed of item examination, lock picking, and improves the quality of weapon repairs.",
    "levelUp": "Examining items and repairing weapons and armor.",
    "effects": [
     {
      "name": "Examine speed",
-     "perLevel": 1,
+     "perLevel": 2,
      "unit": "%"
     },
     {
-     "name": "Skill learning speed",
-     "perLevel": 1,
+     "name": "Weapon repair effectiveness",
+     "perLevel": 2,
      "unit": "%"
     },
     {
-     "name": "Weapon repair durability loss",
-     "perLevel": -0.6,
+     "name": "Repair kit durability use",
+     "perLevel": -0.5,
      "unit": "%"
     }
    ],
    "elite": [
-    "Items no longer need to be examined"
+    "Ammo counter",
+    "Guess container contents without searching",
+    "No manual needed to examine items"
    ]
   },
   {
    "id": "Attention",
    "name": "Attention",
    "category": "Mental",
-   "description": "Speeds up looting and raises the chance of finding rare items.",
+   "description": "Attention increases the looting speed of various containers.",
    "levelUp": "Searching containers and looting bodies.",
    "effects": [
     {
      "name": "Looting speed",
-     "perLevel": 0.4,
+     "perLevel": 2,
      "unit": "%"
     },
     {
      "name": "Examine speed",
-     "perLevel": 0.4,
-     "unit": "%"
-    },
-    {
-     "name": "Chance of finding more valuable loot",
-     "perLevel": 0.6,
+     "perLevel": 2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Doubled chance of finding rare items"
+    "Double looting experience",
+    "+50% chance to find an item in a container instantly"
    ]
   },
   {
    "id": "Charisma",
    "name": "Charisma",
    "category": "Mental",
-   "description": "Lowers trader service costs (insurance, healing, scav case) and improves reputation gains.",
+   "description": "Mastering the art of charisma allows to receive discounts on various services.",
    "levelUp": "Leveling Attention, Perception and Intellect.",
    "effects": [
     {
-     "name": "Insurance and trader service costs",
-     "perLevel": -0.3,
+     "name": "Operational task replacement cost",
+     "perLevel": -0.1,
      "unit": "%"
     },
     {
-     "name": "Scav cooldown",
-     "perLevel": -0.3,
+     "name": "Healing service prices after raid",
+     "perLevel": -0.1,
      "unit": "%"
     },
     {
-     "name": "Quest money rewards",
-     "perLevel": 0.3,
+     "name": "Insurance prices",
+     "perLevel": -0.1,
+     "unit": "%"
+    },
+    {
+     "name": "Paid exfil prices",
+     "perLevel": -0.1,
      "unit": "%"
     }
    ],
    "elite": [
-    "Lower trader buy-back fees"
+    "10% discount on Scav Case prices",
+    "Fence standing penalty halved (applies at Scav karma 6+)",
+    "One more daily operational task"
    ]
   },
   {
    "id": "Pistol",
    "name": "Pistols",
    "category": "Combat",
-   "description": "Improves handling of pistols.",
+   "description": "Pistol handling skill improves the overall handling, reduces recoil and reload time of pistols.",
    "levelUp": "Shooting pistols.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Instant fire-mode switch and malfunction recovery"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "Revolver",
    "name": "Revolvers",
    "category": "Combat",
-   "description": "Improves handling of revolvers.",
+   "description": "Revolver handling skill.",
    "levelUp": "Shooting revolvers.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Faster reloads"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "SMG",
    "name": "Submachine Guns",
    "category": "Combat",
-   "description": "Improves handling of submachine guns.",
+   "description": "Submachine Gun handling skill improves the overall handling, reduces recoil and reload time of SMGs.",
    "levelUp": "Shooting SMGs.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Instant fire-mode switch and malfunction recovery"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "Assault",
    "name": "Assault Rifles",
    "category": "Combat",
-   "description": "Improves handling of assault rifles.",
+   "description": "Assault rifles handling skill improves the overall handling, reduces recoil and reload time of Assault rifles.",
    "levelUp": "Shooting assault rifles.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Instant fire-mode switch and malfunction recovery"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "Shotgun",
    "name": "Shotguns",
    "category": "Combat",
-   "description": "Improves handling of shotguns.",
+   "description": "Shotgun handling skill improves the overall handling and recoil of shotguns.",
    "levelUp": "Shooting shotguns.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Faster shell loading"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "Sniper",
    "name": "Bolt-action Rifles",
    "category": "Combat",
-   "description": "Improves handling of bolt-action sniper rifles.",
+   "description": "The Bolt-action rifles weapon skill is improved by firing and reloading the corresponding weapon type.",
    "levelUp": "Shooting bolt-action rifles.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Faster bolt cycling"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "LMG",
    "name": "Light Machine Guns",
    "category": "Combat",
-   "description": "Improves handling of light machine guns.",
+   "description": "Light Machinegun handling skill improves the overall handling, reduces recoil and reload time of LMGs.",
    "levelUp": "Shooting LMGs.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Instant fire-mode switch and malfunction recovery"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "HMG",
    "name": "Heavy Machine Guns",
    "category": "Combat",
-   "description": "Improves handling of heavy machine guns (mounted and stationary).",
+   "description": "Heavy machinegun handling skill improves the overall handling, reduces recoil and reload time of Heavy Machine Guns.",
    "levelUp": "Shooting heavy machine guns.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Instant fire-mode switch and malfunction recovery"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "Launcher",
    "name": "Grenade Launchers",
    "category": "Combat",
-   "description": "Improves handling of grenade launchers.",
+   "description": "Launchers handling skill.",
    "levelUp": "Firing grenade launchers.",
    "effects": [
     {
      "name": "Reload speed",
-     "perLevel": 0.3,
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
      "unit": "%"
     },
     {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Faster reloads"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "AttachedLauncher",
    "name": "Underbarrel Launchers",
    "category": "Combat",
-   "description": "Improves handling of underbarrel grenade launchers.",
+   "description": "Underbarrel grenade launcher handling skill.",
    "levelUp": "Firing underbarrel grenade launchers.",
    "effects": [
     {
      "name": "Reload speed",
-     "perLevel": 0.3,
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
+    {
+     "name": "Recoil",
+     "perLevel": -0.3,
      "unit": "%"
     },
     {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Faster reloads"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "Throwing",
    "name": "Throwables",
    "category": "Combat",
-   "description": "Improves grenade throw strength and reduces the stamina cost of throwing.",
+   "description": "The throwing weapons handling skills allow you to throw grenades farther and with less energy consumption.",
    "levelUp": "Throwing grenades.",
    "effects": [
     {
      "name": "Throw strength",
-     "perLevel": 0.6,
+     "perLevel": 0.5,
      "unit": "%"
     },
     {
-     "name": "Throw stamina cost",
-     "perLevel": -0.6,
+     "name": "Throw energy",
+     "perLevel": -1,
      "unit": "%"
     }
    ],
    "elite": [
-    "Better throw handling"
+    "Throwables need no energy and fatigue doesn't affect their accuracy"
    ]
   },
   {
@@ -621,166 +684,181 @@
    "id": "DMR",
    "name": "DMRs",
    "category": "Combat",
-   "description": "Improves handling of designated marksman rifles.",
+   "description": "Designated Marksman Rifle handling skill improves the overall handling, reduces recoil and reload time of DMRs.",
    "levelUp": "Shooting marksman rifles.",
    "effects": [
+    {
+     "name": "Reload speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon switching speed",
+     "perLevel": 0.8,
+     "unit": "%"
+    },
     {
      "name": "Recoil",
      "perLevel": -0.3,
      "unit": "%"
     },
     {
-     "name": "Reload speed",
-     "perLevel": 0.3,
-     "unit": "%"
-    },
-    {
      "name": "Weapon ergonomics",
-     "perLevel": 0.3,
+     "perLevel": 0.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Instant fire-mode switch and malfunction recovery"
+    "Steady aim for the first 3 seconds at any stamina",
+    "Double weapon mastering gain"
    ]
   },
   {
    "id": "AimDrills",
    "name": "Aim Drills",
    "category": "Combat",
-   "description": "Speeds up aiming down sights and reduces sway.",
+   "description": "Aim drills will increase your aiming speed and will allow to perform aiming quieter.",
    "levelUp": "Hitting targets while aiming.",
    "effects": [
     {
-     "name": "Aim speed",
-     "perLevel": 0.4,
+     "name": "Aiming speed",
+     "perLevel": 1,
      "unit": "%"
     },
     {
-     "name": "Aim stamina drain",
-     "perLevel": -0.5,
+     "name": "Aiming sound",
+     "perLevel": -1,
      "unit": "%"
     }
    ],
    "elite": [
-    "Less sway when aiming while moving"
+    "No hand shake at any stamina for the first 2 seconds of aiming",
+    "Less hand shake from tremor and fractures for the first 2 seconds of aiming"
    ]
   },
   {
    "id": "TroubleShooting",
    "name": "Troubleshooting",
    "category": "Combat",
-   "description": "Speeds up fixing malfunctions.",
+   "description": "Troubleshooting skill facilitates rectification of weapon malfunctions.",
    "levelUp": "Fixing weapon malfunctions.",
    "effects": [
     {
      "name": "Malfunction fix speed",
-     "perLevel": 1,
+     "perLevel": 0.5,
      "unit": "%"
     }
    ],
    "elite": [
-    "Malfunction cause is recognised immediately"
+    "Malfunction type known without examining the weapon",
+    "−50% chance of the same malfunction (magazine, durability or cartridge) after fixing it"
    ]
   },
   {
    "id": "Surgery",
    "name": "Surgery",
    "category": "Practical",
-   "description": "Speeds up surgery kits and reduces their HP penalty.",
+   "description": "The ability to perform field surgery may save your life in critical situations. The better you learn this skill, the faster and better you will perform combat surgeries.",
    "levelUp": "Using surgery kits (CMS, Surv12).",
    "effects": [
     {
      "name": "Surgery speed",
-     "perLevel": 1,
+     "perLevel": 0.4,
      "unit": "%"
     },
     {
-     "name": "HP penalty after surgery",
+     "name": "Surgery HP penalty",
      "perLevel": -1,
      "unit": "%"
     }
    ],
    "elite": [
-    "Surgery restores more HP"
+    "Surgery speed +20% more (+40% in total)",
+    "Surgery HP penalty −50% more: limbs are restored with full HP"
    ]
   },
   {
    "id": "CovertMovement",
    "name": "Covert Movement",
    "category": "Practical",
-   "description": "Makes your steps quieter and reduces the sound radius when moving.",
+   "description": "Covert movement makes your steps quieter and reduces the sound radius when moving slow.",
    "levelUp": "Moving quietly.",
    "effects": [
     {
-     "name": "Movement noise",
+     "name": "Footstep noise on common surfaces",
      "perLevel": -1.2,
      "unit": "%"
     },
     {
-     "name": "Movement speed while sneaking",
-     "perLevel": 0.6,
+     "name": "Footstep noise on uncommon surfaces",
+     "perLevel": -0.6,
+     "unit": "%"
+    },
+    {
+     "name": "Covert movement speed",
+     "perLevel": 1,
+     "unit": "%"
+    },
+    {
+     "name": "Weapon and equipment noise",
+     "perLevel": -1.2,
      "unit": "%"
     }
    ],
    "elite": [
-    "Footsteps much harder to hear on all surfaces"
+    "Covert movement equally quiet on all surfaces (−60%)"
    ]
   },
   {
    "id": "Search",
    "name": "Search",
    "category": "Practical",
-   "description": "Speeds up searching containers and bodies.",
+   "description": "The search skill mastering allows you to search bodies and containers faster and more efficiently.",
    "levelUp": "Searching containers and bodies.",
    "effects": [
     {
      "name": "Search speed",
      "perLevel": 1,
      "unit": "%"
-    },
-    {
-     "name": "Search double-find chance",
-     "perLevel": 1,
-     "unit": "%"
     }
    ],
    "elite": [
-    "Search two containers at once"
+    "Search two containers at a time"
    ]
   },
   {
    "id": "MagDrills",
    "name": "Mag Drills",
    "category": "Practical",
-   "description": "Speeds up loading, unloading and checking magazines.",
+   "description": "Skill aimed at magazine handling - loading and unloading of ammo, checking for remaining cartridges.",
    "levelUp": "Loading and unloading magazines.",
    "effects": [
     {
-     "name": "Magazine load speed",
-     "perLevel": 0.8,
+     "name": "Ammo loading speed",
+     "perLevel": 0.6,
      "unit": "%"
     },
     {
-     "name": "Magazine unload speed",
-     "perLevel": 0.8,
+     "name": "Ammo unloading speed",
+     "perLevel": 0.6,
      "unit": "%"
     },
     {
      "name": "Magazine check speed",
-     "perLevel": 2,
+     "perLevel": 0.8,
      "unit": "%"
     }
    ],
    "elite": [
-    "Ammo count is known when checking magazines"
+    "Magazines are checked instantly when moved to your inventory",
+    "Loading gets faster with every round loaded"
    ]
   },
   {
    "id": "LightVests",
    "name": "Light Vests",
    "category": "Practical",
-   "description": "Improves movement and protection while wearing light (class 2-3) armor.",
+   "description": "Light body armor wearing skill improves mobility and reduces the amount of received penetration and melee damage to your health.",
    "levelUp": "Taking hits on light armor.",
    "effects": [
     {
@@ -789,92 +867,98 @@
      "unit": "%"
     },
     {
-     "name": "Armor repair cost/durability loss",
+     "name": "Melee damage through light armor",
      "perLevel": -0.6,
      "unit": "%"
     },
     {
-     "name": "Melee damage reduction",
-     "perLevel": 0.6,
+     "name": "Repair kit wear",
+     "perLevel": -0.8,
      "unit": "%"
     }
    ],
    "elite": [
-    "Armor no longer loses max durability on repair"
+    "Body parts covered by light armor can't bleed",
+    "50% chance of no wear when repairing"
    ]
   },
   {
    "id": "HeavyVests",
    "name": "Heavy Vests",
    "category": "Practical",
-   "description": "Improves movement and protection while wearing heavy (class 4+) armor.",
+   "description": "Heavy body armor wearing skill reduces amount of received penetration health damage, explosive damage to health and armor and improves mobility.",
    "levelUp": "Taking hits on heavy armor.",
    "effects": [
     {
      "name": "Movement speed penalty in heavy armor",
-     "perLevel": -0.6,
+     "perLevel": -0.5,
      "unit": "%"
     },
     {
-     "name": "Armor repair cost/durability loss",
-     "perLevel": -0.6,
+     "name": "Blunt damage through heavy armor",
+     "perLevel": -0.4,
      "unit": "%"
     },
     {
-     "name": "Blunt damage reduction",
-     "perLevel": 0.4,
+     "name": "Repair kit wear",
+     "perLevel": -1,
      "unit": "%"
     }
    ],
    "elite": [
-    "Armor no longer loses max durability on repair"
+    "Chance to deflect a bullet with heavy armor",
+    "50% chance of no wear when repairing"
    ]
   },
   {
    "id": "WeaponTreatment",
    "name": "Weapon Maintenance",
    "category": "Practical",
-   "description": "Reduces weapon wear and improves repairs with kits.",
+   "description": "Weapon service and maintenance skills.",
    "levelUp": "Repairing weapons with repair kits.",
    "effects": [
     {
-     "name": "Weapon wear",
-     "perLevel": -1,
+     "name": "Gun wear while shooting",
+     "perLevel": -0.5,
      "unit": "%"
     },
     {
-     "name": "Repair kit efficiency",
-     "perLevel": 1,
+     "name": "Chance of wear when repairing",
+     "perLevel": -1,
      "unit": "%"
     }
    ],
    "elite": [
-    "Chance of weapon buff when repairing with a kit"
+    "Wear chance with repair kits −50%"
    ]
   },
   {
    "id": "Crafting",
    "name": "Crafting",
    "category": "Practical",
-   "description": "Speeds up hideout production (crafting).",
+   "description": "Improving the crafting skill reduces the production time of items, including those produced cyclically.",
    "levelUp": "Collecting crafts from the hideout.",
    "effects": [
     {
      "name": "Production time",
      "perLevel": -0.75,
-     "unit": "%",
-     "source": "game config (ProductionTimeReductionPerLevel)"
+     "unit": "%"
+    },
+    {
+     "name": "Cyclic production time (not the Bitcoin Farm)",
+     "perLevel": -0.75,
+     "unit": "%"
     }
    ],
    "elite": [
-    "One extra production can run in each hideout station at the same time"
+    "Craft up to two different items in a zone at once (Scav Case included)"
    ]
   },
   {
    "id": "HideoutManagement",
    "name": "Hideout Management",
    "category": "Practical",
-   "description": "Reduces hideout resource consumption and improves zone bonuses.",
+   "description": "Efficient hideout management allows you to use less fuel and filters in production, and increases bonuses from different Hideout zones.",
    "levelUp": "Hideout zones consuming fuel and filters, upgrading zones and collecting crafts.",
    "effects": [
     {
@@ -892,8 +976,8 @@
    ],
    "elite": [
     "+2 fuel slots in the Generator",
-    "+2 filter slots in the Air Filtering Unit",
-    "+2 filter slots in the Water Collector",
+    "+2 water filter slots in the Water Collector",
+    "+2 air filter slots in the Air Filtering Unit",
     "+2 bitcoin storage in the Bitcoin Farm"
    ]
   }
@@ -957,6 +1041,8 @@
    ],
    "source": "game config gpuBoostRate 0.041225 (SPT mirror); 300000 s base verified against the in-game Bitcoin Farm (1 GPU: 3d 11h 20m, 50 GPUs: 1d 3h 35m 36s)"
   },
-  "craftSpeedWithoutFuel": 0.07
- }
+  "craftSpeedWithoutFuel": 0.07,
+  "enduranceEliteStaminaPercent": 20
+ },
+ "effectsSource": "Character skills pages of the EFT wiki (escapefromtarkov.fandom.com), Nov 2026"
 }

@@ -41,28 +41,29 @@ export function strength() {
 }
 
 // Sprint time from full stamina (not overweight) and the time to refill it from empty, standing still.
+// Endurance raises stamina (+1%/level, +20% more at elite) but not how fast it refills.
 export function endurance() {
-  const s = base().stamina || {};
-  const cap0 = s.capacity || 115, drain = s.sprintDrainPerSecond || 4, rest0 = (s.restorePerSecond || 4.5) * (s.restoreStanding || 1);
-  const capacity = cap0 * (1 + pct('Endurance', /^stamina$/i) / 100);
-  const restore = rest0 * (1 + pct('Endurance', /stamina recovery/i) / 100);
-  return { level: level('Endurance'), capacity, sprint: { now: capacity / drain, base: cap0 / drain }, refill: { now: capacity / restore, base: cap0 / rest0 } };
+  const b = base(), s = b.stamina || {};
+  const cap0 = s.capacity || 115, drain = s.sprintDrainPerSecond || 4, rest = (s.restorePerSecond || 4.5) * (s.restoreStanding || 1);
+  const elite = level('Endurance') >= (S.skills?.eliteLevel || 51) ? (b.enduranceEliteStaminaPercent || 0) : 0;
+  const staminaPct = pct('Endurance', /^stamina$/i) + elite;
+  const capacity = cap0 * (1 + staminaPct / 100);
+  return { level: level('Endurance'), staminaPct, capacity, sprint: { now: capacity / drain, base: cap0 / drain }, refill: { now: capacity / rest, base: cap0 / rest } };
 }
 
-// What food and drink give (Metabolism) and how fast energy and hydration drain in raid (Health;
-// Metabolism does not change the drain).
+// What food and drink give (Metabolism) and how fast energy and hydration drain in raid (Health:
+// energy consumption and dehydration rate; Metabolism does not change the drain).
 export function metabolism() {
   const b = base();
   const gain = pct('Metabolism', /food and drink positive/i);
-  const drainHealth = pct('Health', /drain/i);
-  const f = 1 + drainHealth / 100;
+  const drainEnergy = pct('Health', /energy consumption/i), drainWater = pct('Health', /dehydration/i);
   const extraEnergy = hideoutBonusTotals().find((x) => x.type === 'MaximumEnergyReserve')?.total || 0;
-  const pool = (perMin, max) => ({ max, perMin: perMin * f, basePerMin: perMin, minutes: max / (perMin * f), baseMinutes: max / perMin });
+  const pool = (perMin, max, p) => { const f = 1 + p / 100; return { max, pct: p, perMin: perMin * f, basePerMin: perMin, minutes: max / (perMin * f), baseMinutes: max / perMin }; };
   return {
-    level: level('Metabolism'), health: level('Health'), gainPct: gain, drainHealth,
+    level: level('Metabolism'), health: level('Health'), gainPct: gain,
     item50: 50 * (1 + gain / 100),
-    energy: pool(b.energyDrainPerMinute || 3.2, (b.maxEnergy || 100) + extraEnergy),
-    hydration: pool(b.hydrationDrainPerMinute || 2.6, b.maxHydration || 100),
+    energy: pool(b.energyDrainPerMinute || 3.8, (b.maxEnergy || 100) + extraEnergy, drainEnergy),
+    hydration: pool(b.hydrationDrainPerMinute || 3.2, b.maxHydration || 100, drainWater),
   };
 }
 
