@@ -172,7 +172,13 @@
     "id": "Throwing",
     "name": "Throwing Name"
    }
-  ]
+  ],
+  "itemCategories": {
+   "cat-tac": {
+    "id": "cat-tac",
+    "name": "Tactical devices"
+   }
+  }
  },
  "translations": [
   "$.data.items.*.name",

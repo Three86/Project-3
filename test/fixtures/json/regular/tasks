@@ -131,6 +131,51 @@
       "status": [
        "complete"
       ]
+     },
+     {
+      "id": "o-build",
+      "type": "buildWeapon",
+      "description": "Modify an MP-133 to comply with the given specifications",
+      "optional": false,
+      "maps": [],
+      "item": "i-mp133",
+      "containsAll": [
+       "i-mp133"
+      ],
+      "containsCategory": [
+       "cat-tac",
+       "cat-unknown"
+      ],
+      "buildAttributes": {
+       "accuracy": {
+        "compareMethod": ">=",
+        "value": 0
+       },
+       "durability": {
+        "compareMethod": ">=",
+        "value": 60
+       },
+       "ergonomics": {
+        "compareMethod": ">=",
+        "value": 45
+       },
+       "magazineCapacity": {
+        "compareMethod": ">=",
+        "value": 5
+       },
+       "recoil": {
+        "compareMethod": "<=",
+        "value": 850
+       },
+       "width": {
+        "compareMethod": "<=",
+        "value": 4
+       },
+       "weight": {
+        "compareMethod": "<=",
+        "value": 0
+       }
+      }
      }
     ],
     "finishRewards": {

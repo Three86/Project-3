@@ -80,7 +80,7 @@ async function loadFile(path, lang) {
 const idOf = (x) => (x && typeof x === 'object' ? x.id : x);
 const list = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]);
 
-function makeResolvers({ items, traders, maps, tasks, questItems, stations }) {
+function makeResolvers({ items, traders, maps, tasks, questItems, stations, categories = {} }) {
   const item = (x) => {
     const id = idOf(x);
     if (id == null) return null;
@@ -98,6 +98,8 @@ function makeResolvers({ items, traders, maps, tasks, questItems, stations }) {
     map: named(maps),
     task: named(tasks),
     station: named(stations),
+    // Item categories (weapon build parts "any tactical device"); unknown ids get a plain label.
+    category: (x) => { const id = idOf(x); return id == null ? null : { id, name: categories[id]?.name || x?.name || 'a part of the required type' }; },
     questItem: (x) => {
       const id = idOf(x);
       const q = questItems[id];
@@ -117,6 +119,9 @@ function normObjective(o, R) {
   if (o.wearing) out.wearing = list(o.wearing).map((set) => R.items(set));
   if (o.notWearing) out.notWearing = R.items(o.notWearing);
   if (o.containsAll) out.containsAll = R.items(o.containsAll);
+  if (o.containsCategory) out.containsCategory = list(o.containsCategory).map(R.category).filter(Boolean);
+  // Weapon build stat limits: { ergonomics: { compareMethod, value }, ... } -> [{ name, compareMethod, value }]
+  if (o.buildAttributes && !Array.isArray(o.buildAttributes)) out.buildAttributes = Object.entries(o.buildAttributes).map(([name, r]) => ({ name, compareMethod: r?.compareMethod, value: Number(r?.value) }));
   if (o.requiredKeys) out.requiredKeys = list(o.requiredKeys).map((set) => R.items(set)).filter((set) => set.length); // [[key]]: any key of a set
   if (o.questItem) out.questItem = R.questItem(o.questItem);
   if (o.trader) out.trader = R.trader(o.trader);
@@ -175,6 +180,7 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
     tasks: tasksFile.tasks || {},
     questItems: tasksFile.questItems || {},
     stations: hideoutFile || {},
+    categories: { ...(itemsFile.handbookCategories || itemsFile.HandbookCategory || {}), ...(itemsFile.itemCategories || itemsFile.ItemCategory || itemsFile.categories || {}) },
   });
 
   const tasks = rawTasks.map((t) => ({

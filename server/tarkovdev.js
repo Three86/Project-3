@@ -27,10 +27,12 @@ const OBJECTIVE_FULL = `
 `;
 // Asked for first; if the live schema does not have these, the queries without them below are used:
 // keys an objective needs ([[Item]]: any item of a set opens that lock) and the time window of kill
-// objectives (e.g. 21–4: at night).
+// objectives (e.g. 21–4: at night) and the spec of weapon builds (Gunsmith): parts, part categories and
+// stat limits.
 const KEY_TYPES = ['TaskObjectiveBasic', 'TaskObjectiveExtract', 'TaskObjectiveItem', 'TaskObjectiveMark', 'TaskObjectiveQuestItem', 'TaskObjectiveShoot', 'TaskObjectiveUseItem'];
 const OBJECTIVE_EXTRA = `${OBJECTIVE_FULL}${KEY_TYPES.map((ty) => `  ... on ${ty} { requiredKeys { ${ITEM} } }`).join('\n')}
   ... on TaskObjectiveShoot { timeFromHour timeUntilHour }
+  ... on TaskObjectiveBuildItem { containsAll { ${ITEM} } containsCategory { id name } attributes { name requirement { compareMethod value } } }
 `;
 const OBJECTIVE_MIN = `__typename id type description optional maps { id name }`;
 

@@ -84,6 +84,11 @@ test('loads and normalises the json.tarkov.dev feed', async () => {
     // Loyalty levels a quest needs and traders it unlocks (reputation rewards are not kept); traders
     // with loyalty levels and restock time.
     assert.deepStrictEqual(debut.traderRequirements, []);
+    // Weapon build spec (Gunsmith): parts, categories (unknown ids get a plain label) and stat limits.
+    const build = checking.objectives.find((o) => o.type === 'buildWeapon');
+    assert.deepStrictEqual(build.containsAll.map((i) => i.shortName), ['MP-133']);
+    assert.deepStrictEqual(build.containsCategory, [{ id: 'cat-tac', name: 'Tactical devices' }, { id: 'cat-unknown', name: 'a part of the required type' }]);
+    assert.deepStrictEqual(build.buildAttributes.find((a) => a.name === 'ergonomics'), { name: 'ergonomics', compareMethod: '>=', value: 45 });
     // Keys per objective: sets of alternatives, resolved to items.
     assert.deepStrictEqual(checking.objectives[0].requiredKeys, [[{ id: 'i-mp133', name: 'MP-133 12ga shotgun', shortName: 'MP-133', iconLink: 'https://assets.tarkov.dev/i-mp133-icon.webp' }]]);
     assert.deepStrictEqual(checking.traderRequirements, [{ trader: { id: '54cb50c76803fa8b248b4571', name: 'Prapor' }, requirementType: 'level', compareMethod: '>=', value: 2 }]);

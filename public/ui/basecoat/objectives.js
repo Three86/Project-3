@@ -2,7 +2,7 @@
 // default views of quests, hideout, prestige, needed items and search.
 import { setRequirement, stepRequirement } from '../../core/progress.js';
 import { esc, readableType } from '../../core/util.js';
-import { NEEDS, STATUS_LABEL, objItems, objKeys, objNeeds, objTarget, objTitle, objValue } from '../../core/game.js';
+import { NEEDS, STATUS_LABEL, buildSpec, objItems, objKeys, objNeeds, objTarget, objTitle, objValue } from '../../core/game.js';
 import { badge, checkbox, stepperControl } from './components.js';
 
 export function itemTag(it) {
@@ -17,6 +17,12 @@ export function objTags(o) {
   if (items.length) tags.push(items.length > 1 ? `<span class="badge" data-variant="outline">any of:</span> ${items.map(itemTag).join(' ')}` : itemTag(items[0]));
   if (['giveItem', 'findItem', 'plantItem', 'mark', 'useItem', 'sellItem'].includes(o.type) && items.length) {
     tags.push(o.foundInRaid ? badge('FIR', 'primary', 'fir', 'Must be found in raid') : badge('not FIR', 'outline', 'nofir', 'Does not need to be found in raid'));
+  }
+  if (o.type === 'buildWeapon') {
+    const spec = buildSpec(o);
+    if (spec.stats.length) tags.push(`<span class="badge" data-variant="outline">spec:</span> ${spec.stats.map((s) => `<span class="badge spec" data-variant="secondary">${esc(s.text)}</span>`).join(' ')}`);
+    if (spec.parts.length) tags.push(`<span class="badge" data-variant="outline">with parts:</span> ${spec.parts.map(itemTag).join(' ')}`);
+    for (const c of spec.categories) tags.push(`<span class="badge" data-variant="outline">with any: ${esc(c.name)}</span>`);
   }
   if (o.questItem) tags.push(`<span class="badge" data-variant="outline">quest item: ${esc(o.questItem.name)}</span>`);
   if (o.dogTagLevel) tags.push(`<span class="badge" data-variant="outline">dogtag lvl ≥ ${o.dogTagLevel}</span>`);

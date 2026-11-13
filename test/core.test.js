@@ -256,6 +256,18 @@ test('raid planner: auto-pin unlocked Kappa / Lightkeeper quests; locked ones jo
   assert.deepStrictEqual(pinned(), ['x0:manual', `${CHECKING}:manual`]);
 });
 
+test('weapon build spec (Gunsmith): stat limits from either data source, parts and categories', async () => {
+  await reset();
+  const json = { type: 'buildWeapon', containsAll: [{ id: 'p', name: 'Part', shortName: 'P' }], containsCategory: [{ id: 'c', name: 'Tactical devices' }],
+    buildAttributes: [{ name: 'recoil', compareMethod: '<=', value: 850 }, { name: 'accuracy', compareMethod: '>=', value: 0 }, { name: 'ergonomics', compareMethod: '>=', value: 45 }, { name: 'weight', compareMethod: '<=', value: 3.25 }] };
+  const s = game.buildSpec(json);
+  assert.deepStrictEqual(s.stats.map((x) => x.text), ['Ergonomics ≥ 45', 'Recoil ≤ 850', 'Weight ≤ 3.25 kg'], 'game order, no-limit (0) left out');
+  assert.deepStrictEqual([s.parts.length, s.categories[0].name], [1, 'Tactical devices']);
+  const gql = { type: 'buildWeapon', attributes: [{ name: 'magazineCapacity', requirement: { compareMethod: '>=', value: 5 } }, { name: 'durability', requirement: { compareMethod: '>=', value: 60 } }] };
+  assert.deepStrictEqual(game.buildSpec(gql).stats.map((x) => x.text), ['Magazine capacity ≥ 5 rounds', 'Durability ≥ 60%']);
+  assert.deepStrictEqual(game.buildSpec({ type: 'buildWeapon' }), { parts: [], categories: [], stats: [] });
+});
+
 test('maps: variants fold into their base map with a note; objectives on 6+ maps count as any map', async () => {
   const S = await reset();
   const names = ['Customs', 'Factory', 'Ground Zero', 'Ground Zero 21+', 'Ground Zero Tutorial', 'Icebreaker', 'Infected Factory', 'Infected Lab', 'Interchange', 'Lighthouse',

@@ -6,7 +6,7 @@
 // counts as pinned too, so locked ones join as soon as they unlock.
 import { S, setProgress, saveUi } from '../../core/store.js';
 import { norm, byName } from '../../core/util.js';
-import { idx, objItems, objKeys, objValue, taskMaps, taskStatus, traderList } from '../../core/game.js';
+import { buildSpec, idx, objItems, objKeys, objValue, taskMaps, taskStatus, traderList } from '../../core/game.js';
 
 export const uiDefaults = {
   rp: { map: '', locked: false, text: '' },
@@ -90,7 +90,7 @@ const add = (map, key, make, fn) => { const e = map.get(key) || make(); fn(e); m
 
 // What the pinned quests still need, objectives already done left out:
 // { tasks, maps: [{ map, count }], items: [{ items (one of), count, have, fir, from }],
-//   questItems: [{ item, from }], keys: [{ keys (any one of), maps, from }], gear: [{ items (one of), how, from }] }
+//   questItems: [{ item, from }], keys: [{ keys (any one of), maps, from }], gear: [{ items (one of), how, spec?, from }] }
 export function pinnedTotals() {
   const tasks = pinnedTasks();
   const items = new Map(), questItems = new Map(), keys = new Map(), gear = new Map(), maps = new Map();
@@ -115,7 +115,7 @@ export function pinnedTotals() {
       }
       if (o.usingWeapon?.length) add(gear, `use|${setKey(o.usingWeapon)}`, () => ({ items: o.usingWeapon, how: 'use', from: [] }), from);
       for (const set of o.wearing || []) if (set?.length) add(gear, `wear|${setKey(set)}`, () => ({ items: set, how: 'wear', from: [] }), from);
-      if (o.type === 'buildWeapon' && o.item) add(gear, `build|${o.item.id}`, () => ({ items: [o.item], how: 'build', from: [] }), from);
+      if (o.type === 'buildWeapon' && o.item) add(gear, `build|${o.id}`, () => ({ items: [o.item], how: 'build', spec: buildSpec(o), from: [] }), from);
     }
   }
   const byFirstName = (a, b) => byName((a.items || a.keys || [a.item])[0]?.name, (b.items || b.keys || [b.item])[0]?.name);

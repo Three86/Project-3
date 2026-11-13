@@ -129,6 +129,26 @@ export function objEquipment(o) {
 // Keys an objective needs: [[item]], any key of a set opens that lock (tarkov.dev requiredKeys).
 export const objKeys = (o) => (o.requiredKeys || []).filter((set) => Array.isArray(set) && set.length);
 
+// Spec of a weapon build objective (Gunsmith): { parts: [item], categories: [{ id, name }],
+// stats: [{ name, cmp, value, text }] }. Stat limits come as buildAttributes (JSON feed, normalised to
+// [{ name, compareMethod, value }]) or attributes [{ name, requirement }] (GraphQL); 0 means "no limit".
+const BUILD_STATS = { ergonomics: ['Ergonomics', ''], recoil: ['Recoil', ''], magazineCapacity: ['Magazine capacity', ' rounds'], durability: ['Durability', '%'],
+  weight: ['Weight', ' kg'], width: ['Width', ' cells'], height: ['Height', ' cells'], accuracy: ['Accuracy', ' MOA'], effectiveDistance: ['Effective distance', ' m'], muzzleVelocity: ['Muzzle velocity', ' m/s'] };
+const CMP = { '>=': '≥', '<=': '≤', '>': '>', '<': '<', '=': '=', '==': '=' };
+export function buildSpec(o) {
+  const raw = Array.isArray(o.buildAttributes) ? o.buildAttributes
+    : Array.isArray(o.attributes) ? o.attributes.map((a) => ({ name: a?.name, compareMethod: a?.requirement?.compareMethod, value: a?.requirement?.value }))
+    : Object.entries(o.buildAttributes || {}).map(([name, r]) => ({ name, compareMethod: r?.compareMethod, value: r?.value }));
+  const order = Object.keys(BUILD_STATS);
+  const stats = raw.filter((a) => a?.name && Number(a.value)).sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name)).map((a) => {
+    const [label, unit] = BUILD_STATS[a.name] || [a.name, ''];
+    const cmp = CMP[a.compareMethod] || a.compareMethod || '';
+    const value = Number(a.value);
+    return { name: a.name, cmp, value, text: `${label} ${cmp} ${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}${unit}` };
+  });
+  return { parts: (o.containsAll || []).filter(Boolean), categories: (o.containsCategory || []).filter(Boolean), stats };
+}
+
 export function objNeeds(o) {
   const n = new Set();
   switch (o.type) {

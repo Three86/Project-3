@@ -61,7 +61,9 @@ function totalsPanel() {
   ].join('');
   const keys = T.keys.map((e) => line(ico(e.keys), e.keys.length > 1 ? `any one of: ${names(e.keys)}` : esc(e.keys[0].name), `${esc(e.maps.map(mapLabel).join(', '))} · ${esc(e.from.join(', '))}`)).join('');
   const HOW = { use: 'Use', wear: 'Wear', build: 'Build' };
-  const gear = T.gear.map((e) => line(ico(e.items), `${HOW[e.how]}: ${e.how === 'wear' ? e.items.map((i) => esc(i.name)).join(' + ') : anyOf(e.items)}`, esc(e.from.join(', ')))).join('');
+  // A build lists its spec: stat limits, required parts and part types.
+  const specText = (s) => [...s.stats.map((x) => x.text), ...s.parts.map((i) => `part: ${i.shortName || i.name}`), ...s.categories.map((c) => `any ${c.name}`)].map(esc).join(' · ');
+  const gear = T.gear.map((e) => line(ico(e.items), `${HOW[e.how]}: ${e.how === 'wear' ? e.items.map((i) => esc(i.name)).join(' + ') : anyOf(e.items)}`, `${esc(e.from.join(', '))}${e.spec ? `<br>${specText(e.spec)}` : ''}`)).join('');
   const group = (title, count, body, none) => `<div class="rp-sum" data-group="${title.toLowerCase().split(' ')[0]}"><h4><span>${title}</span><span>${count}</span></h4>${body || `<p class="count">${none}</p>`}</div>`;
   return `<div class="card" data-size="sm"><header><h2>Pinned quests (${T.tasks.length})</h2><p>Everything they still need, added up</p></header><section>
     <div class="rp-pins">${T.tasks.map((t) => `<div class="rp-pin" data-id="${esc(t.id)}"><span><a href="#" data-act="rp-show" data-id="${esc(t.id)}">${esc(t.name)}</a> <small>· ${esc(t.trader?.name || '')}</small>${pins.get(t.id) === 'auto' ? '<span class="rp-note auto" title="Pinned automatically">auto</span>' : ''}${mapNotes(t)}</span><small>${esc(taskMaps(t).map(mapLabel).join(', '))}</small>${btn(icon('x'), `data-act="rp-pin" data-id="${esc(t.id)}" aria-label="Unpin ${esc(t.name)}"`, { variant: 'ghost', size: 'icon-sm' })}</div>`).join('')}</div>
