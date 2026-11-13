@@ -742,9 +742,9 @@ async function run(dataDir) {
     ok(await page.locator('.ig-row[data-id="Immunity"].zero').count() === 1, 'unleveled skill dimmed');
     // Panel
     await page.click('.ig-row[data-id="Strength"]'); await settle();
-    ok((await page.locator('.ig-info h3').innerText()).includes('Strength') && await page.locator('.ig-info .ig-fx > div').count() === 5, 'clicking a skill shows its description and effects');
+    ok((await page.locator('.ig-info h3').innerText()).includes('Strength') && await page.locator('.ig-info .ig-fx > div').count() === 6, 'clicking a skill shows its description and effects');
     const fx1 = await page.locator('.ig-info .ig-fx > div').first();
-    ok((await fx1.locator('b').innerText()) === '+4.80%' && (await fx1.locator('small').innerText()) === '+0.40/lvl · max +20.00%' && (await fx1.innerText()).startsWith('Carry weight'), 'effects show now, per level and at max');
+    ok((await fx1.locator('b').innerText()) === '+4.80%' && (await fx1.locator('small').innerText()) === '+0.40/lvl · max +20.00%' && (await fx1.innerText()).startsWith('Jump height'), 'effects show now, per level and at max');
     ok(await page.locator('.ig-info .ig-elite .locked').count() === 2, 'elite perks locked below level 51');
     // − / + on a row and in the panel, typed level
     ops = [];

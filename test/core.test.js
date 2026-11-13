@@ -152,9 +152,10 @@ test('overview: weight limits, stamina, food and drain, fuel and filters at your
   const near = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-6, `${msg}: ${a} vs ${b}`);
   Object.assign(S.progress.skills, { Strength: 12, Endurance: 15, Metabolism: 10, Health: 8, Crafting: 20, HideoutManagement: 10 });
   const s = ov.strength();
-  near(s.overweight.now, 26 * 1.048, 'overweight'); near(s.sprint.now, 72 * 1.048, 'sprint limit'); near(s.critical.now, 77 * 1.048, 'critical');
+  near(s.overweight.now, 26 * 1.072, 'overweight'); near(s.sprint.now, 72 * 1.072, 'sprint limit'); near(s.critical.now, 77 * 1.072, 'critical');
   S.progress.skills.Strength = 51;
-  near(ov.strength().carryPct, 30, 'elite: 20% (capped at level 50) + 10%');
+  near(ov.strength().carryPct, 30, 'elite: 0.6% x 50 (capped at level 50)');
+  assert.strictEqual(Math.round(ov.strength().critical.now), 100, 'as the wiki says: 100 kg at elite');
   const e = ov.endurance();
   near(e.sprint.base, 115 / 4, 'base sprint time'); near(e.sprint.now, 115 * 1.15 / 4, 'sprint time');
   near(e.refill.now, 115 * 1.15 / (4.5 * 1.15 * 1.25), 'refill standing');

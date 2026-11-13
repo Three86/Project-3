@@ -35,38 +35,43 @@
    "id": "Strength",
    "name": "Strength",
    "category": "Physical",
-   "description": "Increases carry weight, sprint speed, jump height, throw distance and melee power.",
+   "description": "Increases carry weight, movement and sprint speed, jump height, throw distance and melee power, and lowers stamina drain while aiming.",
    "levelUp": "Sprinting, jumping and moving while overweight, throwing grenades, melee hits.",
    "effects": [
-    {
-     "name": "Carry weight",
-     "perLevel": 0.4,
-     "unit": "%"
-    },
-    {
-     "name": "Sprint speed",
-     "perLevel": 0.4,
-     "unit": "%"
-    },
     {
      "name": "Jump height",
      "perLevel": 0.4,
      "unit": "%"
     },
     {
-     "name": "Throw distance",
-     "perLevel": 0.8,
+     "name": "Carry weight",
+     "perLevel": 0.6,
      "unit": "%"
     },
     {
      "name": "Melee power",
      "perLevel": 0.6,
      "unit": "%"
+    },
+    {
+     "name": "Movement and sprint speed",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Throw distance",
+     "perLevel": 0.4,
+     "unit": "%"
+    },
+    {
+     "name": "Stamina drain while aiming",
+     "perLevel": -0.4,
+     "unit": "%"
     }
    ],
    "elite": [
-    "+10% carry weight",
-    "Melee attacks deal extra damage"
+    "Weapons on the sling and on your back don't count towards your weight",
+    "+50% chance to deal critical melee damage"
    ]
   },
   {
@@ -911,7 +916,6 @@
   "maxEnergy": 100,
   "maxHydration": 100,
   "drainSource": "measured in game (Oct 2026): −3.69 energy / −3.10 hydration per minute at Health 5 (−3%); the SPT mirror's 3.2 / 2.6 is outdated",
-  "strengthEliteCarryPercent": 10,
   "airFilter": {
    "resource": 300,
    "perHour": 17,

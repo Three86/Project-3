@@ -39,7 +39,7 @@ function goalsCard() {
 function strengthCard() {
   const s = strength();
   return skillCard('strength', 'Strength', 'dumbbell', lv('Strength', s.level), `
-    ${stat('Overweight from', kg(s.overweight.now), `base ${kg(s.overweight.base)} · carry weight +${s.carryPct.toFixed(1)}%${s.elite ? ' (elite included)' : ''}`)}
+    ${stat('Overweight from', kg(s.overweight.now), `base ${kg(s.overweight.base)} · carry weight +${s.carryPct.toFixed(1)}%`)}
     ${stat('Heaviest you can sprint with', kg(s.sprint.now), `base ${kg(s.sprint.base)} · no sprinting above this`)}
     ${stat('Critically overweight from', kg(s.critical.now), `base ${kg(s.critical.base)}`)}`);
 }

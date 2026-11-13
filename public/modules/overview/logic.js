@@ -31,14 +31,13 @@ export function goals() {
   });
 }
 
-// Weight limits raised by carry weight (Strength, plus its elite bonus).
+// Weight limits raised by Strength's carry weight bonus.
 export function strength() {
   const b = base();
-  const elite = level('Strength') >= (S.skills?.eliteLevel || 51) ? (b.strengthEliteCarryPercent || 0) : 0;
-  const carryPct = pct('Strength', /carry weight/i) + elite;
+  const carryPct = pct('Strength', /carry weight/i);
   const m = 1 + carryPct / 100;
   const lim = (kg) => ({ now: kg * m, base: kg });
-  return { level: level('Strength'), carryPct, elite: elite > 0, overweight: lim(b.overweightStartKg || 26), sprint: lim(b.sprintLimitKg || 72), critical: lim(b.criticalOverweightKg || 77) };
+  return { level: level('Strength'), carryPct, overweight: lim(b.overweightStartKg || 26), sprint: lim(b.sprintLimitKg || 72), critical: lim(b.criticalOverweightKg || 77) };
 }
 
 // Sprint time from full stamina (not overweight) and the time to refill it from empty, standing still.
