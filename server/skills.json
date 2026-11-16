@@ -1000,17 +1000,21 @@
   "maxEnergy": 100,
   "maxHydration": 100,
   "drainSource": "measured in game (Oct 2026): −3.69 energy / −3.10 hydration per minute at Health 5 (−3%); the SPT mirror's 3.2 / 2.6 is outdated",
-  "airFilter": {
-   "resource": 300,
-   "perHour": 17,
-   "source": "game config airFilterUnitFlowRate 0.0047222/s (SPT mirror); filter size 300 from the community wiki"
-  },
   "waterFilter": {
-   "resource": 100,
    "perCanister": 66,
    "canisterSeconds": 19500,
    "collectorLevel": 3,
-   "source": "game production config (Water Collector, purified water: 66 filter resource, 19500 s), SPT mirror; filter size 100 from the community wiki"
+   "source": "game production config (Water Collector, purified water: 66 filter resource, 19500 s), SPT mirror; filter sizes: water filter 100 (community wiki), Everclear two-stage filter 400 (in game)",
+   "filters": [
+    {
+     "name": "Water filter",
+     "resource": 100
+    },
+    {
+     "name": "Everclear two-stage filter",
+     "resource": 400
+    }
+   ]
   },
   "generatorFuelPerHour": 4.75,
   "fuelTanks": [

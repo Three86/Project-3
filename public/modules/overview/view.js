@@ -1,5 +1,5 @@
 // Overview: default (Basecoat) view. The tracker opens here.
-import { esc, fmtDuration } from '../../core/util.js';
+import { esc, fmtDuration, fmtDurationSec } from '../../core/util.js';
 import { badge, emptyState, icon } from '../../ui/basecoat/components.js';
 import { endurance, goals, hideoutResources, metabolism, pmc, strength } from './logic.js';
 
@@ -65,18 +65,23 @@ function metabolismCard() {
 function hideoutCard() {
   const h = hideoutResources();
   const hrs = (x) => fmtDuration(x * 3600);
-  const { fuel, water: w } = h;
+  const { fuel, water: w, bitcoin: btc } = h;
   const boost = fuel.bonus ? fuel.bonus.boosted / fuel.bonus.pct : 1;
-  const notes = [`Fuel and filters use ${signed(fuel.hmPct)} from Hideout Management`];
+  const notes = [`Generator burns ${fuel.perHour.toFixed(2)} fuel/h`, `fuel and filters use ${signed(fuel.hmPct)} from Hideout Management`];
   if (fuel.bonus) notes.push(`${esc(fuel.bonus.from.join(', '))} ${signed(fuel.bonus.pct)} fuel${boost > 1.0001 ? `, ×${boost.toFixed(2)} from Hideout Management` : ''}`);
-  const collector = w.collectorBuilt == null ? '' : w.collectorBuilt >= w.collectorLevel ? '' : ` (yours is level ${w.collectorBuilt})`;
+  const collector = w.collectorBuilt == null || w.collectorBuilt >= w.collectorLevel ? '' : ` (yours is level ${w.collectorBuilt})`;
+  const farm = btc
+    ? `${stat('1 bitcoin every', fmtDurationSec(btc.secs), `${btc.gpus} graphics card${btc.gpus === 1 ? '' : 's'} · level ${btc.level} holds ${btc.maxGpus} · set on the Recipes tab`)}
+      ${btc.tanks.map((t) => stat(`Per ${esc(t.name)} (${t.resource})`, `${t.bitcoins.toFixed(2)} bitcoins`)).join('')}`
+    : '<p class="ovw-note">Not built yet.</p>';
   return skillCard('hideout', 'Hideout', 'home', lv('Crafting', h.crafting) + lv('Hideout Mgmt', h.hm), `
-    ${h.tanks.map((t) => stat(`${esc(t.name)} (${t.resource}) lasts`, hrs(t.hours), `base ${hrs(t.baseHours)} · generator ${fuel.perHour.toFixed(2)} fuel/h`)).join('')}
-    ${stat(`Air filter (${h.air.resource}) lasts`, hrs(h.air.hours), `base ${hrs(h.air.baseHours)}`)}
-    <div class="stat-sub">Water filter (${w.resource}) · purified water</div>
-    ${stat('Canisters per filter', w.canisters.toFixed(2), `uses ${w.use.toFixed(1)} of the filter per canister · base ${w.baseCanisters.toFixed(2)}`)}
-    ${stat('Time per canister', fmtDuration(w.seconds), `base ${fmtDuration(w.baseSeconds)} · Crafting ${signed(w.craftPct)}`)}
-    <p class="ovw-note">${notes.join('; ')}. Purified water needs Water Collector level ${w.collectorLevel}${collector}.</p>`);
+    ${h.tanks.map((t) => stat(`${esc(t.name)} (${t.resource}) lasts`, hrs(t.hours))).join('')}
+    <div class="stat-sub">Purified water</div>
+    ${stat('Time per canister', fmtDuration(w.seconds), `Crafting ${signed(w.craftPct)} · needs Water Collector level ${w.collectorLevel}${collector}`)}
+    ${w.filters.map((f) => stat(`${esc(f.name)} (${f.resource})`, `${f.canisters.toFixed(2)} canisters`)).join('')}
+    <div class="stat-sub">Bitcoin Farm</div>
+    ${farm}
+    <p class="ovw-note">${notes.join('; ')}. A canister uses ${w.perCanister.toFixed(1)} of a filter.</p>`);
 }
 
 function render() {

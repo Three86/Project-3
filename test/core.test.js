@@ -173,8 +173,14 @@ test('overview: weight limits, stamina, food and drain, fuel and filters at your
   near(h.fuel.perHour, fuelH, 'fuel per hour');
   assert.deepStrictEqual(h.tanks.map((t) => t.name), ['Metal fuel tank', 'Expeditionary fuel tank']);
   near(h.tanks[0].hours, 100 / fuelH, 'metal tank'); near(h.tanks[1].hours, 60 / fuelH, 'expeditionary tank');
-  near(h.air.hours, 300 / (17 * 0.95), 'air filter'); near(h.air.baseHours, 300 / 17, 'air filter base');
-  near(h.water.canisters, 100 / (66 * 0.95), 'canisters per water filter'); near(h.water.seconds, 19500 * 0.85, 'time per canister');
+  near(h.water.seconds, 19500 * 0.85, 'time per canister');
+  assert.deepStrictEqual(h.water.filters.map((f) => f.name), ['Water filter', 'Everclear two-stage filter']);
+  near(h.water.filters[0].canisters, 100 / (66 * 0.95), 'canisters per water filter'); near(h.water.filters[1].canisters, 400 / (66 * 0.95), 'canisters per Everclear filter');
+  // Bitcoin Farm level 1 (10 graphics cards in the fixture): time per bitcoin and bitcoins per tank.
+  near(h.bitcoin.secs, game.bitcoinSeconds(10), 'time per bitcoin'); assert.strictEqual(h.bitcoin.level, 1);
+  near(h.bitcoin.tanks[1].bitcoins, (60 / fuelH) / (game.bitcoinSeconds(10) / 3600), 'bitcoins per expeditionary tank');
+  delete S.progress.hideout.btc1;
+  assert.strictEqual(ov.hideoutResources().bitcoin, null, 'farm not built');
   const p = ov.pmc();
   assert.deepStrictEqual([p.faction, p.level, p.image, p.fallback], ['USEC', 30, '/api/images/pmc/usec', 'img/pmc/usec.webp']);
   S.progress.settings.faction = 'BEAR';

@@ -392,7 +392,7 @@ export function hideoutBonusTotals() {
     for (const l of st.levels) {
       if (l.level > built) continue;
       for (const b of l.bonuses || []) {
-        if (b.value == null || !b.type) continue;
+        if (!b.value || !b.type) continue; // no value or 0: nothing to add (and the station isn't named)
         const abs = ABSOLUTE_BONUS.has(b.type);
         const key = `${b.type}|${b.skillName || ''}|${b.type === 'AdditionalSlots' ? st.id : ''}`;
         const e = map.get(key) || { type: b.type, name: b.name || b.type, skillName: b.skillName, station: st.name, abs, total: 0, from: [] };
@@ -418,7 +418,7 @@ export function generatorFuel() {
   const hm = cfg.skills.find((sk) => sk.id === 'HideoutManagement');
   const e = (hm?.effects || []).find((x) => /consumption/i.test(x.name));
   const hmPct = e ? effectValue(hm, e, hmLevel) : 0;
-  const bonus = hideoutBonusTotals().find((b) => b.type === 'FuelConsumption') || null;
+  const bonus = hideoutBonusTotals().find((b) => b.type === 'FuelConsumption' && b.total) || null;
   return { base, hmLevel, hmPct, bonus, perHour: base * (1 + hmPct / 100) * (bonus ? 1 + bonus.boosted / 100 : 1) };
 }
 export const generatorFuelPerHour = () => generatorFuel().perHour;

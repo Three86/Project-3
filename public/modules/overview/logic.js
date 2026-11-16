@@ -1,7 +1,8 @@
 // Overview: your PMC, Kappa / Lightkeeper progress and what a few skills mean in practice.
 // Game values (stamina, drain, filters) are in server/skills.json baseValues.
 import { S } from '../../core/store.js';
-import { activeSkillConfig, builtLevel, craftTimeFactor, effectValue, generatorFuel, hideoutBonusTotals, taskStatus } from '../../core/game.js';
+import { activeSkillConfig, builtLevel, craftTimeFactor, effectValue, generatorFuel, hideoutBonusTotals, isBitcoinFarm, taskStatus } from '../../core/game.js';
+import { bitcoinInfo } from '../recipes/logic.js';
 
 export const uiDefaults = {};
 
@@ -67,22 +68,25 @@ export function metabolism() {
   };
 }
 
-// Fuel tanks, air filter and water filter with Hideout Management (and Crafting for the water time).
+// Fuel tanks, purified water (time per canister, canisters per water filter) and the Bitcoin Farm,
+// with Hideout Management (fuel and filters) and Crafting (production time) applied.
 export function hideoutResources() {
   const b = base();
   const fuel = generatorFuel();
   const cons = 1 + fuel.hmPct / 100;
-  const air = b.airFilter || { resource: 300, perHour: 17 };
-  const wf = b.waterFilter || { resource: 100, perCanister: 66, canisterSeconds: 19500, collectorLevel: 3 };
+  const wf = b.waterFilter || {};
+  const perCanister = (wf.perCanister || 66) * cons;
   const collector = (S.data?.hideout || []).find((st) => /water collector/i.test(st.name));
+  const farm = (S.data?.hideout || []).find(isBitcoinFarm);
+  const btc = farm && builtLevel(farm) ? { ...bitcoinInfo(), level: builtLevel(farm) } : null;
   return {
     crafting: level('Crafting'), hm: level('HideoutManagement'), fuel,
-    tanks: (b.fuelTanks || []).map((t) => ({ ...t, hours: t.resource / fuel.perHour, baseHours: t.resource / fuel.base })),
-    air: { resource: air.resource, hours: air.resource / (air.perHour * cons), baseHours: air.resource / air.perHour },
+    tanks: (b.fuelTanks || []).map((t) => ({ ...t, hours: t.resource / fuel.perHour })),
     water: {
-      resource: wf.resource, use: wf.perCanister * cons, canisters: wf.resource / (wf.perCanister * cons), baseCanisters: wf.resource / wf.perCanister,
-      seconds: wf.canisterSeconds * craftTimeFactor(), baseSeconds: wf.canisterSeconds, craftPct: (craftTimeFactor() - 1) * 100,
-      collectorLevel: wf.collectorLevel, collectorBuilt: collector ? builtLevel(collector) : null,
+      seconds: (wf.canisterSeconds || 19500) * craftTimeFactor(), craftPct: (craftTimeFactor() - 1) * 100, perCanister,
+      filters: (wf.filters || [{ name: 'Water filter', resource: 100 }]).map((f) => ({ ...f, canisters: f.resource / perCanister })),
+      collectorLevel: wf.collectorLevel || 3, collectorBuilt: collector ? builtLevel(collector) : null,
     },
+    bitcoin: btc, // null while the Bitcoin Farm isn't built
   };
 }
