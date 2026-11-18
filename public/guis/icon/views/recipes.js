@@ -66,11 +66,7 @@ function recipePanel(c) {
 
 function fuelLines(fuel) {
   const lines = [`base ${fuel.base}/h`];
-  if (fuel.hmPct) lines.push(`Hideout Management ${fuel.hmLevel}: ${pct(fuel.hmPct)} fuel use`);
-  if (fuel.bonus) {
-    const boost = fuel.bonus.boosted / fuel.bonus.pct;
-    lines.push(`${esc(fuel.bonus.from.join(', '))}: ${pct(fuel.bonus.pct)} fuel use${boost > 1.0001 ? `, ×${boost.toFixed(2)} from Hideout Management` : ''}`);
-  }
+  for (const m of fuel.modules) lines.push(`${esc(m.name)}: ${pct(m.pct)} fuel use${fuel.boostPct ? `, ${pct(m.boosted)} with Hideout Management` : ''}`);
   return lines.map((l) => `<span>· ${l}</span>`).join('');
 }
 

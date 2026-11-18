@@ -69,7 +69,7 @@ export function metabolism() {
 }
 
 // Fuel tanks, purified water (time per canister, canisters per water filter) and the Bitcoin Farm,
-// with Hideout Management (fuel and filters) and Crafting (production time) applied.
+// with module fuel bonuses, Hideout Management (zone boost; filters) and Crafting (production time) applied.
 export function hideoutResources() {
   const b = base();
   const fuel = generatorFuel();

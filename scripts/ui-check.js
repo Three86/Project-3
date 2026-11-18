@@ -819,7 +819,7 @@ async function run(dataDir) {
     ok(lastOp()?.value === 9 && (await page.locator('.btc-big div').first().innerText()).startsWith('2d 14h 39m 57s'), `− removes one card; time per bitcoin follows (${(await page.locator('.btc-big div').first().innerText()).split('\n')[0]})`);
     const tanks = await page.locator('.tank-row').allInnerTexts();
     ok(tanks.length === 2 && tanks[0].includes('Metal fuel tank') && tanks[1].includes('Expeditionary fuel tank') && tanks.every((x) => /\d\.\d\d\s*bitcoins/.test(x)), 'bitcoins per fuel tank for both tanks');
-    ok((await page.locator('.fuel-why').innerText()).includes('Hideout Management 10'), 'fuel use explains Hideout Management and hideout bonuses');
+    ok(/Generator: −10.0% fuel use, −11.0% with Hideout Management/.test(await page.locator('.fuel-why').innerText()), 'fuel use lists each module bonus with the Hideout Management boost');
     ok((await page.locator('.rstation[data-id="s-btc"] .r-meta').innerText()).includes('9 GPUs'), 'farm card shows the installed cards');
     await post([{ section: 'craftPins', id: 's-med', value: null }]);
     await shot('icon-recipes');

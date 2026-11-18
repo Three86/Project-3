@@ -66,9 +66,8 @@ function hideoutCard() {
   const h = hideoutResources();
   const hrs = (x) => fmtDuration(x * 3600);
   const { fuel, water: w, bitcoin: btc } = h;
-  const boost = fuel.bonus ? fuel.bonus.boosted / fuel.bonus.pct : 1;
-  const notes = [`Generator burns ${fuel.perHour.toFixed(2)} fuel/h`, `fuel and filters use ${signed(fuel.hmPct)} from Hideout Management`];
-  if (fuel.bonus) notes.push(`${esc(fuel.bonus.from.join(', '))} ${signed(fuel.bonus.pct)} fuel${boost > 1.0001 ? `, ×${boost.toFixed(2)} from Hideout Management` : ''}`);
+  const mods = fuel.modules.map((m) => `${esc(m.name)} ${signed(m.pct)}${fuel.boostPct ? ` (${signed(m.boosted)} with Hideout Management)` : ''}`);
+  const notes = [`Generator burns ${fuel.perHour.toFixed(2)} fuel/h${mods.length ? `: ${mods.join(', ')}` : ''}`, `filters use ${signed(fuel.hmPct)} from Hideout Management`];
   const collector = w.collectorBuilt == null || w.collectorBuilt >= w.collectorLevel ? '' : ` (yours is level ${w.collectorBuilt})`;
   const farm = btc
     ? `${stat('1 bitcoin every', fmtDurationSec(btc.secs), `${btc.gpus} graphics card${btc.gpus === 1 ? '' : 's'} · level ${btc.level} holds ${btc.maxGpus} · set on the Recipes tab`)}
@@ -81,7 +80,7 @@ function hideoutCard() {
     ${w.filters.map((f) => stat(`${esc(f.name)} (${f.resource})`, `${f.canisters.toFixed(2)} canisters`)).join('')}
     <div class="stat-sub">Bitcoin Farm</div>
     ${farm}
-    <p class="ovw-note">${notes.join('; ')}. A canister uses ${w.perCanister.toFixed(1)} of a filter.</p>`);
+    <p class="ovw-note">${notes.join('; ')}. A canister uses ${w.perCanister.toFixed(1)} of a filter. The fuel formula is fitted to in-game readings (within about 2%).</p>`);
 }
 
 function render() {

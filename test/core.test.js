@@ -115,8 +115,8 @@ test('bitcoin farm: graphics card slots follow the built level and the setting i
   S.progress.hideout.gen1 = true;
   const fuel = recipes.bitcoinInfo().fuel;
   assert.strictEqual(fuel.hmPct, -5);
-  assert.ok(Math.abs(fuel.perHour - 4.75 * 0.95 * (1 - 0.1 * 1.1)) < 1e-9, `fuel per hour ${fuel.perHour}`);
-  assert.deepStrictEqual(fuel.bonus.from, ['Generator']);
+  assert.ok(Math.abs(fuel.perHour - 4.75 * (1 - 0.1 * 1.1)) < 1e-9, `fuel per hour ${fuel.perHour} (Hideout Management's −5% is for filters)`);
+  assert.deepStrictEqual(fuel.modules.map((m) => m.name), ['Generator']);
   for (const t of recipes.bitcoinInfo().tanks) assert.ok(Math.abs(t.bitcoins - (t.resource / fuel.perHour) / (recipes.bitcoinInfo().secs / 3600)) < 1e-9);
 });
 
@@ -133,6 +133,29 @@ test('recipe stations: pinned recipes first in pin order, the Bitcoin Farm card 
   assert.deepStrictEqual(g.pinned.map((c) => c.id), ['cr4', 'cr1']);
   assert.ok(!g.rest.some((c) => ['cr4', 'cr1'].includes(c.id)), 'pinned recipes are not listed twice');
   assert.strictEqual(recipes.craftStations()[0].pins, 2);
+});
+
+test('generator fuel matches in-game readings: Solar Power and a finished Defective Wall, Hideout Management 27 and 28', async () => {
+  const S = await reset();
+  const lv = (id, n) => ({ id, level: n, bonuses: [] });
+  S.data.hideout.push(
+    { id: 's-solar', name: 'Solar Power', levels: [{ id: 'sol1', level: 1, bonuses: [{ type: 'FuelConsumption', value: -0.5 }] }] },
+    { id: 's-wall', name: 'Defective Wall', levels: [lv('w1', 1), ...[2, 3, 4, 5].map((n) => ({ id: `w${n}`, level: n, bonuses: [{ type: 'FuelConsumption', value: 0.05 }, { type: 'EnergyRegeneration', value: -0.05 }] })),
+      { id: 'w6', level: 6, bonuses: [{ type: 'FuelConsumption', value: -0.2 }, { type: 'EnergyRegeneration', value: 0.2 }] }] },
+  );
+  S.progress.hideout = { sol1: true, w1: true, w2: true, w3: true, w4: true, w5: true, w6: true };
+  game.buildIndex();
+  // Only the wall's current level counts: its level 2–5 penalties are gone at level 6.
+  assert.deepStrictEqual(game.stationBonuses(S.data.hideout.find((s) => s.id === 's-wall')).map((b) => b.value), [-0.2, 0.2]);
+  // Generator screen: 301 units for 235 h 11 m (HM 27) and 269 units for 216 h 27 m (HM 28): within 2.5%.
+  for (const [hm, units, hours] of [[27, 301, 235 + 11 / 60], [28, 269, 216 + 27 / 60]]) {
+    S.progress.skills.HideoutManagement = hm;
+    game.resetMemo();
+    const f = game.generatorFuel();
+    const off = (units / hours) / f.perHour - 1; // tracker hours vs game hours
+    assert.ok(Math.abs(off) < 0.025, `HM ${hm}: ${f.perHour.toFixed(3)} fuel/h vs game ${(units / hours).toFixed(3)} (${(off * 100).toFixed(1)}%)`);
+    assert.deepStrictEqual(f.modules.map((m) => [m.name, Math.round(m.pct)]), [['Solar Power', -50], ['Defective Wall', -20]]);
+  }
 });
 
 test('crafting skill shortens craft times; recipes respect locks and the pin limit', async () => {
@@ -169,7 +192,7 @@ test('overview: weight limits, stamina, food and drain, fuel and filters at your
   Object.assign(S.progress.skills, { Health: 5, Metabolism: 11 });
   assert.deepStrictEqual([ov.metabolism().energy.perMin.toFixed(2), ov.metabolism().hydration.perMin.toFixed(2)], ['3.69', '3.10']);
   const h = ov.hideoutResources();
-  const fuelH = 4.75 * 0.95; // Generator not built in the fixture: no fuel bonus
+  const fuelH = 4.75; // Generator not built in the fixture: no fuel bonus (Hideout Management's −5% is for filters)
   near(h.fuel.perHour, fuelH, 'fuel per hour');
   assert.deepStrictEqual(h.tanks.map((t) => t.name), ['Metal fuel tank', 'Expeditionary fuel tank']);
   near(h.tanks[0].hours, 100 / fuelH, 'metal tank'); near(h.tanks[1].hours, 60 / fuelH, 'expeditionary tank');

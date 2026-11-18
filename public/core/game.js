@@ -384,22 +384,27 @@ export function hideoutBoostPercent() {
 
 // Sum the bonuses of every built hideout level. Percent bonuses add up across levels;
 // stash size takes the largest; extra slots are counted per station.
+// Modules whose levels replace each other's bonuses instead of adding up: the Defective Wall's levels
+// 2–5 carry penalties that are gone once level 6 is built, so only the built level counts.
+const CURRENT_LEVEL_ONLY = /defective wall/i;
+// Bonuses of the built levels of a station (all of them, or only the top one for CURRENT_LEVEL_ONLY).
+export function stationBonuses(st) {
+  const built = builtLevel(st);
+  return st.levels.filter((l) => l.level <= built && (!CURRENT_LEVEL_ONLY.test(st.name) || l.level === built)).flatMap((l) => l.bonuses || []);
+}
+
 export function hideoutBonusTotals() {
   const boost = hideoutBoostPercent();
   const map = new Map();
   for (const st of S.data?.hideout || []) {
-    const built = builtLevel(st);
-    for (const l of st.levels) {
-      if (l.level > built) continue;
-      for (const b of l.bonuses || []) {
-        if (!b.value || !b.type) continue; // no value or 0: nothing to add (and the station isn't named)
-        const abs = ABSOLUTE_BONUS.has(b.type);
-        const key = `${b.type}|${b.skillName || ''}|${b.type === 'AdditionalSlots' ? st.id : ''}`;
-        const e = map.get(key) || { type: b.type, name: b.name || b.type, skillName: b.skillName, station: st.name, abs, total: 0, from: [] };
-        e.total = b.type === 'StashSize' ? Math.max(e.total, b.value) : e.total + b.value;
-        if (!e.from.includes(st.name)) e.from.push(st.name);
-        map.set(key, e);
-      }
+    for (const b of stationBonuses(st)) {
+      if (!b.value || !b.type) continue; // no value or 0: nothing to add (and the station isn't named)
+      const abs = ABSOLUTE_BONUS.has(b.type);
+      const key = `${b.type}|${b.skillName || ''}|${b.type === 'AdditionalSlots' ? st.id : ''}`;
+      const e = map.get(key) || { type: b.type, name: b.name || b.type, skillName: b.skillName, station: st.name, abs, total: 0, from: [] };
+      e.total = b.type === 'StashSize' ? Math.max(e.total, b.value) : e.total + b.value;
+      if (!e.from.includes(st.name)) e.from.push(st.name);
+      map.set(key, e);
     }
   }
   return [...map.values()].map((e) => {
@@ -409,8 +414,13 @@ export function hideoutBonusTotals() {
 }
 
 // ---------------------------------------------------------------- crafting
-// Fuel the generator burns per hour after Hideout Management and hideout fuel bonuses, with the parts:
-// { base, hmLevel, hmPct, bonus (FuelConsumption hideout bonus or null), perHour }.
+// Fuel the generator burns per hour. Each module's fuel bonus (Solar Power −50%, a finished Defective
+// Wall −20%, ...) is boosted by Hideout Management's zone bonus and the modules multiply:
+//   base × Π (1 + bonus × (1 + zoneBoost))
+// Hideout Management's own consumption reduction is left out for fuel (it applies to water filters):
+// this fits in-game readings best (Generator screen at Hideout Management 27 and 28 with Solar Power
+// and a finished wall: 1.0% and 2.2% short); the wiki and SPT formulas were 15% off. Revisit with
+// more readings. Returns { base, hmLevel, hmPct (filters), boostPct, modules: [{ name, pct, boosted }], perHour }.
 export function generatorFuel() {
   const cfg = activeSkillConfig();
   const base = (cfg.baseValues || {}).generatorFuelPerHour || 4.75;
@@ -418,8 +428,14 @@ export function generatorFuel() {
   const hm = cfg.skills.find((sk) => sk.id === 'HideoutManagement');
   const e = (hm?.effects || []).find((x) => /consumption/i.test(x.name));
   const hmPct = e ? effectValue(hm, e, hmLevel) : 0;
-  const bonus = hideoutBonusTotals().find((b) => b.type === 'FuelConsumption' && b.total) || null;
-  return { base, hmLevel, hmPct, bonus, perHour: base * (1 + hmPct / 100) * (bonus ? 1 + bonus.boosted / 100 : 1) };
+  const boostPct = hideoutBoostPercent();
+  const modules = [];
+  for (const st of S.data?.hideout || []) {
+    const total = stationBonuses(st).filter((b) => b.type === 'FuelConsumption' && b.value).reduce((a, b) => a + b.value, 0);
+    if (total) modules.push({ name: st.name, pct: total * 100, boosted: total * 100 * (1 + boostPct / 100) });
+  }
+  const perHour = base * modules.reduce((f, m) => f * Math.max(0, 1 + m.boosted / 100), 1);
+  return { base, hmLevel, hmPct, boostPct, modules, perHour };
 }
 export const generatorFuelPerHour = () => generatorFuel().perHour;
 
