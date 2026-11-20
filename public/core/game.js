@@ -418,7 +418,7 @@ export function hideoutBonusTotals() {
 //   base × Π (1 + module bonus × (1 + zoneBoost)) × (1 − hmFuelReductionPerLevel × Hideout Management level)
 // Module bonuses (e.g. Solar Power −50%) are boosted by Hideout Management's zone bonus, as the game
 // shows. The rest is fitted to in-game Generator readings (baseValues.generatorFit): Hideout Management
-// saves about 0.97% fuel per level (the skill says 0.5%) and the Defective Wall's fuel bonus has no
+// saves about 0.98% fuel per level (the skill says 0.5%) and the Defective Wall's fuel bonus has no
 // effect on the generator. The wiki and SPT formulas were 15% off. Revisit with more readings.
 // Returns { base, hmLevel, hmPct (filters), hmFuelPct, boostPct, modules: [{ name, pct, boosted }], perHour }.
 export function generatorFuel() {

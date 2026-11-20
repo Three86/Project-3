@@ -1048,11 +1048,11 @@
   "craftSpeedWithoutFuel": 0.07,
   "enduranceEliteStaminaPercent": 20,
   "generatorFit": {
-   "hmFuelReductionPerLevel": 0.97,
+   "hmFuelReductionPerLevel": 0.98,
    "noFuelEffect": [
     "Defective Wall"
    ],
-   "source": "fitted to in-game Generator readings with Solar Power and a finished Defective Wall: Hideout Management 27 (301 units, 235 h 11 m), 28 (269 units, 216 h 27 m), 29 (220 units, 182 h 23 m); within 0.34%. Revisit with more readings."
+   "source": "fitted to in-game Generator readings with Solar Power and a finished Defective Wall: Hideout Management 27 (301 units, 235 h 11 m), 28 (269 units, 216 h 27 m), 29 (220 units, 182 h 23 m), 30 (160 units, 136 h 37 m); within 0.5%. Revisit with more readings."
   }
  },
  "effectsSource": "Character skills pages of the EFT wiki (escapefromtarkov.fandom.com), Nov 2026"

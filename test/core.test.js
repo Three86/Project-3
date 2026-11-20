@@ -115,7 +115,7 @@ test('bitcoin farm: graphics card slots follow the built level and the setting i
   S.progress.hideout.gen1 = true;
   const fuel = recipes.bitcoinInfo().fuel;
   assert.strictEqual(fuel.hmPct, -5);
-  assert.ok(Math.abs(fuel.perHour - 4.75 * (1 - 0.1 * 1.1) * (1 - 0.097)) < 1e-9, `fuel per hour ${fuel.perHour} (Generator −10% boosted ×1.1, Hideout Management 10 × 0.97% fitted)`);
+  assert.ok(Math.abs(fuel.perHour - 4.75 * (1 - 0.1 * 1.1) * (1 - 0.098)) < 1e-9, `fuel per hour ${fuel.perHour} (Generator −10% boosted ×1.1, Hideout Management 10 × 0.98% fitted)`);
   assert.deepStrictEqual(fuel.modules.map((m) => m.name), ['Generator']);
   for (const t of recipes.bitcoinInfo().tanks) assert.ok(Math.abs(t.bitcoins - (t.resource / fuel.perHour) / (recipes.bitcoinInfo().secs / 3600)) < 1e-9);
 });
@@ -135,7 +135,7 @@ test('recipe stations: pinned recipes first in pin order, the Bitcoin Farm card 
   assert.strictEqual(recipes.craftStations()[0].pins, 2);
 });
 
-test('generator fuel matches in-game readings: Solar Power and a finished Defective Wall, Hideout Management 27, 28 and 29', async () => {
+test('generator fuel matches in-game readings: Solar Power and a finished Defective Wall, Hideout Management 27 to 30', async () => {
   const S = await reset();
   const lv = (id, n) => ({ id, level: n, bonuses: [] });
   S.data.hideout.push(
@@ -147,8 +147,8 @@ test('generator fuel matches in-game readings: Solar Power and a finished Defect
   game.buildIndex();
   // Only the wall's current level counts: its level 2–5 penalties are gone at level 6.
   assert.deepStrictEqual(game.stationBonuses(S.data.hideout.find((s) => s.id === 's-wall')).map((b) => b.value), [-0.2, 0.2]);
-  // Generator screen: 301 units for 235 h 11 m (HM 27), 269 for 216 h 27 m (HM 28), 220 for 182 h 23 m (HM 29).
-  for (const [hm, units, hours] of [[27, 301, 235 + 11 / 60], [28, 269, 216 + 27 / 60], [29, 220, 182 + 23 / 60]]) {
+  // Generator screen: 301 units for 235 h 11 m (HM 27), 269 for 216 h 27 m (HM 28), 220 for 182 h 23 m (HM 29), 160 for 136 h 38 m (HM 30).
+  for (const [hm, units, hours] of [[27, 301, 235 + 11 / 60], [28, 269, 216 + 27 / 60], [29, 220, 182 + 23 / 60], [30, 160, 136 + 37.5 / 60]]) {
     S.progress.skills.HideoutManagement = hm;
     game.resetMemo();
     const f = game.generatorFuel();
@@ -192,7 +192,7 @@ test('overview: weight limits, stamina, food and drain, fuel and filters at your
   Object.assign(S.progress.skills, { Health: 5, Metabolism: 11 });
   assert.deepStrictEqual([ov.metabolism().energy.perMin.toFixed(2), ov.metabolism().hydration.perMin.toFixed(2)], ['3.69', '3.10']);
   const h = ov.hideoutResources();
-  const fuelH = 4.75 * (1 - 0.097); // Generator not built in the fixture; Hideout Management 10 × 0.97% (fitted) on fuel
+  const fuelH = 4.75 * (1 - 0.098); // Generator not built in the fixture; Hideout Management 10 × 0.98% (fitted) on fuel
   near(h.fuel.perHour, fuelH, 'fuel per hour');
   assert.deepStrictEqual(h.tanks.map((t) => t.name), ['Metal fuel tank', 'Expeditionary fuel tank']);
   near(h.tanks[0].hours, 100 / fuelH, 'metal tank'); near(h.tanks[1].hours, 60 / fuelH, 'expeditionary tank');
