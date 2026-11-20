@@ -414,28 +414,33 @@ export function hideoutBonusTotals() {
 }
 
 // ---------------------------------------------------------------- crafting
-// Fuel the generator burns per hour. Each module's fuel bonus (Solar Power −50%, a finished Defective
-// Wall −20%, ...) is boosted by Hideout Management's zone bonus and the modules multiply:
-//   base × Π (1 + bonus × (1 + zoneBoost))
-// Hideout Management's own consumption reduction is left out for fuel (it applies to water filters):
-// this fits in-game readings best (Generator screen at Hideout Management 27 and 28 with Solar Power
-// and a finished wall: 1.0% and 2.2% short); the wiki and SPT formulas were 15% off. Revisit with
-// more readings. Returns { base, hmLevel, hmPct (filters), boostPct, modules: [{ name, pct, boosted }], perHour }.
+// Fuel the generator burns per hour:
+//   base × Π (1 + module bonus × (1 + zoneBoost)) × (1 − hmFuelReductionPerLevel × Hideout Management level)
+// Module bonuses (e.g. Solar Power −50%) are boosted by Hideout Management's zone bonus, as the game
+// shows. The rest is fitted to in-game Generator readings (baseValues.generatorFit): Hideout Management
+// saves about 0.97% fuel per level (the skill says 0.5%) and the Defective Wall's fuel bonus has no
+// effect on the generator. The wiki and SPT formulas were 15% off. Revisit with more readings.
+// Returns { base, hmLevel, hmPct (filters), hmFuelPct, boostPct, modules: [{ name, pct, boosted }], perHour }.
 export function generatorFuel() {
   const cfg = activeSkillConfig();
-  const base = (cfg.baseValues || {}).generatorFuelPerHour || 4.75;
+  const bv = cfg.baseValues || {};
+  const fit = bv.generatorFit || {};
+  const base = bv.generatorFuelPerHour || 4.75;
   const hmLevel = Number(S.progress.skills?.HideoutManagement || 0);
   const hm = cfg.skills.find((sk) => sk.id === 'HideoutManagement');
   const e = (hm?.effects || []).find((x) => /consumption/i.test(x.name));
   const hmPct = e ? effectValue(hm, e, hmLevel) : 0;
+  const hmFuelPct = fit.hmFuelReductionPerLevel != null ? -fit.hmFuelReductionPerLevel * Math.min(hmLevel, S.skills?.effectCapLevel || 50) : hmPct;
   const boostPct = hideoutBoostPercent();
+  const skip = new Set(fit.noFuelEffect || []);
   const modules = [];
   for (const st of S.data?.hideout || []) {
+    if (skip.has(st.name)) continue;
     const total = stationBonuses(st).filter((b) => b.type === 'FuelConsumption' && b.value).reduce((a, b) => a + b.value, 0);
     if (total) modules.push({ name: st.name, pct: total * 100, boosted: total * 100 * (1 + boostPct / 100) });
   }
-  const perHour = base * modules.reduce((f, m) => f * Math.max(0, 1 + m.boosted / 100), 1);
-  return { base, hmLevel, hmPct, boostPct, modules, perHour };
+  const perHour = base * modules.reduce((f, m) => f * Math.max(0, 1 + m.boosted / 100), 1) * Math.max(0, 1 + hmFuelPct / 100);
+  return { base, hmLevel, hmPct, hmFuelPct, boostPct, modules, perHour };
 }
 export const generatorFuelPerHour = () => generatorFuel().perHour;
 

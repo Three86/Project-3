@@ -67,6 +67,7 @@ function hideoutCard() {
   const hrs = (x) => fmtDuration(x * 3600);
   const { fuel, water: w, bitcoin: btc } = h;
   const mods = fuel.modules.map((m) => `${esc(m.name)} ${signed(m.pct)}${fuel.boostPct ? ` (${signed(m.boosted)} with Hideout Management)` : ''}`);
+  if (fuel.hmFuelPct) mods.push(`Hideout Management ${signed(fuel.hmFuelPct)}`);
   const notes = [`Generator burns ${fuel.perHour.toFixed(2)} fuel/h${mods.length ? `: ${mods.join(', ')}` : ''}`, `filters use ${signed(fuel.hmPct)} from Hideout Management`];
   const collector = w.collectorBuilt == null || w.collectorBuilt >= w.collectorLevel ? '' : ` (yours is level ${w.collectorBuilt})`;
   const farm = btc
@@ -80,7 +81,7 @@ function hideoutCard() {
     ${w.filters.map((f) => stat(`${esc(f.name)} (${f.resource})`, `${f.canisters.toFixed(2)} canisters`)).join('')}
     <div class="stat-sub">Bitcoin Farm</div>
     ${farm}
-    <p class="ovw-note">${notes.join('; ')}. A canister uses ${w.perCanister.toFixed(1)} of a filter. The fuel formula is fitted to in-game readings (within about 2%).</p>`);
+    <p class="ovw-note">${notes.join('; ')}. A canister uses ${w.perCanister.toFixed(1)} of a filter. The fuel formula is fitted to in-game readings (within about 0.5%).</p>`);
 }
 
 function render() {

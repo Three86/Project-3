@@ -67,6 +67,7 @@ function recipePanel(c) {
 function fuelLines(fuel) {
   const lines = [`base ${fuel.base}/h`];
   for (const m of fuel.modules) lines.push(`${esc(m.name)}: ${pct(m.pct)} fuel use${fuel.boostPct ? `, ${pct(m.boosted)} with Hideout Management` : ''}`);
+  if (fuel.hmFuelPct) lines.push(`Hideout Management ${fuel.hmLevel}: ${pct(fuel.hmFuelPct)} fuel use`);
   return lines.map((l) => `<span>· ${l}</span>`).join('');
 }
 
