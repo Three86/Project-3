@@ -67,6 +67,20 @@ for (const [from, to] of Object.entries(SKILL_RENAMES)) {
 // Progress saved before the wipe filter existed may hold quest states from older wipes.
 const needsLogRebuild = savedProgress.settings && !('logsSince' in savedProgress.settings);
 let gameData = readJson(GAME_FILE, null);
+// Quests tarkov.dev doesn't publish (storyline-chapter and Arena quests), converted from the EFT wiki by
+// scripts/wiki-quests.js. Added to the game data the browser gets, except quests tarkov.dev has (by name).
+const WIKI_QUESTS = readJson(process.env.WIKI_QUESTS_FILE || path.join(__dirname, 'wiki-quests.json'), { tasks: [] }).tasks || [];
+const questKey = (name) => String(name || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+let withWikiCache = { src: null, out: null };
+function withWikiQuests(data) {
+  if (!data || !WIKI_QUESTS.length) return data;
+  if (withWikiCache.src === data) return withWikiCache.out;
+  const have = new Set((data.tasks || []).map((q) => questKey(q.name)));
+  const extra = WIKI_QUESTS.filter((q) => !have.has(questKey(q.name)));
+  const out = { ...data, tasks: [...(data.tasks || []), ...extra], meta: { ...data.meta, wikiQuests: extra.length } };
+  withWikiCache = { src: data, out };
+  return out;
+}
 const logState = readJson(LOGSTATE_FILE, { offsets: {}, events: 0, lastEvents: [] });
 let refreshing = null;
 let lastRefreshError = null;
@@ -403,7 +417,7 @@ async function handleApi(req, res, url) {
       return send(res, result.error ? 400 : 200, result);
     }
     case 'GET /api/data':
-      return gameData ? send(res, 200, gameData) : send(res, 404, { error: 'no game data yet', ...status() });
+      return gameData ? send(res, 200, withWikiQuests(gameData)) : send(res, 404, { error: 'no game data yet', ...status() });
     case 'GET /api/data/queries':
       return send(res, 200, { url: API_URL, gameMode: progress.settings.gameMode || 'regular', queries: queryVariants({ gameMode: progress.settings.gameMode || 'regular' }) });
     case 'POST /api/data/refresh':

@@ -5,7 +5,7 @@ import { esc } from '../../core/util.js';
 import { STATUS_LABEL, objValue, taskMapNotes, taskMaps, taskStatus } from '../../core/game.js';
 import { badge, btn, emptyState, icon, toggleSwitch } from '../../ui/basecoat/components.js';
 import { objRow, objectiveActions, objectiveChanges } from '../../ui/basecoat/objectives.js';
-import { questCardToggle } from '../../ui/basecoat/quest-card.js';
+import { questCardToggle, wikiBadge, wikiNotes } from '../../ui/basecoat/quest-card.js';
 import { setTaskStatus } from '../../core/progress.js';
 import { traderImage } from '../quests/logic.js';
 import { ANY_MAP, isGoalQuest, mapCounts, pinState, pinnedTotals, plannerTasks, setMap, togglePin } from './logic.js';
@@ -36,11 +36,11 @@ function questRow(t, pins) {
     : badge(`${icon('lock')} ${STATUS_LABEL[st]}`);
   return `<li><details class="rp-q st-${st}${pinned ? ' pinned' : ''}" id="rp-${esc(t.id)}" data-open="${esc(t.id)}" ${S.ui.open?.[t.id] ? 'open' : ''}>
     <summary>${icon('chevron', 'caret')}${pic(traderImage(t.trader?.id), t.trader?.name, 'tr')}
-      <span class="q-name">${esc(t.name)}<span class="q-sub">${esc(t.trader?.name || '')}${st === 'locked' ? ' · locked' : st === 'available' ? ' · not started' : ''}${goalTags(t)}${mapNotes(t)}</span></span>
+      <span class="q-name">${esc(t.name)}${wikiBadge(t)}<span class="q-sub">${esc(t.trader?.name || '')}${st === 'locked' ? ' · locked' : st === 'available' ? ' · not started' : ''}${goalTags(t)}${mapNotes(t)}</span></span>
       <span class="q-map">${esc(taskMaps(t).map(mapLabel).join(', '))}</span>
       <span class="q-prog">${req.length ? `${done}/${req.length} objectives<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span>
       ${btn(icon('star', pinned ? 'filled' : ''), `data-act="rp-pin" data-id="${esc(t.id)}" aria-pressed="${pinned}" aria-label="${pinned ? 'Unpin' : 'Pin'} ${esc(t.name)}"`, { variant: pinned ? 'secondary' : 'ghost', size: 'icon-sm', cls: `pin${kind === 'auto' ? ' auto' : ''}`, tip: kind === 'auto' ? AUTO_TIP : pinned ? 'Unpin' : 'Pin: add to the totals', side: 'left' })}</summary>
-    <div class="q-body"><ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
+    <div class="q-body">${wikiNotes(t)}<ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
       <div class="q-tools">${action}${btn(`Open in Quests ${icon('external')}`, `data-act="goto" data-module="quests" data-id="${esc(t.id)}"`, { variant: 'ghost', size: 'xs' })}</div></div>
   </details></li>`;
 }

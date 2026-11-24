@@ -5,6 +5,7 @@ import { esc } from '../../../core/util.js';
 import { STATUS_LABEL, objValue, taskMapText, taskStatus } from '../../../core/game.js';
 import { badge, btn, checkbox, emptyState, progressBar } from '../../../ui/basecoat/components.js';
 import { objRow, objectiveActions, objectiveChanges } from '../../../ui/basecoat/objectives.js';
+import { wikiBadge } from '../../../ui/basecoat/quest-card.js';
 import { filteredTasks, sortTasks, toggleStatusFilter, focusTask, setTaskStatus } from '../../../modules/quests/logic.js';
 
 const SHOWN = ['active', 'locked', 'completed'];
@@ -15,7 +16,7 @@ function questRow(t) {
   const done = req.filter((o) => objValue('objectives', o.id, o).done).length;
   return `<li class="cq-row st-${st}" id="task-${t.id}">
     <div class="cq-head">
-      <span class="cq-name">${esc(t.name)}</span>
+      <span class="cq-name">${esc(t.name)}${wikiBadge(t)}</span>
       <span class="cq-meta">${esc(t.trader?.name || '?')} · ${esc(taskMapText(t))}</span>
       ${badge(STATUS_LABEL[st], 'outline', `status-${st}`)}
       <span class="cq-actions">${st === 'active'

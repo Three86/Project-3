@@ -16,8 +16,9 @@ export const ANY_MAP = 'Any';
 const listed = (st) => st === 'active' || (S.ui.rp.locked && st === 'locked');
 const UNLOCKED = new Set(['active', 'available']);
 export const isGoalQuest = (t) => !!(t.kappaRequired || t.lightkeeperRequired);
-// In the list: listed statuses, plus pinned quests you could start (auto-pin adds those).
-const inList = (t, st, pins) => listed(st) || (st === 'available' && pins.has(t.id));
+// In the list: listed statuses, plus pinned quests and wiki quests you could start.
+// Wiki quests are listed as soon as they can be started (the game logs can't start them).
+const inList = (t, st, pins) => listed(st) || (st === 'available' && (pins.has(t.id) || t.source === 'wiki'));
 
 // Maps with no base map to share a chip with: shown only while you have an active quest there.
 export const ACTIVE_ONLY_MAPS = new Set(['The Labyrinth', 'Icebreaker']);

@@ -261,7 +261,8 @@ export function taskStatus(id, seen = new Set()) {
   else if (seen.has(id)) st = 'locked';
   else {
     seen.add(id);
-    const prereqs = t.taskRequirements.every((r) => {
+    // taskRequirementsAny (wiki quests with "A or B" before them): one of them is enough.
+    const prereqs = t.taskRequirements[t.taskRequirementsAny ? 'some' : 'every']((r) => {
       if (!r.task) return true;
       const ps = taskStatus(r.task.id, seen);
       return reqStatuses(r).some((w) => (w === 'complete' ? ps === 'completed' : w === 'active' ? ['active', 'completed'].includes(ps) : w === 'failed' ? ps === 'failed' : false));

@@ -25,7 +25,10 @@ export function filteredTasks() {
   const text = norm(f.text);
   return S.data.tasks.filter((t) => {
     const st = taskStatus(t.id);
-    if (f.statuses.length && (st === 'available' || !f.statuses.includes(st))) return false;
+    // Wiki quests have no game id, so the game logs can't start them: list them with the active ones
+    // as soon as they can be started (with a Start button).
+    const shownAs = st === 'available' && t.source === 'wiki' ? 'active' : st;
+    if (f.statuses.length && (shownAs === 'available' || !f.statuses.includes(shownAs))) return false;
     if (f.trader && t.trader?.name !== f.trader) return false;
     if (f.map && !taskMaps(t).includes(f.map) && !taskMaps(t).includes('Any')) return false;
     if (f.kappa && !t.kappaRequired) return false;

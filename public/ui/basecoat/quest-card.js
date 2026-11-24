@@ -37,11 +37,11 @@ export function taskCard(t) {
       <div class="meta"><span>${esc(t.trader?.name || '?')}</span>·<span>${esc(taskMapText(t))}</span>·<span>Lvl ${t.minPlayerLevel || 1}</span>
         ${t.objectives.length ? `·<span>${pending ? `${pending} left` : 'all objectives done'} (${pct}%)</span>` : ''}
         ${t.kappaRequired ? badge('Kappa', 'outline', 'kappa') : ''}${t.lightkeeperRequired ? badge('Lightkeeper', 'outline', 'kappa') : ''}
-        ${t.factionName && t.factionName !== 'Any' ? badge(esc(t.factionName)) : ''}</div>
+        ${t.factionName && t.factionName !== 'Any' ? badge(esc(t.factionName)) : ''}${wikiBadge(t)}</div>
       ${t.objectives.length ? progressBar(pct, 100, 'Objectives done') : ''}
     </summary>
     <section>
-      <ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
+      ${wikiNotes(t)}<ul class="objs">${t.objectives.map((o) => objRow('objectives', o.id, o)).join('')}</ul>
       ${prereqs.length ? `<div class="prereqs">Requires: ${prereqs.map((x) => x.html).join(', ')}</div>` : ''}
     </section>
     <footer class="actions">${actions.join('')}${why}${t.wikiLink ? `<a class="btn" data-variant="ghost" data-size="sm" href="${esc(t.wikiLink)}" target="_blank" rel="noopener">Wiki ${icon('external')}</a>` : ''}
@@ -63,3 +63,8 @@ export function questCardToggle(el) {
   S.ui.open[id] = el.open;
   return true;
 }
+
+// Quests from the EFT wiki (tarkov.dev doesn't publish them): a small badge and the wiki's notes on how
+// the quest starts (story chapters, seasonal mode, reputation ...).
+export const wikiBadge = (t) => (t.source === 'wiki' ? ' <span class="badge wiki-src" data-variant="outline" title="Quest data from the EFT wiki (tarkov.dev doesn\'t publish this quest)">wiki</span>' : '');
+export const wikiNotes = (t) => (t.wikiNotes?.length ? `<ul class="wiki-notes">${t.wikiNotes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` : '');

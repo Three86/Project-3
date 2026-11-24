@@ -1,0 +1,48 @@
+{
+ "meta": {
+  "source": "test"
+ },
+ "tasks": [
+  {
+   "id": "wiki-test-quest",
+   "name": "Wiki Test Quest",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Wiki_Test_Quest",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "p",
+    "name": "Prapor"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-test-quest-o1",
+     "type": "giveQuestItem",
+     "description": "Hand over the found intel",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-intel",
+      "name": "Intel"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  }
+ ]
+}

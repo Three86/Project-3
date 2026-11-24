@@ -37,7 +37,7 @@ async function main() {
   gd.traders.forEach((t, i) => { t.resetTime = new Date(Date.now() + (25 + i * 17) * 60000).toISOString(); });
   fs.writeFileSync(path.join(dir, 'gamedata.json'), JSON.stringify(gd));
   const server = spawn(process.execPath, [path.join(__dirname, '..', 'server', 'index.js')], {
-    env: { ...process.env, PORT: String(PORT), DATA_DIR: dir, REFRESH_HOURS: '100000', EFT_LOGS_DIR: path.join(dir, 'nologs'), EFT_SCREENSHOTS_DIR: path.join(dir, 'noshots') },
+    env: { ...process.env, PORT: String(PORT), DATA_DIR: dir, WIKI_QUESTS_FILE: path.join(dir, 'wiki-quests.json'), REFRESH_HOURS: '100000', EFT_LOGS_DIR: path.join(dir, 'nologs'), EFT_SCREENSHOTS_DIR: path.join(dir, 'noshots') },
     stdio: 'ignore',
   });
   try {
@@ -183,7 +183,7 @@ async function run(dataDir) {
     console.log('Quests');
     await freshUi('quests');
     ok(await page.locator('[data-act="qstatus"]').count() > 0 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0, 'no Available filter');
-    ok(await page.locator('details.qcard').count() === 0 && await page.locator('[data-open="5936d90786f7742b1420ba5b"]').count() === 0, 'available quests are not listed (only active ones by default)');
+    ok(await page.locator('details.qcard:not(:has(.wiki-src))').count() === 0 && await page.locator('[data-open="5936d90786f7742b1420ba5b"]').count() === 0 && await page.locator('details.qcard:has(.wiki-src)').count() === 1, 'available quests are not listed (only active ones by default), except wiki quests (the game logs can\'t start those)');
     // The rest of this section works on the full list: an empty status filter shows every quest
     // (what a link to a quest uses), so available quests like Debut are reachable.
     await freshUi('quests', { q: { statuses: [] } });
@@ -469,6 +469,17 @@ async function run(dataDir) {
     await ops([{ section: 'questPins', id: 'x0', value: null }, ...['x0', 'x1', 't3'].map((id) => ({ section: 'tasks', id, value: null })), { section: 'tasks', id: CHECKING, value: null }, { section: 'objectives', id: 'o3', value: null }, { section: 'objectives', id: 'xo0b', value: null }]);
   }
 
+  // ------------------------------------------------------------ quests from the wiki (test/fixtures/ui/wiki-quests.json)
+  if (want('wiki')) {
+    console.log('Wiki quests');
+    await freshUi('search', { search: 'Wiki Test' });
+    await page.waitForSelector('#view');
+    const card = page.locator('details:has-text("Wiki Test Quest")').first();
+    ok(await card.count() === 1 && await card.locator('.badge.wiki-src').count() === 1, 'a quest tarkov.dev lacks is merged in from the wiki and marked "wiki"');
+    await card.locator('summary').click(); await settle();
+    ok((await card.innerText()).includes('Must be playing in the Seasonal mode.'), 'the wiki notes on how the quest starts are shown');
+  }
+
   // ------------------------------------------------------------ search
   if (want('search')) {
     console.log('Search');
@@ -593,7 +604,7 @@ async function run(dataDir) {
     await page.evaluate(() => fetch('/api/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: [{ section: 'tasks', id: '5936d90786f7742b1420ba5b', value: null }, { section: 'tasks', id: '59674cd986f7744ab26e32f2', value: null }] }) }));
     await page.evaluate(() => localStorage.setItem('tt-gui', 'icon')); await setUiState('tt-ui:icon', { tab: 'quests' });
     await page.reload(); await page.waitForSelector('.trader-strip .trader');
-    ok(await page.locator('[data-act="qstatus"]').count() > 0 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0 && await page.locator('.qrow.st-available').count() === 0, 'Icon GUI: no Available filter, available quests not listed');
+    ok(await page.locator('[data-act="qstatus"]').count() > 0 && await page.locator('[data-act="qstatus"][data-s="available"]').count() === 0 && await page.locator('.qrow.st-available:not(:has(.wiki-src))').count() === 0, 'Icon GUI: no Available filter, available quests not listed');
     // The checks below use every quest of a trader (empty status filter, as a link to a quest does).
     await setUiState('tt-ui:icon', { tab: 'quests', q: { statuses: [] } });
     await page.reload(); await page.waitForSelector('.trader-strip .trader');

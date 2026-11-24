@@ -158,6 +158,58 @@ test('generator fuel matches in-game readings: Solar Power and a finished Defect
   }
 });
 
+test('wiki quests: parsed into the tarkov.dev quest format; "A or B" before a quest needs only one', async () => {
+  const S = await reset();
+  const { parseQuest } = require('../scripts/wiki-quests.js');
+  const item = (id, name, shortName) => ({ id, name, shortName });
+  const items = { 'bntikirasanbodyarmor': item('kir', 'BNTI Kirasa-N body armor', 'Kirasa-N'), '144kordssd': item('ssd', '14-4 KORD SSD', 'SSD'), 'tp200tntbrick': item('tnt', 'TP-200 TNT brick', 'TP-200') };
+  const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const ctx = {
+    item: (n) => items[norm(n)] || null,
+    itemLoose: (n) => items[norm(n)] || Object.values(items).find((i) => norm(i.shortName) === norm(n)) || null,
+    map: (n) => ({ lighthouse: { id: 'lh', name: 'Lighthouse' }, groundzero: { id: 'gz', name: 'Ground Zero' } }[norm(n)] || null),
+    trader: (n) => ({ skier: { id: 'sk', name: 'Skier' } }[norm(n)] || null),
+    task: (n) => ({ easymoneypart1: { id: 'em1', name: 'Easy Money - Part 1' } }[norm(n)] || null),
+  };
+  const w = `{{Infobox quest
+|given by        =[[Skier]]
+|location        =[[Lighthouse]]
+|LL requirement  =2
+|previous        =Accept [[Easy Money - Part 1]]
+|reqkappa        =<font color="red">Yes</font>
+}}
+==Requirements==
+* Must be playing in the [[Seasons#Season 1|Seasonal mode]].
+==Objectives==
+* Extract from [[Lighthouse]] through the Armored Train while wearing a Kirasa-N body armor
+* Locate and obtain 2 [[14-4 KORD SSD]]s
+* Hand over the found [[14-4 KORD SSD|intel]]
+* Plant 3 [[TP-200 TNT brick]]s on the second floor of the cafe on [[Ground Zero]]
+* Eliminate 15 [[Rogues]] on [[Lighthouse]]
+* (''Optional'') Win a match on Fort
+==Rewards==
+* +15,000 [[EXP]]`;
+  const q = parseQuest('A Familiar Face...', w, ctx);
+  assert.deepStrictEqual([q.id, q.name, q.trader.name, q.map.name, q.kappaRequired, q.source, q.seasonal], ['wiki-a-familiar-face', 'A Familiar Face...', 'Skier', 'Lighthouse', true, 'wiki', true]);
+  assert.deepStrictEqual(q.traderRequirements, [{ trader: { id: 'sk', name: 'Skier' }, requirementType: 'level', compareMethod: '>=', value: 2 }]);
+  assert.deepStrictEqual(q.taskRequirements, [{ task: { id: 'em1', name: 'Easy Money - Part 1' }, status: ['active'] }], '"Accept X": X active is enough');
+  const o = q.objectives;
+  assert.deepStrictEqual(o.map((x) => x.type), ['extract', 'findQuestItem', 'giveQuestItem', 'plantItem', 'shoot', 'basic']);
+  assert.deepStrictEqual(o[0].wearing, [[items.bntikirasanbodyarmor]], 'unlinked armor name resolved');
+  assert.deepStrictEqual([o[1].count, o[2].count, o[2].questItem.id], [2, 2, 'ssd'], 'the found item is handed over in the same amount');
+  assert.deepStrictEqual([o[3].count, o[3].items[0].id, o[3].maps[0].name], [3, 'tnt', 'Ground Zero']);
+  assert.deepStrictEqual([o[4].count, o[4].targetNames], [15, ['Rogues']]);
+  assert.strictEqual(o[5].optional, true);
+  // "A or B" before a quest: either one completed unlocks it.
+  S.data.tasks.push({ ...q, id: 'wq', name: 'Either', minPlayerLevel: 1, map: null, traderRequirements: [], taskRequirementsAny: true,
+    taskRequirements: [{ task: { id: '5936d90786f7742b1420ba5b' }, status: ['complete'] }, { task: { id: 't3' }, status: ['complete'] }] });
+  game.buildIndex();
+  assert.strictEqual(game.taskStatus('wq'), 'locked');
+  S.progress.tasks.t3 = { status: 'completed' };
+  game.resetMemo();
+  assert.strictEqual(game.taskStatus('wq'), 'available', 'one of the two is enough');
+});
+
 test('crafting skill shortens craft times; recipes respect locks and the pin limit', async () => {
   const S = await reset();
   S.progress.skills.Crafting = 20;
