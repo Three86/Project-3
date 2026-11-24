@@ -1,0 +1,7240 @@
+{
+ "meta": {
+  "source": "https://escapefromtarkov.fandom.com (Category:Quests)",
+  "fetchedAt": "2026-11-24T00:45:38.829Z",
+  "count": 116,
+  "note": "Quests tarkov.dev does not publish (mostly storyline-chapter quests and Arena), converted from the EFT wiki by scripts/wiki-quests.js. Regenerate after a patch."
+ },
+ "tasks": [
+  {
+   "id": "wiki-for-the-good-of-the-chosen",
+   "name": "...for the Good of the Chosen",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/...for_the_Good_of_the_Chosen",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "638f541a29ffd1183d187f57",
+    "name": "Lightkeeper"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-in-the-name-of-humanity",
+      "name": "In the Name of Humanity..."
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-for-the-good-of-the-chosen-o1",
+     "type": "visit",
+     "description": "Report back to Lightkeeper",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-a-familiar-face",
+   "name": "A Familiar Face...",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/A_Familiar_Face...",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "58330581ace78e27b8b10cee",
+    "name": "Skier"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [],
+   "traderRequirements": [
+    {
+     "trader": {
+      "id": "58330581ace78e27b8b10cee",
+      "name": "Skier"
+     },
+     "requirementType": "level",
+     "compareMethod": ">=",
+     "value": 2
+    }
+   ],
+   "objectives": [
+    {
+     "id": "wiki-a-familiar-face-o1",
+     "type": "extract",
+     "description": "Extract from Lighthouse through the Armored Train while wearing a Kirasa-N or NFM THOR CRV body armor",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "count": 1,
+     "wearing": [
+      [
+       {
+        "id": "5b44d22286f774172b0c9de8",
+        "name": "BNTI Kirasa-N body armor",
+        "shortName": "Kirasa-N",
+        "iconLink": "https://assets.tarkov.dev/5b44d22286f774172b0c9de8-icon.webp"
+       }
+      ],
+      [
+       {
+        "id": "609e8540d5c319764c2bc2e9",
+        "name": "NFM THOR Concealable Reinforced Vest body armor",
+        "shortName": "THOR CRV",
+        "iconLink": "https://assets.tarkov.dev/609e8540d5c319764c2bc2e9-icon.webp"
+       }
+      ]
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-advertising-business-part-1",
+   "name": "Advertising Business - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Advertising_Business_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-all-for-the-show-death-from-above",
+      "name": "All for the Show - Death from Above"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-advertising-business-part-1-o1",
+     "type": "basic",
+     "description": "Win 3 matches while wearing the Hexgrid armor in CheckPoint mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-advertising-business-part-2",
+   "name": "Advertising Business - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Advertising_Business_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-all-for-the-show-big-tour",
+      "name": "All for the Show - Big Tour"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-advertising-business-part-2-o1",
+     "type": "shoot",
+     "description": "Eliminate 50 enemies with headshots while using an UZI PRO or MDR 7.62x51",
+     "optional": false,
+     "maps": [],
+     "count": 50,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-advertising-business-part-3",
+   "name": "Advertising Business - Part 3",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Advertising_Business_-_Part_3",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-all-for-the-show-soldier",
+      "name": "All for the Show - Soldier"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-advertising-business-part-3-o1",
+     "type": "basic",
+     "description": "Win 6 matches while wearing a TV-110 plate carrier",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-advertising-business-part-4",
+   "name": "Advertising Business - Part 4",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Advertising_Business_-_Part_4",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-advertising-business-part-3",
+      "name": "Advertising Business - Part 3"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-advertising-business-part-4-o1",
+     "type": "basic",
+     "description": "Win 10 matches while wearing a Banshee or A18 Skanda plate carrier",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-advertising-business-part-5",
+   "name": "Advertising Business - Part 5",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Advertising_Business_-_Part_5",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-advertising-business-part-4",
+      "name": "Advertising Business - Part 4"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-advertising-business-part-5-o1",
+     "type": "shoot",
+     "description": "Eliminate 30 enemies while using a T-5000M or RPDN in BlastGang or TeamFight mode",
+     "optional": false,
+     "maps": [],
+     "count": 30,
+     "targetNames": [
+      "enemies"
+     ],
+     "usingWeapon": [
+      {
+       "id": "5df24cf80dee1b22f862e9bc",
+       "name": "ORSIS T-5000M 7.62x51 bolt-action sniper rifle",
+       "shortName": "T-5000M",
+       "iconLink": "https://assets.tarkov.dev/5df24cf80dee1b22f862e9bc-icon.webp"
+      },
+      {
+       "id": "65268d8ecb944ff1e90ea385",
+       "name": "Degtyarev RPDN 7.62x39 machine gun",
+       "shortName": "RPDN",
+       "iconLink": "https://assets.tarkov.dev/65268d8ecb944ff1e90ea385-icon.webp"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-advertising-business-part-6",
+   "name": "Advertising Business - Part 6",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Advertising_Business_-_Part_6",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-advertising-business-part-5",
+      "name": "Advertising Business - Part 5"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-advertising-business-part-6-o1",
+     "type": "shoot",
+     "description": "Eliminate 40 enemies with headshots while using a Velociraptor, PKP or SR-2M",
+     "optional": false,
+     "maps": [],
+     "count": 40,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-against-the-conscience-part-1",
+   "name": "Against the Conscience - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Against_the_Conscience_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "579dc571d53a0658a154fbec",
+    "name": "Fence"
+   },
+   "map": {
+    "id": "56f40101d2720b2a4d8b45d6",
+    "name": "Customs"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-hold-the-lead",
+      "name": "Hold the Lead"
+     },
+     "status": [
+      "complete"
+     ]
+    },
+    {
+     "task": {
+      "id": "wiki-create-a-distraction-part-1",
+      "name": "Create a Distraction - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-against-the-conscience-part-1-o1",
+     "type": "visit",
+     "description": "Locate the old champion's room on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ]
+    },
+    {
+     "id": "wiki-against-the-conscience-part-1-o2",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the key at the smugglers' base on Shoreline",
+     "optional": true,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "questItem": {
+      "id": "664d4b0103ef2c61246afb56",
+      "name": "Dorm overseer key",
+      "shortName": "Overseer",
+      "iconLink": "https://assets.tarkov.dev/664d4b0103ef2c61246afb56-icon.webp"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-against-the-conscience-part-1-o3",
+     "type": "visit",
+     "description": "Find out what happened to the champion",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-against-the-conscience-part-1-o4",
+     "type": "extract",
+     "description": "Survive and extract from the location",
+     "optional": false,
+     "maps": [],
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-against-the-conscience-part-2",
+   "name": "Against the Conscience - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Against_the_Conscience_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-against-the-conscience-part-1",
+      "name": "Against the Conscience - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-against-the-conscience-part-2-o1",
+     "type": "shoot",
+     "description": "Eliminate 100 enemies in any game mode in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ],
+     "count": 100,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-all-for-the-show-big-tour",
+   "name": "All for the Show - Big Tour",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/All_for_the_Show_-_Big_Tour",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-advertising-business-part-1",
+      "name": "Advertising Business - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-all-for-the-show-big-tour-o1",
+     "type": "basic",
+     "description": "Win a match on Fort",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-all-for-the-show-big-tour-o2",
+     "type": "basic",
+     "description": "Win a match on Equator",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-all-for-the-show-big-tour-o3",
+     "type": "basic",
+     "description": "Win a match on Bowl",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-all-for-the-show-big-tour-o4",
+     "type": "basic",
+     "description": "Win a match on Chop Shop",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-all-for-the-show-big-tour-o5",
+     "type": "basic",
+     "description": "Win a match on Bay 5",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-all-for-the-show-death-from-above",
+   "name": "All for the Show - Death from Above",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/All_for_the_Show_-_Death_from_Above",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-all-for-the-show-heroism",
+      "name": "All for the Show - Heroism"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-all-for-the-show-death-from-above-o1",
+     "type": "shoot",
+     "description": "Eliminate 3 enemies while mid-air",
+     "optional": false,
+     "maps": [],
+     "count": 3,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-all-for-the-show-heroism",
+   "name": "All for the Show - Heroism",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/All_for_the_Show_-_Heroism",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-jack-of-all-trades",
+      "name": "Jack of All Trades"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-all-for-the-show-heroism-o1",
+     "type": "shoot",
+     "description": "Eliminate 5 enemies while suffering from light or heavy bleeding",
+     "optional": false,
+     "maps": [],
+     "count": 5,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-all-for-the-show-major-sponsor",
+   "name": "All for the Show - Major Sponsor",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/All_for_the_Show_-_Major_Sponsor",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-all-for-the-show-supremacy",
+      "name": "All for the Show - Supremacy"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-all-for-the-show-major-sponsor-o1",
+     "type": "shoot",
+     "description": "Eliminate 5 enemies in one life 10 times",
+     "optional": false,
+     "maps": [],
+     "count": 5,
+     "targetNames": [
+      "enemies"
+     ]
+    },
+    {
+     "id": "wiki-all-for-the-show-major-sponsor-o2",
+     "type": "shoot",
+     "description": "Eliminate 2 or more enemies with headshots within one round 10 times",
+     "optional": false,
+     "maps": [],
+     "count": 2,
+     "targetNames": [
+      "or more enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-all-for-the-show-soldier",
+   "name": "All for the Show - Soldier",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/All_for_the_Show_-_Soldier",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-jack-of-all-trades-pro",
+      "name": "Jack of All Trades - Pro"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-all-for-the-show-soldier-o1",
+     "type": "shoot",
+     "description": "Eliminate 50 enemies while wearing any beret in CheckPoint mode",
+     "optional": false,
+     "maps": [],
+     "count": 50,
+     "targetNames": [
+      "enemies"
+     ],
+     "wearing": [
+      [
+       {
+        "id": "5f60e6403b85f6263c14558c",
+        "name": "Beret (Black)",
+        "shortName": "Beret",
+        "iconLink": "https://assets.tarkov.dev/5f60e6403b85f6263c14558c-icon.webp"
+       }
+      ]
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-all-for-the-show-supremacy",
+   "name": "All for the Show - Supremacy",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/All_for_the_Show_-_Supremacy",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-i-am-speed-part-3",
+      "name": "I Am Speed - Part 3"
+     },
+     "status": [
+      "complete"
+     ]
+    },
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-9",
+      "name": "No Limit to Perfection - Part 9"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-all-for-the-show-supremacy-o1",
+     "type": "basic",
+     "description": "Earn a Match MVP after eliminating 5 or more enemies with AK-12",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-arena-business",
+   "name": "Arena Business",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Arena_Business",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-balancing-part-1",
+      "name": "Balancing - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-arena-business-o1",
+     "type": "taskStatus",
+     "description": "Complete the task Professional Fitness - Part 2",
+     "optional": false,
+     "maps": [],
+     "task": {
+      "id": "wiki-professional-fitness-part-2",
+      "name": "Professional Fitness - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    },
+    {
+     "id": "wiki-arena-business-o2",
+     "type": "taskStatus",
+     "description": "Complete the task To Great Heights! - Part 6",
+     "optional": false,
+     "maps": [],
+     "task": {
+      "id": "wiki-to-great-heights-part-6",
+      "name": "To Great Heights! - Part 6"
+     },
+     "status": [
+      "complete"
+     ]
+    },
+    {
+     "id": "wiki-arena-business-o3",
+     "type": "taskStatus",
+     "description": "Complete the task Hold the Lead",
+     "optional": false,
+     "maps": [],
+     "task": {
+      "id": "wiki-hold-the-lead",
+      "name": "Hold the Lead"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-balancing-part-1",
+   "name": "Balancing - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Balancing_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-easy-money-part-2",
+      "name": "Easy Money - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-balancing-part-1-o1",
+     "type": "shoot",
+     "description": "Eliminate 5 Scavs while using a Steyr AUG on any location",
+     "optional": false,
+     "maps": [],
+     "count": 5,
+     "targetNames": [
+      "Scavs"
+     ],
+     "usingWeapon": [
+      {
+       "id": "62e7c4fba689e8c9c50dfc38",
+       "name": "Steyr AUG A1 5.56x45 assault rifle",
+       "shortName": "AUG A1",
+       "iconLink": "https://assets.tarkov.dev/62e7c4fba689e8c9c50dfc38-icon.webp"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-balancing-part-2",
+   "name": "Balancing - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Balancing_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-balancing-part-1",
+      "name": "Balancing - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-balancing-part-2-o1",
+     "type": "shoot",
+     "description": "Eliminate 2 PMC operatives while wearing a PACA Soft Armor on any location",
+     "optional": false,
+     "maps": [],
+     "count": 2,
+     "targetNames": [
+      "PMC operatives"
+     ],
+     "wearing": [
+      [
+       {
+        "id": "5648a7494bdc2d9d488b4583",
+        "name": "PACA Soft Armor",
+        "shortName": "PACA",
+        "iconLink": "https://assets.tarkov.dev/5648a7494bdc2d9d488b4583-icon.webp"
+       }
+      ]
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-between-two-fires",
+   "name": "Between Two Fires",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Between_Two_Fires",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "579dc571d53a0658a154fbec",
+    "name": "Fence"
+   },
+   "map": {
+    "id": "56f40101d2720b2a4d8b45d6",
+    "name": "Customs"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-against-the-conscience-part-2",
+      "name": "Against the Conscience - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-between-two-fires-o1",
+     "type": "visit",
+     "description": "Return to the old champion's hideout on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ]
+    },
+    {
+     "id": "wiki-between-two-fires-o2",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the compromising information on Ref",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-ref-dirt",
+      "name": "Ref dirt",
+      "shortName": "compromising information on Ref"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-between-two-fires-o3",
+     "type": "giveQuestItem",
+     "description": "Hand over the found info",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-ref-dirt",
+      "name": "Ref dirt",
+      "shortName": "compromising information on Ref"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-break-the-chain",
+   "name": "Break the Chain",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Break_the_Chain",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-desperate-assault",
+      "name": "Desperate Assault"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-break-the-chain-o1",
+     "type": "visit",
+     "description": "Destroy the transmitter on the factory chimney near the unfinished construction site on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ]
+    },
+    {
+     "id": "wiki-break-the-chain-o2",
+     "type": "visit",
+     "description": "Destroy the transmitter on the power line tower on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ]
+    },
+    {
+     "id": "wiki-break-the-chain-o3",
+     "type": "visit",
+     "description": "Destroy the transmitter on top of the mountain on Woods",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e3c2d2720bac5b8b4567",
+       "name": "Woods"
+      }
+     ]
+    },
+    {
+     "id": "wiki-break-the-chain-o4",
+     "type": "visit",
+     "description": "Destroy the transmitter on the cell tower on Woods",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e3c2d2720bac5b8b4567",
+       "name": "Woods"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-cast-the-net",
+   "name": "Cast the Net",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Cast_the_Net",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "54cb50c76803fa8b248b4571",
+    "name": "Prapor"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-uninvited-guests-part-2",
+      "name": "Uninvited Guests - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-cast-the-net-o1",
+     "type": "plantItem",
+     "description": "Plant a WI-FI Camera in the Ural truck near the hydroelectric power station on Shoreline",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-cast-the-net-o2",
+     "type": "plantItem",
+     "description": "Plant a WI-FI Camera in the excavator at the stream near the smugglers' base on Shoreline",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-cast-the-net-o3",
+     "type": "plantItem",
+     "description": "Plant a WI-FI Camera in the cargo truck cabin near Mira Ave on Ground Zero",
+     "optional": false,
+     "maps": [
+      {
+       "id": "653e6760052c01c1c805532f",
+       "name": "Ground Zero"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-cast-the-net-o4",
+     "type": "plantItem",
+     "description": "Plant a WI-FI Camera inside the yellow bus in the underground tunnel on Ground Zero",
+     "optional": false,
+     "maps": [
+      {
+       "id": "653e6760052c01c1c805532f",
+       "name": "Ground Zero"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-consequences-of-our-decisions",
+   "name": "Consequences of Our Decisions",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Consequences_of_Our_Decisions",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "5714dc692459777137212e12",
+    "name": "Streets of Tarkov"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-final-stretch",
+      "name": "Final Stretch"
+     },
+     "status": [
+      "active"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-consequences-of-our-decisions-o1",
+     "type": "basic",
+     "description": "Decrypt the data from the secret facility laptop",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-consequences-of-our-decisions-o2",
+     "type": "basic",
+     "description": "Read the data recovered from Fence's laptop",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-consequences-of-our-decisions-o3",
+     "type": "giveItem",
+     "description": "Hand over the laptop",
+     "optional": false,
+     "maps": [],
+     "items": [],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-create-a-distraction-part-1",
+   "name": "Create a Distraction - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Create_a_Distraction_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "653e6760052c01c1c805532f",
+    "name": "Ground Zero"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-surprise",
+      "name": "Surprise"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-create-a-distraction-part-1-o1",
+     "type": "plantItem",
+     "description": "Plant 3 TP-200 TNT bricks on the second floor of the cafe on Ground Zero",
+     "optional": false,
+     "maps": [
+      {
+       "id": "653e6760052c01c1c805532f",
+       "name": "Ground Zero"
+      }
+     ],
+     "items": [
+      {
+       "id": "60391b0fb847c71012789415",
+       "name": "TP-200 TNT brick",
+       "shortName": "TP-200",
+       "iconLink": "https://assets.tarkov.dev/60391b0fb847c71012789415-icon.webp"
+      }
+     ],
+     "count": 3,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-create-a-distraction-part-2",
+   "name": "Create a Distraction - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Create_a_Distraction_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "5714dc692459777137212e12",
+    "name": "Streets of Tarkov"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-create-a-distraction-part-1",
+      "name": "Create a Distraction - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-create-a-distraction-part-2-o1",
+     "type": "shoot",
+     "description": "Eliminate 2 of Kaban's or Kollontay's guards on Streets of Tarkov",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ],
+     "count": 2,
+     "targetNames": [
+      "of Kaban's or Kollontay's guards"
+     ]
+    },
+    {
+     "id": "wiki-create-a-distraction-part-2-o2",
+     "type": "basic",
+     "description": "Do not harm Kaban or Kollontay",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-cut-down-to-the-root",
+   "name": "Cut Down to the Root",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Cut_Down_to_the_Root",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5c0647fdd443bc2504c2d371",
+    "name": "Jaeger"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-scope-the-clearing",
+      "name": "Scope the Clearing"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-cut-down-to-the-root-o1",
+     "type": "shoot",
+     "description": "Eliminate 15 Rogues on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "count": 15,
+     "targetNames": [
+      "Rogues"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-decisions-decisions",
+   "name": "Decisions, Decisions",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Decisions%2C_Decisions",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "56f40101d2720b2a4d8b45d6",
+    "name": "Customs"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-between-two-fires",
+      "name": "Between Two Fires"
+     },
+     "status": [
+      "active"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-decisions-decisions-o1",
+     "type": "visit",
+     "description": "Return to the old champion's hideout on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ]
+    },
+    {
+     "id": "wiki-decisions-decisions-o2",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the compromising information on Ref",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-ref-dirt",
+      "name": "Ref dirt",
+      "shortName": "compromising information on Ref"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-decisions-decisions-o3",
+     "type": "giveQuestItem",
+     "description": "Hand over the found info",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-ref-dirt",
+      "name": "Ref dirt",
+      "shortName": "compromising information on Ref"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-desperate-assault",
+   "name": "Desperate Assault",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Desperate_Assault",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "5b0fc42d86f7744a585f9105",
+    "name": "The Lab"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-final-stretch",
+      "name": "Final Stretch"
+     },
+     "status": [
+      "complete"
+     ]
+    },
+    {
+     "task": {
+      "id": "wiki-consequences-of-our-decisions",
+      "name": "Consequences of Our Decisions"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "taskRequirementsAny": true,
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-desperate-assault-o1",
+     "type": "shoot",
+     "description": "Eliminate 8 Black Division operatives in The Lab",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5b0fc42d86f7744a585f9105",
+       "name": "The Lab"
+      }
+     ],
+     "count": 8,
+     "targetNames": [
+      "Black Division operatives"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-digital-puzzle",
+   "name": "Digital Puzzle",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Digital_Puzzle",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-break-the-chain",
+      "name": "Break the Chain"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-digital-puzzle-o1",
+     "type": "giveItem",
+     "description": "Hand over the data from the Black Division rugged laptop",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "6a5f9c25e8c84d8b0602f22a",
+       "name": "Black Division rugged laptop",
+       "shortName": "BD laptop",
+       "iconLink": "https://assets.tarkov.dev/6a5f9c25e8c84d8b0602f22a-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-ease-the-move",
+   "name": "Ease the Move",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Ease_the_Move",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5935c25fb3acc3127c3d8cd9",
+    "name": "Peacekeeper"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-scope-the-clearing",
+      "name": "Scope the Clearing"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-ease-the-move-o1",
+     "type": "mark",
+     "description": "Locate and mark the first Rogue stash at the abandoned island village with an MS2000 Marker on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "markerItem": {
+      "id": "5991b51486f77447b112d44f",
+      "name": "MS2000 Marker",
+      "shortName": "MS2000",
+      "iconLink": "https://assets.tarkov.dev/5991b51486f77447b112d44f-icon.webp"
+     }
+    },
+    {
+     "id": "wiki-ease-the-move-o2",
+     "type": "mark",
+     "description": "Locate and mark the second Rogue stash at the abandoned island village with an MS2000 Marker on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "markerItem": {
+      "id": "5991b51486f77447b112d44f",
+      "name": "MS2000 Marker",
+      "shortName": "MS2000",
+      "iconLink": "https://assets.tarkov.dev/5991b51486f77447b112d44f-icon.webp"
+     }
+    },
+    {
+     "id": "wiki-ease-the-move-o3",
+     "type": "mark",
+     "description": "Locate and mark the Rogue stash at the grotto with an MS2000 Marker on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "markerItem": {
+      "id": "5991b51486f77447b112d44f",
+      "name": "MS2000 Marker",
+      "shortName": "MS2000",
+      "iconLink": "https://assets.tarkov.dev/5991b51486f77447b112d44f-icon.webp"
+     }
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-easy-money-part-1",
+   "name": "Easy Money - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Easy_Money_-_Part_1",
+   "minPlayerLevel": 10,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "58330581ace78e27b8b10cee",
+    "name": "Skier"
+   },
+   "map": {
+    "id": "56f40101d2720b2a4d8b45d6",
+    "name": "Customs"
+   },
+   "taskRequirements": [],
+   "traderRequirements": [
+    {
+     "trader": {
+      "id": "58330581ace78e27b8b10cee",
+      "name": "Skier"
+     },
+     "requirementType": "level",
+     "compareMethod": ">=",
+     "value": 2
+    }
+   ],
+   "objectives": [
+    {
+     "id": "wiki-easy-money-part-1-o1",
+     "type": "plantItem",
+     "description": "Plant the Bison vs Undertaker poster in the living quarters at the Scav base on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ],
+     "items": [
+      {
+       "id": "675a0288c3102563bd01c9c3",
+       "name": "Arena advertisement poster",
+       "shortName": "Poster",
+       "iconLink": "https://assets.tarkov.dev/675a0288c3102563bd01c9c3-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-easy-money-part-2",
+   "name": "Easy Money - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Easy_Money_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-easy-money-part-1",
+      "name": "Easy Money - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-easy-money-part-2-o1",
+     "type": "giveItem",
+     "description": "Hand over 5 found in raid items from the Drinks category",
+     "optional": false,
+     "maps": [],
+     "items": [],
+     "count": 5,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-easy-money-part-2-o2",
+     "type": "giveItem",
+     "description": "Hand over 5 found in raid items from the Food category",
+     "optional": false,
+     "maps": [],
+     "items": [],
+     "count": 5,
+     "foundInRaid": true
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-final-stretch",
+   "name": "Final Stretch",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Final_Stretch",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "579dc571d53a0658a154fbec",
+    "name": "Fence"
+   },
+   "map": {
+    "id": "5714dc692459777137212e12",
+    "name": "Streets of Tarkov"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-sheep-in-wolf-s-clothing",
+      "name": "Sheep in Wolf's Clothing"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-final-stretch-o1",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the laptop from Fence's stash on Streets of Tarkov",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-laptop-from-an-unknown-facility",
+      "name": "Laptop from an unknown facility",
+      "shortName": "laptop from Fence's stash"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-final-stretch-o2",
+     "type": "giveQuestItem",
+     "description": "Hand over the found item",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-laptop-from-an-unknown-facility",
+      "name": "Laptop from an unknown facility",
+      "shortName": "laptop from Fence's stash"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-first-introduction",
+   "name": "First Introduction",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/First_Introduction",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-first-introduction-o1",
+     "type": "basic",
+     "description": "Play a match in Last Hero or CheckPoint mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-forbidden-knowledge",
+   "name": "Forbidden Knowledge",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Forbidden_Knowledge",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "579dc571d53a0658a154fbec",
+    "name": "Fence"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-what-s-in-the-bag",
+      "name": "What's in the Bag?"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-forbidden-knowledge-o1",
+     "type": "findQuestItem",
+     "description": "Locate and obtain 2 14-4 KORD SSDs",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "6a5f9c49b8281c31a1062aea",
+      "name": "14-4 KORD SSD",
+      "shortName": "BD SSD",
+      "iconLink": "https://assets.tarkov.dev/6a5f9c49b8281c31a1062aea-icon.webp"
+     },
+     "count": 2
+    },
+    {
+     "id": "wiki-forbidden-knowledge-o2",
+     "type": "giveQuestItem",
+     "description": "Hand over the found intel",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "6a5f9c49b8281c31a1062aea",
+      "name": "14-4 KORD SSD",
+      "shortName": "BD SSD",
+      "iconLink": "https://assets.tarkov.dev/6a5f9c49b8281c31a1062aea-icon.webp"
+     },
+     "count": 2
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-gladiator-doping-part-1",
+   "name": "Gladiator Doping - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Doping_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-final-exam",
+      "name": "Gladiator Life - Final Exam"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-doping-part-1-o1",
+     "type": "shoot",
+     "description": "Eliminate 30 enemies while under the effect of a painkiller",
+     "optional": false,
+     "maps": [],
+     "count": 30,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-doping-part-2",
+   "name": "Gladiator Doping - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Doping_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-doping-part-1",
+      "name": "Gladiator Doping - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-doping-part-2-o1",
+     "type": "shoot",
+     "description": "Eliminate 30 enemies while under the effect of the Propital stimulant",
+     "optional": false,
+     "maps": [],
+     "count": 30,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-doping-part-3",
+   "name": "Gladiator Doping - Part 3",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Doping_-_Part_3",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-doping-part-2",
+      "name": "Gladiator Doping - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-doping-part-3-o1",
+     "type": "shoot",
+     "description": "Eliminate 30 enemies while under the effect of the Perfotoran stimulant",
+     "optional": false,
+     "maps": [],
+     "count": 30,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-doping-part-4",
+   "name": "Gladiator Doping - Part 4",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Doping_-_Part_4",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-doping-part-3",
+      "name": "Gladiator Doping - Part 3"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-doping-part-4-o1",
+     "type": "shoot",
+     "description": "Eliminate 30 enemies while under the effect of the Zagustin stimulant",
+     "optional": false,
+     "maps": [],
+     "count": 30,
+     "targetNames": [
+      "enemies"
+     ]
+    },
+    {
+     "id": "wiki-gladiator-doping-part-4-o2",
+     "type": "shoot",
+     "description": "Eliminate 30 enemies while under the effect of the Propital stimulant",
+     "optional": false,
+     "maps": [],
+     "count": 30,
+     "targetNames": [
+      "enemies"
+     ]
+    },
+    {
+     "id": "wiki-gladiator-doping-part-4-o3",
+     "type": "shoot",
+     "description": "Eliminate 30 enemies while under the effect of the Meldonin stimulant",
+     "optional": false,
+     "maps": [],
+     "count": 30,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-final-exam",
+   "name": "Gladiator Life - Final Exam",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Final_Exam",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-10",
+      "name": "Gladiator Life - Part 10"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-final-exam-o1",
+     "type": "basic",
+     "description": "Win a round without dying in TeamFight, BlastGang or ShootOut mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-1",
+   "name": "Gladiator Life - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-first-introduction",
+      "name": "First Introduction"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-1-o1",
+     "type": "shoot",
+     "description": "Eliminate 15 enemies in Last Hero mode",
+     "optional": false,
+     "maps": [],
+     "count": 15,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-10",
+   "name": "Gladiator Life - Part 10",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_10",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-9",
+      "name": "Gladiator Life - Part 9"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-10-o1",
+     "type": "basic",
+     "description": "Earn 1,500 objective score in CheckPoint mode",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-gladiator-life-part-10-o2",
+     "type": "shoot",
+     "description": "Eliminate 20 enemies in CheckPoint mode",
+     "optional": false,
+     "maps": [],
+     "count": 20,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-2",
+   "name": "Gladiator Life - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-1",
+      "name": "Gladiator Life - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-2-o1",
+     "type": "basic",
+     "description": "Capture the objective 5 times in CheckPoint mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-3",
+   "name": "Gladiator Life - Part 3",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_3",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-2",
+      "name": "Gladiator Life - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-3-o1",
+     "type": "shoot",
+     "description": "Eliminate 10 enemies as Enforcer or Assault in CheckPoint mode",
+     "optional": false,
+     "maps": [],
+     "count": 10,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-4",
+   "name": "Gladiator Life - Part 4",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_4",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-3",
+      "name": "Gladiator Life - Part 3"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-4-o1",
+     "type": "basic",
+     "description": "Win a match in CheckPoint mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-5",
+   "name": "Gladiator Life - Part 5",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_5",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-4",
+      "name": "Gladiator Life - Part 4"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-5-o1",
+     "type": "shoot",
+     "description": "Eliminate 5 enemies with headshots",
+     "optional": false,
+     "maps": [],
+     "count": 5,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-6",
+   "name": "Gladiator Life - Part 6",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_6",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-5",
+      "name": "Gladiator Life - Part 5"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-6-o1",
+     "type": "shoot",
+     "description": "Eliminate 10 enemies as Scout or Marksman",
+     "optional": false,
+     "maps": [],
+     "count": 10,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-7",
+   "name": "Gladiator Life - Part 7",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_7",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-6",
+      "name": "Gladiator Life - Part 6"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-7-o1",
+     "type": "shoot",
+     "description": "Eliminate 5 enemies while under the effect of any stimulant or painkiller",
+     "optional": false,
+     "maps": [],
+     "count": 5,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-8",
+   "name": "Gladiator Life - Part 8",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_8",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-7",
+      "name": "Gladiator Life - Part 7"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-8-o1",
+     "type": "basic",
+     "description": "Win 2 rounds in TeamFight, BlastGang or ShootOut mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-gladiator-life-part-9",
+   "name": "Gladiator Life - Part 9",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Gladiator_Life_-_Part_9",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-life-part-8",
+      "name": "Gladiator Life - Part 8"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-gladiator-life-part-9-o1",
+     "type": "basic",
+     "description": "Claim at least 5th place in Last Hero mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-historical-prospects",
+   "name": "Historical Prospects",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Historical_Prospects",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "638f541a29ffd1183d187f57",
+    "name": "Lightkeeper"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-for-the-good-of-the-chosen",
+      "name": "...for the Good of the Chosen"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-historical-prospects-o1",
+     "type": "shoot",
+     "description": "Eliminate 3 PMC operatives during 22:00-08:00 on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ],
+     "count": 3,
+     "targetNames": [
+      "PMC operatives during 22:00-08:00"
+     ]
+    },
+    {
+     "id": "wiki-historical-prospects-o2",
+     "type": "plantItem",
+     "description": "Stash 3 PMC dogtags in the marked room on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ],
+     "items": [
+      {
+       "id": "customdogtags12345678910",
+       "name": "Dogtag",
+       "shortName": "Dogtag",
+       "iconLink": "https://assets.tarkov.dev/customdogtags12345678910-icon.webp"
+      },
+      {
+       "id": "5780cf7f2459777de4559322",
+       "name": "Dorm room 314 marked key",
+       "shortName": "Dorm 314",
+       "iconLink": "https://assets.tarkov.dev/5780cf7f2459777de4559322-icon.webp"
+      }
+     ],
+     "count": 3,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-historical-prospects-o3",
+     "type": "shoot",
+     "description": "Eliminate 3 PMC operatives during 22:00-08:00 on Woods",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e3c2d2720bac5b8b4567",
+       "name": "Woods"
+      }
+     ],
+     "count": 3,
+     "targetNames": [
+      "PMC operatives during 22:00-08:00"
+     ]
+    },
+    {
+     "id": "wiki-historical-prospects-o4",
+     "type": "plantItem",
+     "description": "Stash 3 PMC dogtags at the abandoned village marked circle on Woods",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e3c2d2720bac5b8b4567",
+       "name": "Woods"
+      }
+     ],
+     "items": [
+      {
+       "id": "customdogtags12345678910",
+       "name": "Dogtag",
+       "shortName": "Dogtag",
+       "iconLink": "https://assets.tarkov.dev/customdogtags12345678910-icon.webp"
+      }
+     ],
+     "count": 3,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-historical-prospects-o5",
+     "type": "shoot",
+     "description": "Eliminate 3 PMC operatives during 22:00-08:00 on Streets of Tarkov",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ],
+     "count": 3,
+     "targetNames": [
+      "PMC operatives during 22:00-08:00"
+     ]
+    },
+    {
+     "id": "wiki-historical-prospects-o6",
+     "type": "plantItem",
+     "description": "Stash 3 PMC dogtags in the marked circle in Nikitskaya St. 8 second floor apartment on Streets of Tarkov",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ],
+     "items": [
+      {
+       "id": "customdogtags12345678910",
+       "name": "Dogtag",
+       "shortName": "Dogtag",
+       "iconLink": "https://assets.tarkov.dev/customdogtags12345678910-icon.webp"
+      }
+     ],
+     "count": 3,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-hold-the-lead",
+   "name": "Hold the Lead",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Hold_the_Lead",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-great-heights-part-6",
+      "name": "To Great Heights! - Part 6"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-hold-the-lead-o1",
+     "type": "shoot",
+     "description": "Eliminate 75 enemies in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ],
+     "count": 75,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-honest-review",
+   "name": "Honest Review",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Honest_Review",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "656f0f98d80a697f855d34b1",
+    "name": "BTR Driver"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-honest-review-o1",
+     "type": "visit",
+     "description": "Scout the intersection at the village on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ]
+    },
+    {
+     "id": "wiki-honest-review-o2",
+     "type": "visit",
+     "description": "Scout the UN checkpoint at the main road on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ]
+    },
+    {
+     "id": "wiki-honest-review-o3",
+     "type": "visit",
+     "description": "Scout the parking between the two main buildings at the water treatment plant on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ]
+    },
+    {
+     "id": "wiki-honest-review-o4",
+     "type": "basic",
+     "description": "Share your feedback with the BTR Driver",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-i-am-speed-part-1",
+   "name": "I Am Speed - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/I_Am_Speed_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-advertising-business-part-6",
+      "name": "Advertising Business - Part 6"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-i-am-speed-part-1-o1",
+     "type": "shoot",
+     "description": "Eliminate 2 enemies within 10 seconds 10 times",
+     "optional": false,
+     "maps": [],
+     "count": 2,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-i-am-speed-part-2",
+   "name": "I Am Speed - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/I_Am_Speed_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-i-am-speed-part-1",
+      "name": "I Am Speed - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-i-am-speed-part-2-o1",
+     "type": "basic",
+     "description": "Capture 12 objectives within one match in CheckPoint mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-i-am-speed-part-3",
+   "name": "I Am Speed - Part 3",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/I_Am_Speed_-_Part_3",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-i-am-speed-part-2",
+      "name": "I Am Speed - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-i-am-speed-part-3-o1",
+     "type": "shoot",
+     "description": "Eliminate 25 enemies within one match in CheckPoint, BlastGang, LastHero or TeamFight",
+     "optional": false,
+     "maps": [],
+     "count": 25,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-i-m-something-of-a-btr-myself",
+   "name": "I'm Something of a BTR Myself",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/I'm_Something_of_a_BTR_Myself",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "656f0f98d80a697f855d34b1",
+    "name": "BTR Driver"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-honest-review",
+      "name": "Honest Review"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-i-m-something-of-a-btr-myself-o1",
+     "type": "shoot",
+     "description": "Eliminate 15 Scavs with any 7.62x54R caliber weapon on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "count": 15,
+     "targetNames": [
+      "Scavs"
+     ]
+    },
+    {
+     "id": "wiki-i-m-something-of-a-btr-myself-o2",
+     "type": "visit",
+     "description": "Report back to the BTR Driver",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-in-the-name-of-humanity",
+   "name": "In the Name of Humanity...",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/In_the_Name_of_Humanity...",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "638f541a29ffd1183d187f57",
+    "name": "Lightkeeper"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-price-for-information",
+      "name": "Price for Information"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-in-the-name-of-humanity-o1",
+     "type": "shoot",
+     "description": "Eliminate any 3 targets during 20:00-08:00 on Interchange (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dbc024597771384a510d",
+       "name": "Interchange"
+      }
+     ],
+     "count": 1,
+     "targetNames": [
+      "3 targets during 20:00-08:00"
+     ]
+    },
+    {
+     "id": "wiki-in-the-name-of-humanity-o2",
+     "type": "visit",
+     "description": "Locate the hidden keycard panel in the Burger Spot bathroom on Interchange (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dbc024597771384a510d",
+       "name": "Interchange"
+      }
+     ]
+    },
+    {
+     "id": "wiki-in-the-name-of-humanity-o3",
+     "type": "visit",
+     "description": "Locate the hidden TerraGroup saferoom on Interchange (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dbc024597771384a510d",
+       "name": "Interchange"
+      }
+     ]
+    },
+    {
+     "id": "wiki-in-the-name-of-humanity-o4",
+     "type": "visit",
+     "description": "Locate and access Container 14 on Interchange (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dbc024597771384a510d",
+       "name": "Interchange"
+      }
+     ]
+    },
+    {
+     "id": "wiki-in-the-name-of-humanity-o5",
+     "type": "findQuestItem",
+     "description": "Obtain the carbon fiber case from Container 14 on Interchange (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dbc024597771384a510d",
+       "name": "Interchange"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-carbon-fiber-case",
+      "name": "carbon fiber case",
+      "shortName": "carbon fiber case"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-in-the-name-of-humanity-o6",
+     "type": "basic",
+     "description": "Use the transit from Interchange to Streets of Tarkov (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dbc024597771384a510d",
+       "name": "Interchange"
+      },
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ]
+    },
+    {
+     "id": "wiki-in-the-name-of-humanity-o7",
+     "type": "shoot",
+     "description": "Eliminate any 3 targets during 20:00-08:00 on Streets of Tarkov (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ],
+     "count": 1,
+     "targetNames": [
+      "3 targets during 20:00-08:00"
+     ]
+    },
+    {
+     "id": "wiki-in-the-name-of-humanity-o8",
+     "type": "plantQuestItem",
+     "description": "Stash the carbon fiber case on the 3rd floor balcony of the Pinewood Hotel restaurant on Streets of Tarkov (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-carbon-fiber-case",
+      "name": "carbon fiber case",
+      "shortName": "carbon fiber case"
+     }
+    },
+    {
+     "id": "wiki-in-the-name-of-humanity-o9",
+     "type": "basic",
+     "description": "Launch a yellow signal flare at the tram that collapsed into the sewers on Streets of Tarkov (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-jack-of-all-trades",
+   "name": "Jack of All Trades",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Jack_of_All_Trades",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-doping-part-4",
+      "name": "Gladiator Doping - Part 4"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-jack-of-all-trades-o1",
+     "type": "shoot",
+     "description": "Eliminate 20 enemies as Assault",
+     "optional": false,
+     "maps": [],
+     "count": 20,
+     "targetNames": [
+      "enemies"
+     ]
+    },
+    {
+     "id": "wiki-jack-of-all-trades-o2",
+     "type": "shoot",
+     "description": "Eliminate 20 enemies as Enforcer",
+     "optional": false,
+     "maps": [],
+     "count": 20,
+     "targetNames": [
+      "enemies"
+     ]
+    },
+    {
+     "id": "wiki-jack-of-all-trades-o3",
+     "type": "shoot",
+     "description": "Eliminate 20 enemies as Scout",
+     "optional": false,
+     "maps": [],
+     "count": 20,
+     "targetNames": [
+      "enemies"
+     ]
+    },
+    {
+     "id": "wiki-jack-of-all-trades-o4",
+     "type": "shoot",
+     "description": "Eliminate 20 enemies as Marksman",
+     "optional": false,
+     "maps": [],
+     "count": 20,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-jack-of-all-trades-pro",
+   "name": "Jack of All Trades - Pro",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Jack_of_All_Trades_-_Pro",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-advertising-business-part-2",
+      "name": "Advertising Business - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-jack-of-all-trades-pro-o1",
+     "type": "basic",
+     "description": "Win a round as Assault in BlastGang or TeamFight mode",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-jack-of-all-trades-pro-o2",
+     "type": "basic",
+     "description": "Win a round as Enforcer in BlastGang or TeamFight mode",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-jack-of-all-trades-pro-o3",
+     "type": "basic",
+     "description": "Win a round as Scout in BlastGang or TeamFight mode",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-jack-of-all-trades-pro-o4",
+     "type": "basic",
+     "description": "Win a round as Marksman in BlastGang or TeamFight mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-key-to-understanding",
+   "name": "Key to Understanding",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Key_to_Understanding",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "579dc571d53a0658a154fbec",
+    "name": "Fence"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-reverse-gear",
+      "name": "Reverse Gear"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-key-to-understanding-o1",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the Black Division encryption keys",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "6a5f9cfcc409750b6e065592",
+      "name": "Black Division encryption keys",
+      "shortName": "BD keys",
+      "iconLink": "https://assets.tarkov.dev/6a5f9cfcc409750b6e065592-icon.webp"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-key-to-understanding-o2",
+     "type": "giveQuestItem",
+     "description": "Hand over the found item",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "6a5f9cfcc409750b6e065592",
+      "name": "Black Division encryption keys",
+      "shortName": "BD keys",
+      "iconLink": "https://assets.tarkov.dev/6a5f9cfcc409750b6e065592-icon.webp"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be level 20 to start this quest.",
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-know-your-enemy",
+   "name": "Know Your Enemy",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Know_Your_Enemy",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "54cb50c76803fa8b248b4571",
+    "name": "Prapor"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-cast-the-net",
+      "name": "Cast the Net"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-know-your-enemy-o1",
+     "type": "giveItem",
+     "description": "Hand over 3 any Black Division plate carriers",
+     "optional": false,
+     "maps": [],
+     "items": [],
+     "count": 3,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-make-amends",
+   "name": "Make Amends",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Make_Amends",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-make-amends-equipment",
+      "name": "Make Amends - Equipment"
+     },
+     "status": [
+      "complete"
+     ]
+    },
+    {
+     "task": {
+      "id": "wiki-make-amends-sweep-up",
+      "name": "Make Amends - Sweep Up"
+     },
+     "status": [
+      "complete"
+     ]
+    },
+    {
+     "task": {
+      "id": "wiki-make-amends-quarantine",
+      "name": "Make Amends - Quarantine"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "taskRequirementsAny": true,
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-make-amends-o1",
+     "type": "findQuestItem",
+     "description": "Obtain the V3 Flash drive on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-secure-flash-drive-v3",
+      "name": "Secure Flash drive V3",
+      "shortName": "V3 Flash drive"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-make-amends-o2",
+     "type": "basic",
+     "description": "Reflash the Radio transmitter",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-make-amends-o3",
+     "type": "giveQuestItem",
+     "description": "Hand over the flash drive to Mechanic",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-secure-flash-drive-v3",
+      "name": "Secure Flash drive V3",
+      "shortName": "flash drive"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-make-amends-o4",
+     "type": "visit",
+     "description": "Visit the Lighthouse building",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-make-amends-buyout",
+   "name": "Make Amends - Buyout",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Buyout",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-make-amends-buyout-o1",
+     "type": "giveItem",
+     "description": "Hand over 1,000,000 RUB to Mechanic",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "5449016a4bdc2d6f028b456f",
+       "name": "Roubles",
+       "shortName": "RUB",
+       "iconLink": "https://assets.tarkov.dev/5449016a4bdc2d6f028b456f-icon.webp"
+      }
+     ],
+     "count": 1000000,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-make-amends-equipment",
+   "name": "Make Amends - Equipment",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Equipment",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-make-amends-buyout",
+      "name": "Make Amends - Buyout"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-make-amends-equipment-o1",
+     "type": "giveItem",
+     "description": "Hand over the 4 found in raid SVDS sniper rifles",
+     "optional": false,
+     "maps": [],
+     "items": [],
+     "count": 4,
+     "foundInRaid": true
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-make-amends-quarantine",
+   "name": "Make Amends - Quarantine",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Quarantine",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-make-amends-software",
+      "name": "Make Amends - Software"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-make-amends-quarantine-o1",
+     "type": "plantItem",
+     "description": "Place a WI-FI Camera inside the quarantine zone in The Lab",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5b0fc42d86f7744a585f9105",
+       "name": "The Lab"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-make-amends-security",
+   "name": "Make Amends - Security",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Security",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-make-amends-security-o1",
+     "type": "plantItem",
+     "description": "Place a WI-FI Camera at the yellow bus on the southern bridge approaching the water treatment plant on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-make-amends-security-o2",
+     "type": "plantItem",
+     "description": "Place a WI-FI Camera at the yellow bulldozer in the south-eastern part of the water treatment plant on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-make-amends-security-o3",
+     "type": "plantItem",
+     "description": "Place a WI-FI Camera at the police truck in the western part of the water treatment plant on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-make-amends-security-o4",
+     "type": "plantItem",
+     "description": "Place a WI-FI Camera at the army truck near the industrial zone in the northern part of the water treatment plant on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-make-amends-software",
+   "name": "Make Amends - Software",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Software",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-make-amends-software-o1",
+     "type": "giveItem",
+     "description": "Hand over 15 found in raid Secure Flash drives",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "590c621186f774138d11ea29",
+       "name": "Secure Flash drive",
+       "shortName": "Flash drive",
+       "iconLink": "https://assets.tarkov.dev/590c621186f774138d11ea29-icon.webp"
+      }
+     ],
+     "count": 15,
+     "foundInRaid": true
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-make-amends-sweep-up",
+   "name": "Make Amends - Sweep Up",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Make_Amends_-_Sweep_Up",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "5704e5fad2720bc05b8b4567",
+    "name": "Reserve"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-make-amends-security",
+      "name": "Make Amends - Security"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-make-amends-sweep-up-o1",
+     "type": "shoot",
+     "description": "Eliminate 25 Raiders on Reserve",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e5fad2720bc05b8b4567",
+       "name": "Reserve"
+      }
+     ],
+     "count": 25,
+     "targetNames": [
+      "Raiders"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-1",
+   "name": "No Limit to Perfection - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-professional-part-3",
+      "name": "Professional - Part 3"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-1-o1",
+     "type": "shoot",
+     "description": "Eliminate 10 enemies while using an RSh-12",
+     "optional": false,
+     "maps": [],
+     "count": 10,
+     "targetNames": [
+      "enemies"
+     ],
+     "usingWeapon": [
+      {
+       "id": "633ec7c2a6918cb895019c6c",
+       "name": "RSh-12 12.7x55 revolver",
+       "shortName": "RSh-12",
+       "iconLink": "https://assets.tarkov.dev/633ec7c2a6918cb895019c6c-icon.webp"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-2",
+   "name": "No Limit to Perfection - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-1",
+      "name": "No Limit to Perfection - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-2-o1",
+     "type": "basic",
+     "description": "Get the first kill of the round 5 times in BlastGang or TeamFight mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-3",
+   "name": "No Limit to Perfection - Part 3",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_3",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-2",
+      "name": "No Limit to Perfection - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-3-o1",
+     "type": "shoot",
+     "description": "Eliminate 50 enemies while using assault rifles",
+     "optional": false,
+     "maps": [],
+     "count": 50,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-4",
+   "name": "No Limit to Perfection - Part 4",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_4",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-3",
+      "name": "No Limit to Perfection - Part 3"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-4-o1",
+     "type": "shoot",
+     "description": "Eliminate 50 enemies while using marksman rifles",
+     "optional": false,
+     "maps": [],
+     "count": 50,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-5",
+   "name": "No Limit to Perfection - Part 5",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_5",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-4",
+      "name": "No Limit to Perfection - Part 4"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-5-o1",
+     "type": "shoot",
+     "description": "Eliminate 100 enemies while aiming down sights",
+     "optional": false,
+     "maps": [],
+     "count": 100,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-6",
+   "name": "No Limit to Perfection - Part 6",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_6",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-5",
+      "name": "No Limit to Perfection - Part 5"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-6-o1",
+     "type": "shoot",
+     "description": "Eliminate 2 enemies within 15 seconds while using a submachine gun 20 times",
+     "optional": false,
+     "maps": [],
+     "count": 2,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-7",
+   "name": "No Limit to Perfection - Part 7",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_7",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-6",
+      "name": "No Limit to Perfection - Part 6"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-7-o1",
+     "type": "shoot",
+     "description": "Eliminate 50 enemies while using shotguns",
+     "optional": false,
+     "maps": [],
+     "count": 50,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-8",
+   "name": "No Limit to Perfection - Part 8",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_8",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-7",
+      "name": "No Limit to Perfection - Part 7"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-8-o1",
+     "type": "shoot",
+     "description": "Eliminate 50 enemies with point fire while using light machine guns",
+     "optional": false,
+     "maps": [],
+     "count": 50,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-no-limit-to-perfection-part-9",
+   "name": "No Limit to Perfection - Part 9",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/No_Limit_to_Perfection_-_Part_9",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-no-limit-to-perfection-part-8",
+      "name": "No Limit to Perfection - Part 8"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-no-limit-to-perfection-part-9-o1",
+     "type": "shoot",
+     "description": "Eliminate 10 enemies with headshots while using bolt-action rifles",
+     "optional": false,
+     "maps": [],
+     "count": 10,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-pay-the-fare",
+   "name": "Pay the Fare!",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Pay_the_Fare!",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5ac3b934156ae10c4430e83c",
+    "name": "Ragman"
+   },
+   "map": null,
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-pay-the-fare-o1",
+     "type": "findItem",
+     "description": "Find the item in raid: Pipe grip wrench",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "619cbfccbedcde2f5b3f7bdd",
+       "name": "Pipe grip wrench",
+       "shortName": "PGW",
+       "iconLink": "https://assets.tarkov.dev/619cbfccbedcde2f5b3f7bdd-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-pay-the-fare-o2",
+     "type": "giveItem",
+     "description": "Hand over the item",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "619cbfccbedcde2f5b3f7bdd",
+       "name": "Pipe grip wrench",
+       "shortName": "PGW",
+       "iconLink": "https://assets.tarkov.dev/619cbfccbedcde2f5b3f7bdd-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-pay-the-fare-o3",
+     "type": "findItem",
+     "description": "Find the item in raid: Ratchet wrench",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "60391afc25aff57af81f7085",
+       "name": "Ratchet wrench",
+       "shortName": "Ratchet",
+       "iconLink": "https://assets.tarkov.dev/60391afc25aff57af81f7085-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-pay-the-fare-o4",
+     "type": "giveItem",
+     "description": "Hand over the item",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "60391afc25aff57af81f7085",
+       "name": "Ratchet wrench",
+       "shortName": "Ratchet",
+       "iconLink": "https://assets.tarkov.dev/60391afc25aff57af81f7085-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-pay-the-fare-o5",
+     "type": "findItem",
+     "description": "Find the item in raid: Electric drill",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "59e35de086f7741778269d84",
+       "name": "Electric drill",
+       "shortName": "Drill",
+       "iconLink": "https://assets.tarkov.dev/59e35de086f7741778269d84-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-pay-the-fare-o6",
+     "type": "giveItem",
+     "description": "Hand over the item",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "59e35de086f7741778269d84",
+       "name": "Electric drill",
+       "shortName": "Drill",
+       "iconLink": "https://assets.tarkov.dev/59e35de086f7741778269d84-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Tell Mechanic that you found transport to the icebreaker in the Boreas story chapter."
+   ]
+  },
+  {
+   "id": "wiki-postponed-reward",
+   "name": "Postponed Reward",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Postponed_Reward",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-surprise-gift",
+      "name": "Surprise Gift"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-postponed-reward-o1",
+     "type": "giveItem",
+     "description": "Hand over a Lega Medal to Ref",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "6656560053eaaa7a23349c86",
+       "name": "Lega Medal",
+       "shortName": "Lega",
+       "iconLink": "https://assets.tarkov.dev/6656560053eaaa7a23349c86-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-preserve-a-valuable-piece",
+   "name": "Preserve a Valuable Piece",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Preserve_a_Valuable_Piece",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "638f541a29ffd1183d187f57",
+    "name": "Lightkeeper"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-cut-down-to-the-root",
+      "name": "Cut Down to the Root"
+     },
+     "status": [
+      "active"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-preserve-a-valuable-piece-o1",
+     "type": "shoot",
+     "description": "Eliminate 7 PMC operatives on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "count": 7,
+     "targetNames": [
+      "PMC operatives"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-price-for-information",
+   "name": "Price for Information",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Price_for_Information",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "638f541a29ffd1183d187f57",
+    "name": "Lightkeeper"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-digital-puzzle",
+      "name": "Digital Puzzle"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-price-for-information-o1",
+     "type": "basic",
+     "description": "Use the transit from Shoreline to Lighthouse (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      },
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ]
+    },
+    {
+     "id": "wiki-price-for-information-o2",
+     "type": "basic",
+     "description": "Use the transit from Lighthouse to Reserve (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      },
+      {
+       "id": "5704e5fad2720bc05b8b4567",
+       "name": "Reserve"
+      }
+     ]
+    },
+    {
+     "id": "wiki-price-for-information-o3",
+     "type": "basic",
+     "description": "Use the transit from Reserve to Woods (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e5fad2720bc05b8b4567",
+       "name": "Reserve"
+      },
+      {
+       "id": "5704e3c2d2720bac5b8b4567",
+       "name": "Woods"
+      }
+     ]
+    },
+    {
+     "id": "wiki-price-for-information-o4",
+     "type": "shoot",
+     "description": "Eliminate any 10 targets except Black Division while completing the other objectives",
+     "optional": false,
+     "maps": [],
+     "count": 1,
+     "targetNames": [
+      "10 targets except Black Division"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-professional-part-1",
+   "name": "Professional - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Professional_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-gladiator-doping-part-4",
+      "name": "Gladiator Doping - Part 4"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-professional-part-1-o1",
+     "type": "plantQuestItem",
+     "description": "Plant or deactivate the device 3 times in BlastGang mode",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-blastgang-attackers-backpack",
+      "name": "BlastGang attackers' backpack",
+      "shortName": "device"
+     }
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-professional-part-2",
+   "name": "Professional - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Professional_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-professional-part-1",
+      "name": "Professional - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-professional-part-2-o1",
+     "type": "basic",
+     "description": "Win a match claiming at least 4th place in the team in BlastGang or TeamFight mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-professional-part-3",
+   "name": "Professional - Part 3",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Professional_-_Part_3",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-professional-part-2",
+      "name": "Professional - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-professional-part-3-o1",
+     "type": "basic",
+     "description": "Earn a Round MVP in BlastGang or TeamFight mode",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-professional-fitness-part-1",
+   "name": "Professional Fitness - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Professional_Fitness_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-balancing-part-1",
+      "name": "Balancing - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-professional-fitness-part-1-o1",
+     "type": "basic",
+     "description": "Play a match in CheckPoint or Last Hero mode in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-professional-fitness-part-2",
+   "name": "Professional Fitness - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Professional_Fitness_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-professional-fitness-part-1",
+      "name": "Professional Fitness - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-professional-fitness-part-2-o1",
+     "type": "shoot",
+     "description": "Eliminate 20 enemies in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ],
+     "count": 20,
+     "targetNames": [
+      "enemies"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-reverse-gear",
+   "name": "Reverse Gear",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Reverse_Gear",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "54cb50c76803fa8b248b4571",
+    "name": "Prapor"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-know-your-enemy",
+      "name": "Know Your Enemy"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-reverse-gear-o1",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the Wi-Fi Camera from the Ural truck near the hydroelectric power station on Shoreline",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-wi-fi-camera-quest-item",
+      "name": "WI-FI Camera (quest item)",
+      "shortName": "Wi-Fi Camera"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-reverse-gear-o2",
+     "type": "giveQuestItem",
+     "description": "Hand over the camera",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-wi-fi-camera-quest-item",
+      "name": "WI-FI Camera (quest item)",
+      "shortName": "camera"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-reverse-gear-o3",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the Wi-Fi Camera from the excavator at the stream near the smugglers' base on Shoreline",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-wi-fi-camera-quest-item",
+      "name": "WI-FI Camera (quest item)",
+      "shortName": "Wi-Fi Camera"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-reverse-gear-o4",
+     "type": "giveQuestItem",
+     "description": "Hand over the camera",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-wi-fi-camera-quest-item",
+      "name": "WI-FI Camera (quest item)",
+      "shortName": "camera"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-reverse-gear-o5",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the Wi-Fi Camera from the cargo truck cabin near Mira Ave on Ground Zero",
+     "optional": false,
+     "maps": [
+      {
+       "id": "653e6760052c01c1c805532f",
+       "name": "Ground Zero"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-wi-fi-camera-quest-item",
+      "name": "WI-FI Camera (quest item)",
+      "shortName": "Wi-Fi Camera"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-reverse-gear-o6",
+     "type": "giveQuestItem",
+     "description": "Hand over the camera",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-wi-fi-camera-quest-item",
+      "name": "WI-FI Camera (quest item)",
+      "shortName": "camera"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-reverse-gear-o7",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the Wi-Fi Camera from yellow bus in the underground tunnel on Ground Zero",
+     "optional": false,
+     "maps": [
+      {
+       "id": "653e6760052c01c1c805532f",
+       "name": "Ground Zero"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-wi-fi-camera-quest-item",
+      "name": "WI-FI Camera (quest item)",
+      "shortName": "Wi-Fi Camera"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-reverse-gear-o8",
+     "type": "giveQuestItem",
+     "description": "Hand over the camera",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-wi-fi-camera-quest-item",
+      "name": "WI-FI Camera (quest item)",
+      "shortName": "camera"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-riding-the-wave",
+   "name": "Riding the Wave",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Riding_the_Wave",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5ac3b934156ae10c4430e83c",
+    "name": "Ragman"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-reverse-gear",
+      "name": "Reverse Gear"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-riding-the-wave-o1",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "68947a4be4bf255d1b0ca746",
+       "name": "First Spear Siege-R Optimized M.A.S.S. Plate Carrier (Black Division)",
+       "shortName": "Siege-R",
+       "iconLink": "https://assets.tarkov.dev/68947a4be4bf255d1b0ca746-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o2",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Spiritus Systems LV-119 Plate Carrier (Black Division V2)",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "689479eb30cc5ba7be00f5ff",
+       "name": "Spiritus Systems LV-119 Plate Carrier (Black Division V2)",
+       "shortName": "LV-119",
+       "iconLink": "https://assets.tarkov.dev/689479eb30cc5ba7be00f5ff-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o3",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Ferro Concepts FCPC V5 Plate Carrier (Black Division)",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "689479cb47e5acd1e10be986",
+       "name": "Ferro Concepts FCPC V5 Plate Carrier (Black Division)",
+       "shortName": "FCPC V5",
+       "iconLink": "https://assets.tarkov.dev/689479cb47e5acd1e10be986-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o4",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Spiritus Systems LV-119 Plate Carrier (Black Division V1)",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "689479a4a733b1602007e2eb",
+       "name": "Spiritus Systems LV-119 Plate Carrier (Black Division V1)",
+       "shortName": "LV-119",
+       "iconLink": "https://assets.tarkov.dev/689479a4a733b1602007e2eb-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o5",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Tasmanian Tiger Modular Pack 45 Plus (MultiCam Black)",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "68947a8ce4bf255d1b0ca759",
+       "name": "Tasmanian Tiger Modular Pack 45 Plus (MultiCam Black)",
+       "shortName": "Modular Pack 45",
+       "iconLink": "https://assets.tarkov.dev/68947a8ce4bf255d1b0ca759-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o6",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Mystery Ranch 2 Day Assault Pack (Black)",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "68947ab5a733b1602007e2fe",
+       "name": "Mystery Ranch 2 Day Assault Pack (Black)",
+       "shortName": "2 Day Assault",
+       "iconLink": "https://assets.tarkov.dev/68947ab5a733b1602007e2fe-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o7",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Mystery Ranch NICE Frame Load Sling",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "68947ad3e4bf255d1b0ca75c",
+       "name": "Mystery Ranch NICE Frame Load Sling",
+       "shortName": "NICE Load Sling",
+       "iconLink": "https://assets.tarkov.dev/68947ad3e4bf255d1b0ca75c-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o8",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Avon M53A1 gas mask",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "689b880fff8b4adc420f5b56",
+       "name": "Avon M53A1 gas mask",
+       "shortName": "M53A1",
+       "iconLink": "https://assets.tarkov.dev/689b880fff8b4adc420f5b56-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o9",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Gentex Ops-Core SOTR respirator",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "689b404db49f27df1c0873f6",
+       "name": "Gentex Ops-Core SOTR respirator",
+       "shortName": "SOTR",
+       "iconLink": "https://assets.tarkov.dev/689b404db49f27df1c0873f6-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    },
+    {
+     "id": "wiki-riding-the-wave-o10",
+     "type": "giveItem",
+     "description": "Hand over the found in raid item: Gatorz Specter MILSPEC ballistic glasses",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "689b3fffa1295e322207a677",
+       "name": "Gatorz Specter MILSPEC ballistic glasses",
+       "shortName": "Specter",
+       "iconLink": "https://assets.tarkov.dev/689b3fffa1295e322207a677-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": true
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-scope-the-clearing",
+   "name": "Scope the Clearing",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Scope_the_Clearing",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "58330581ace78e27b8b10cee",
+    "name": "Skier"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-a-familiar-face",
+      "name": "A Familiar Face..."
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-scope-the-clearing-o1",
+     "type": "plantItem",
+     "description": "Plant the first Wi-Fi Camera at the smuggler train platform on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-scope-the-clearing-o2",
+     "type": "plantItem",
+     "description": "Plant the second Wi-Fi Camera at the smuggler train platform on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-scope-the-clearing-o3",
+     "type": "plantItem",
+     "description": "Plant the third Wi-Fi Camera at the Woods transit on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-sheep-in-wolf-s-clothing",
+   "name": "Sheep in Wolf's Clothing",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Sheep_in_Wolf's_Clothing",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "579dc571d53a0658a154fbec",
+    "name": "Fence"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-forbidden-knowledge",
+      "name": "Forbidden Knowledge"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-sheep-in-wolf-s-clothing-o1",
+     "type": "shoot",
+     "description": "Eliminate 8 Black Division operatives while wearing a Black Division plate carrier",
+     "optional": false,
+     "maps": [],
+     "count": 8,
+     "targetNames": [
+      "Black Division operatives"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-stay-clear-of-blast-zone",
+   "name": "Stay Clear of Blast Zone",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Stay_Clear_of_Blast_Zone",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5c0647fdd443bc2504c2d371",
+    "name": "Jaeger"
+   },
+   "map": {
+    "id": "5704e554d2720bac5b8b456e",
+    "name": "Shoreline"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-desperate-assault",
+      "name": "Desperate Assault"
+     },
+     "status": [
+      "active"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-stay-clear-of-blast-zone-o1",
+     "type": "plantItem",
+     "description": "Plant a TP-200 TNT brick at the Health Resort west side fence breach on Shoreline",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "items": [
+      {
+       "id": "60391b0fb847c71012789415",
+       "name": "TP-200 TNT brick",
+       "shortName": "TP-200",
+       "iconLink": "https://assets.tarkov.dev/60391b0fb847c71012789415-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-stay-clear-of-blast-zone-o2",
+     "type": "plantItem",
+     "description": "Plant a TP-200 TNT brick at the Health Resort north side fence breach on Shoreline",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "items": [
+      {
+       "id": "60391b0fb847c71012789415",
+       "name": "TP-200 TNT brick",
+       "shortName": "TP-200",
+       "iconLink": "https://assets.tarkov.dev/60391b0fb847c71012789415-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-stay-clear-of-blast-zone-o3",
+     "type": "plantItem",
+     "description": "Plant a TP-200 TNT brick at the Health Resort east side fence breach on Shoreline",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "items": [
+      {
+       "id": "60391b0fb847c71012789415",
+       "name": "TP-200 TNT brick",
+       "shortName": "TP-200",
+       "iconLink": "https://assets.tarkov.dev/60391b0fb847c71012789415-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-superhuman",
+   "name": "Superhuman",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Superhuman",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-all-for-the-show-major-sponsor",
+      "name": "All for the Show - Major Sponsor"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-superhuman-o1",
+     "type": "shoot",
+     "description": "Eliminate an enemy with a melee weapon while wearing a Ghoul mask",
+     "optional": false,
+     "maps": [],
+     "count": 1,
+     "targetNames": [
+      "an enemy"
+     ],
+     "usingWeapon": [
+      {
+       "id": "5910968f86f77425cf569c32",
+       "name": "Weapon repair kit",
+       "shortName": "Weapon repair kit",
+       "iconLink": "https://assets.tarkov.dev/5910968f86f77425cf569c32-icon.webp"
+      }
+     ],
+     "wearing": [
+      [
+       {
+        "id": "6176a40f0b8c0312ac75a3d3",
+        "name": "Ghoul mask",
+        "shortName": "Ghoul",
+        "iconLink": "https://assets.tarkov.dev/6176a40f0b8c0312ac75a3d3-icon.webp"
+       }
+      ]
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-surprise",
+   "name": "Surprise",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Surprise",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-balancing-part-2",
+      "name": "Balancing - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-surprise-o1",
+     "type": "giveItem",
+     "description": "Hand over 3 found in raid class 4 or higher ballistic plates to Ref",
+     "optional": false,
+     "maps": [],
+     "items": [],
+     "count": 3,
+     "foundInRaid": true
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-surprise-gift",
+   "name": "Surprise Gift",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Surprise_Gift",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "638f541a29ffd1183d187f57",
+    "name": "Lightkeeper"
+   },
+   "map": {
+    "id": "56f40101d2720b2a4d8b45d6",
+    "name": "Customs"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-between-two-fires",
+      "name": "Between Two Fires"
+     },
+     "status": [
+      "active"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-surprise-gift-o1",
+     "type": "visit",
+     "description": "Return to the old champion's hideout on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ]
+    },
+    {
+     "id": "wiki-surprise-gift-o2",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the compromising information on Ref",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-ref-dirt",
+      "name": "Ref dirt",
+      "shortName": "compromising information on Ref"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-surprise-gift-o3",
+     "type": "giveQuestItem",
+     "description": "Hand over the found info",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-ref-dirt",
+      "name": "Ref dirt",
+      "shortName": "compromising information on Ref"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-great-heights-part-1",
+   "name": "To Great Heights! - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-professional-fitness-part-2",
+      "name": "Professional Fitness - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-great-heights-part-1-o1",
+     "type": "basic",
+     "description": "Win a match in CheckPoint or LastHero mode in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-great-heights-part-2",
+   "name": "To Great Heights! - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-great-heights-part-1",
+      "name": "To Great Heights! - Part 1"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-great-heights-part-2-o1",
+     "type": "basic",
+     "description": "Win a match in TeamFight, BlastGang, or CheckPoint mode in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-great-heights-part-3",
+   "name": "To Great Heights! - Part 3",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_3",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-great-heights-part-2",
+      "name": "To Great Heights! - Part 2"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-great-heights-part-3-o1",
+     "type": "basic",
+     "description": "Win 2 matches while claiming at least 3rd place in TeamFight, BlastGang, or CheckPoint mode in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-great-heights-part-4",
+   "name": "To Great Heights! - Part 4",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_4",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-great-heights-part-3",
+      "name": "To Great Heights! - Part 3"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-great-heights-part-4-o1",
+     "type": "giveItem",
+     "description": "Hand over 1,000,000 Roubles",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "5449016a4bdc2d6f028b456f",
+       "name": "Roubles",
+       "shortName": "RUB",
+       "iconLink": "https://assets.tarkov.dev/5449016a4bdc2d6f028b456f-icon.webp"
+      }
+     ],
+     "count": 1000000,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-to-great-heights-part-4-o2",
+     "type": "basic",
+     "description": "Win three out of six matches in TeamFight, BlastGang or CheckPoint mode in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ]
+    },
+    {
+     "id": "wiki-to-great-heights-part-4-o3",
+     "type": "basic",
+     "description": "Failure condition: Lose 4 matches",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-great-heights-part-5",
+   "name": "To Great Heights! - Part 5",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_5",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-great-heights-part-4",
+      "name": "To Great Heights! - Part 4"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-great-heights-part-5-o1",
+     "type": "basic",
+     "description": "Win a match claiming at least 2nd place in the team in TeamFight, BlastGang, or CheckPoint mode in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-great-heights-part-6",
+   "name": "To Great Heights! - Part 6",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_Great_Heights!_-_Part_6",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "6617beeaa9cfa777ca915b7c",
+    "name": "Ref"
+   },
+   "map": {
+    "id": "wiki-arena",
+    "name": "Arena"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-great-heights-part-5",
+      "name": "To Great Heights! - Part 5"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-great-heights-part-6-o1",
+     "type": "basic",
+     "description": "Win 2 matches in a row in TeamFight, BlastGang or CheckPoint mode in Arena",
+     "optional": false,
+     "maps": [
+      {
+       "id": "wiki-arena",
+       "name": "Arena"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-a-time-to-gather-stones",
+   "name": "To the Light - A Time to Gather Stones",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Gather_Stones",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-a-time-to-throw-stones",
+      "name": "To the Light - A Time to Throw Stones"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-a-time-to-gather-stones-o1",
+     "type": "giveItem",
+     "description": "Hand over 2 found in raid PMC dogtags (Level 30 or higher)",
+     "optional": false,
+     "maps": [],
+     "items": [
+      {
+       "id": "customdogtags12345678910",
+       "name": "Dogtag",
+       "shortName": "Dogtag",
+       "iconLink": "https://assets.tarkov.dev/customdogtags12345678910-icon.webp"
+      }
+     ],
+     "count": 2,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-a-time-to-throw-stones",
+   "name": "To the Light - A Time to Throw Stones",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_A_Time_to_Throw_Stones",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "5b0fc42d86f7744a585f9105",
+    "name": "The Lab"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-bite-the-dust",
+      "name": "To the Light - Bite the Dust"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-a-time-to-throw-stones-o1",
+     "type": "shoot",
+     "description": "Eliminate 2 PMC operatives within one raid in The Lab",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5b0fc42d86f7744a585f9105",
+       "name": "The Lab"
+      }
+     ],
+     "count": 2,
+     "targetNames": [
+      "PMC operatives"
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-bite-the-dust",
+   "name": "To the Light - Bite the Dust",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Bite_the_Dust",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5935c25fb3acc3127c3d8cd9",
+    "name": "Peacekeeper"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-fallen-bird",
+      "name": "To the Light - Fallen Bird"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-bite-the-dust-o1",
+     "type": "giveItem",
+     "description": "Hand over the evidence implicating the person behind the disruptions",
+     "optional": false,
+     "maps": [],
+     "items": [],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-clip-their-wings",
+   "name": "To the Light - Clip Their Wings",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Clip_Their_Wings",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-false-call",
+      "name": "To the Light - False Call"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-clip-their-wings-o1",
+     "type": "plantItem",
+     "description": "Plant a Signal jammer at the weather station on the mountain on Woods (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e3c2d2720bac5b8b4567",
+       "name": "Woods"
+      }
+     ],
+     "items": [
+      {
+       "id": "5ac78a9b86f7741cca0bbd8d",
+       "name": "Signal Jammer",
+       "shortName": "Jammer",
+       "iconLink": "https://assets.tarkov.dev/5ac78a9b86f7741cca0bbd8d-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-to-the-light-clip-their-wings-o2",
+     "type": "plantItem",
+     "description": "Plant a Signal jammer at the sawmill guardhouse on Woods (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e3c2d2720bac5b8b4567",
+       "name": "Woods"
+      }
+     ],
+     "items": [
+      {
+       "id": "5ac78a9b86f7741cca0bbd8d",
+       "name": "Signal Jammer",
+       "shortName": "Jammer",
+       "iconLink": "https://assets.tarkov.dev/5ac78a9b86f7741cca0bbd8d-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-to-the-light-clip-their-wings-o3",
+     "type": "basic",
+     "description": "Use the transit from Woods to Customs (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e3c2d2720bac5b8b4567",
+       "name": "Woods"
+      },
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ]
+    },
+    {
+     "id": "wiki-to-the-light-clip-their-wings-o4",
+     "type": "plantItem",
+     "description": "Plant a Signal jammer on the second floor of the roadside construction site on Customs (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ],
+     "items": [
+      {
+       "id": "5ac78a9b86f7741cca0bbd8d",
+       "name": "Signal Jammer",
+       "shortName": "Jammer",
+       "iconLink": "https://assets.tarkov.dev/5ac78a9b86f7741cca0bbd8d-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-to-the-light-clip-their-wings-o5",
+     "type": "basic",
+     "description": "Use the transit from Customs to Shoreline (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      },
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ]
+    },
+    {
+     "id": "wiki-to-the-light-clip-their-wings-o6",
+     "type": "plantItem",
+     "description": "Plant a Signal jammer at the second floor archives in the Health Resort admin building on Shoreline (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ],
+     "items": [
+      {
+       "id": "5ac78a9b86f7741cca0bbd8d",
+       "name": "Signal Jammer",
+       "shortName": "Jammer",
+       "iconLink": "https://assets.tarkov.dev/5ac78a9b86f7741cca0bbd8d-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-dangerous-ambitions",
+   "name": "To the Light - Dangerous Ambitions",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Dangerous_Ambitions",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-fallen-bird",
+      "name": "To the Light - Fallen Bird"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-dangerous-ambitions-o1",
+     "type": "giveItem",
+     "description": "Hand over the Amulet from Lightkeeper to Peacekeeper",
+     "optional": false,
+     "maps": [],
+     "items": [],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-fallen-bird",
+   "name": "To the Light - Fallen Bird",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Fallen_Bird",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-clip-their-wings",
+      "name": "To the Light - Clip Their Wings"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-fallen-bird-o1",
+     "type": "visit",
+     "description": "Return to the Hideout",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-false-call",
+   "name": "To the Light - False Call",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_False_Call",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "56f40101d2720b2a4d8b45d6",
+    "name": "Customs"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-trust-but-verify",
+      "name": "To the Light - Trust but Verify"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-false-call-o1",
+     "type": "shoot",
+     "description": "Eliminate 5 Scavs during 21:00-06:00 on Customs (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ],
+     "count": 5,
+     "targetNames": [
+      "Scavs during 21:00-06:00"
+     ]
+    },
+    {
+     "id": "wiki-to-the-light-false-call-o2",
+     "type": "shoot",
+     "description": "Eliminate 1 PMC operative during 21:00-06:00 on Customs (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ],
+     "count": 1,
+     "targetNames": [
+      "PMC operative during 21:00-06:00"
+     ]
+    },
+    {
+     "id": "wiki-to-the-light-false-call-o3",
+     "type": "plantItem",
+     "description": "Hide a Wi-Fi camera at the AC unit at the convenience store near the bridge on Customs (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ],
+     "items": [
+      {
+       "id": "5b4391a586f7745321235ab2",
+       "name": "WI-FI Camera",
+       "shortName": "Camera",
+       "iconLink": "https://assets.tarkov.dev/5b4391a586f7745321235ab2-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-to-the-light-false-call-o4",
+     "type": "basic",
+     "description": "Launch a yellow signal flare at the Shoreline transit on Customs (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ]
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-getting-acquainted",
+   "name": "To the Light - Getting Acquainted",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Getting_Acquainted",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "5704e4dad2720bb55b8b4567",
+    "name": "Lighthouse"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-the-other-side",
+      "name": "To the Light - The Other Side"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-getting-acquainted-o1",
+     "type": "findQuestItem",
+     "description": "Obtain the V3 Flash drive on Lighthouse",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e4dad2720bb55b8b4567",
+       "name": "Lighthouse"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-secure-flash-drive-v3",
+      "name": "Secure Flash drive V3",
+      "shortName": "V3 Flash drive"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-to-the-light-getting-acquainted-o2",
+     "type": "basic",
+     "description": "Reflash the Radio transmitter using the V3 Flash drive",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-to-the-light-getting-acquainted-o3",
+     "type": "giveQuestItem",
+     "description": "Hand over the flash drive",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-secure-flash-drive-v3",
+      "name": "Secure Flash drive V3",
+      "shortName": "flash drive"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-to-the-light-getting-acquainted-o4",
+     "type": "visit",
+     "description": "Visit the Lighthouse building",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-someone-called",
+   "name": "To the Light - Someone Called?",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Someone_Called%3F",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "56f40101d2720b2a4d8b45d6",
+    "name": "Customs"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-false-call",
+      "name": "To the Light - False Call"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-someone-called-o1",
+     "type": "visit",
+     "description": "Return to the Hideout",
+     "optional": false,
+     "maps": []
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-the-other-side",
+   "name": "To the Light - The Other Side",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_The_Other_Side",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-to-the-light-a-time-to-gather-stones",
+      "name": "To the Light - A Time to Gather Stones"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-the-other-side-o1",
+     "type": "plantItem",
+     "description": "Stash the TerraGroup \"Blue Folders\" materials in any marked room on Reserve",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5704e5fad2720bc05b8b4567",
+       "name": "Reserve"
+      }
+     ],
+     "items": [
+      {
+       "id": "6389c8c5dbfd5e4b95197e6b",
+       "name": "TerraGroup \"Blue Folders\" materials",
+       "shortName": "Blue Folders",
+       "iconLink": "https://assets.tarkov.dev/6389c8c5dbfd5e4b95197e6b-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-to-the-light-the-other-side-o2",
+     "type": "plantItem",
+     "description": "Stash the TerraGroup \"Blue Folders\" materials in any marked room on Streets of Tarkov",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5714dc692459777137212e12",
+       "name": "Streets of Tarkov"
+      }
+     ],
+     "items": [
+      {
+       "id": "6389c8c5dbfd5e4b95197e6b",
+       "name": "TerraGroup \"Blue Folders\" materials",
+       "shortName": "Blue Folders",
+       "iconLink": "https://assets.tarkov.dev/6389c8c5dbfd5e4b95197e6b-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    },
+    {
+     "id": "wiki-to-the-light-the-other-side-o3",
+     "type": "plantItem",
+     "description": "Stash the TerraGroup \"Blue Folders\" materials in any marked room on Customs",
+     "optional": false,
+     "maps": [
+      {
+       "id": "56f40101d2720b2a4d8b45d6",
+       "name": "Customs"
+      }
+     ],
+     "items": [
+      {
+       "id": "6389c8c5dbfd5e4b95197e6b",
+       "name": "TerraGroup \"Blue Folders\" materials",
+       "shortName": "Blue Folders",
+       "iconLink": "https://assets.tarkov.dev/6389c8c5dbfd5e4b95197e6b-icon.webp"
+      }
+     ],
+     "count": 1,
+     "foundInRaid": false
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki"
+  },
+  {
+   "id": "wiki-to-the-light-trust-but-verify",
+   "name": "To the Light - Trust but Verify",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/To_the_Light_-_Trust_but_Verify",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "5a7c2eca46aef81a7ca2145d",
+    "name": "Mechanic"
+   },
+   "map": {
+    "id": "5b0fc42d86f7744a585f9105",
+    "name": "The Lab"
+   },
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-to-the-light-trust-but-verify-o1",
+     "type": "plantQuestItem",
+     "description": "Stash the Hard drive with false data in the server room near the weapon testing area in The Lab (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5b0fc42d86f7744a585f9105",
+       "name": "The Lab"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-hard-drive-with-false-data",
+      "name": "Hard drive with false data",
+      "shortName": "Hard drive with false data"
+     }
+    },
+    {
+     "id": "wiki-to-the-light-trust-but-verify-o2",
+     "type": "basic",
+     "description": "(Optional) After that, extract through the Ventilation Shaft",
+     "optional": false,
+     "maps": []
+    },
+    {
+     "id": "wiki-to-the-light-trust-but-verify-o3",
+     "type": "extract",
+     "description": "Extract from The Lab through the Ventilation Shaft (In one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "5b0fc42d86f7744a585f9105",
+       "name": "The Lab"
+      }
+     ],
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Ask Mechanic about the possibility of working with Lightkeeper after learning about the Terminal situation in the Tour story chapter.",
+    "Reach Loyalty Level 3 with Therapist, Skier, Peacekeeper, Mechanic, Ragman and Jaeger."
+   ]
+  },
+  {
+   "id": "wiki-unanswered-calls",
+   "name": "Unanswered Calls",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Unanswered_Calls",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "54cb57776803fa99248b456e",
+    "name": "Therapist"
+   },
+   "map": {
+    "id": "653e6760052c01c1c805532f",
+    "name": "Ground Zero"
+   },
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-uninvited-guests-part-1",
+      "name": "Uninvited Guests - Part 1"
+     },
+     "status": [
+      "active"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-unanswered-calls-o1",
+     "type": "plantQuestItem",
+     "description": "Stash Therapist's letter at the reception desk on the second floor of the TerraGroup office on Ground Zero (in one raid)",
+     "optional": false,
+     "maps": [
+      {
+       "id": "653e6760052c01c1c805532f",
+       "name": "Ground Zero"
+      }
+     ],
+     "questItem": {
+      "id": "wiki-therapist-s-message",
+      "name": "Therapist's message",
+      "shortName": "Therapist's letter"
+     }
+    },
+    {
+     "id": "wiki-unanswered-calls-o2",
+     "type": "extract",
+     "description": "Extract from the location through the Nakatani Basement Stairs or Emercom Checkpoint exfil (in one raid)",
+     "optional": false,
+     "maps": [],
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-uninvited-guests-part-1",
+   "name": "Uninvited Guests - Part 1",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_1",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "54cb50c76803fa8b248b4571",
+    "name": "Prapor"
+   },
+   "map": {
+    "id": "5704e554d2720bac5b8b456e",
+    "name": "Shoreline"
+   },
+   "taskRequirements": [],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-uninvited-guests-part-1-o1",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the case with military equipment",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-case-with-military-equipment",
+      "name": "Case with military equipment",
+      "shortName": "case with military equipment"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-uninvited-guests-part-1-o2",
+     "type": "visit",
+     "description": "Investigate the shack next to the sordi tower on Shoreline",
+     "optional": true,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ]
+    },
+    {
+     "id": "wiki-uninvited-guests-part-1-o3",
+     "type": "visit",
+     "description": "Investigate the second floor of the weather station building on Shoreline",
+     "optional": true,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ]
+    },
+    {
+     "id": "wiki-uninvited-guests-part-1-o4",
+     "type": "visit",
+     "description": "Investigate the hydroelectric power station on Shoreline",
+     "optional": true,
+     "maps": [
+      {
+       "id": "5704e554d2720bac5b8b456e",
+       "name": "Shoreline"
+      }
+     ]
+    },
+    {
+     "id": "wiki-uninvited-guests-part-1-o5",
+     "type": "giveQuestItem",
+     "description": "Bring the case with military equipment to the BTR Driver",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-case-with-military-equipment",
+      "name": "Case with military equipment",
+      "shortName": "case with military equipment"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode.",
+    "Reach 0.2 reputation with Prapor."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-uninvited-guests-part-2",
+   "name": "Uninvited Guests - Part 2",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/Uninvited_Guests_-_Part_2",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "656f0f98d80a697f855d34b1",
+    "name": "BTR Driver"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-uninvited-guests-part-1",
+      "name": "Uninvited Guests - Part 1"
+     },
+     "status": [
+      "active"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-uninvited-guests-part-2-o1",
+     "type": "findQuestItem",
+     "description": "Obtain and hand over the case with military equipment",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "wiki-case-with-military-equipment",
+      "name": "Case with military equipment",
+      "shortName": "case with military equipment"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  },
+  {
+   "id": "wiki-what-s-in-the-bag",
+   "name": "What's in the Bag?",
+   "wikiLink": "https://escapefromtarkov.fandom.com/wiki/What's_in_the_Bag%3F",
+   "minPlayerLevel": 1,
+   "kappaRequired": false,
+   "lightkeeperRequired": false,
+   "factionName": "Any",
+   "trader": {
+    "id": "579dc571d53a0658a154fbec",
+    "name": "Fence"
+   },
+   "map": null,
+   "taskRequirements": [
+    {
+     "task": {
+      "id": "wiki-key-to-understanding",
+      "name": "Key to Understanding"
+     },
+     "status": [
+      "complete"
+     ]
+    }
+   ],
+   "traderRequirements": [],
+   "objectives": [
+    {
+     "id": "wiki-what-s-in-the-bag-o1",
+     "type": "findQuestItem",
+     "description": "Locate and obtain the Briefcase with documents",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "6a3563dacdaebb512e0a009c",
+      "name": "Briefcase with documents",
+      "shortName": "Briefcase",
+      "iconLink": "https://assets.tarkov.dev/6a3563dacdaebb512e0a009c-icon.webp"
+     },
+     "count": 1
+    },
+    {
+     "id": "wiki-what-s-in-the-bag-o2",
+     "type": "giveQuestItem",
+     "description": "Hand over the found item",
+     "optional": false,
+     "maps": [],
+     "questItem": {
+      "id": "6a3563dacdaebb512e0a009c",
+      "name": "Briefcase with documents",
+      "shortName": "Briefcase",
+      "iconLink": "https://assets.tarkov.dev/6a3563dacdaebb512e0a009c-icon.webp"
+     },
+     "count": 1
+    }
+   ],
+   "finishRewards": {
+    "traderUnlock": []
+   },
+   "source": "wiki",
+   "wikiNotes": [
+    "Must be playing in the Seasonal mode."
+   ],
+   "seasonal": true
+  }
+ ]
+}

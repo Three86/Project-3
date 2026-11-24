@@ -261,4 +261,4 @@ async function fetchGameDataJson({ gameMode = 'regular', lang = 'en', log = cons
   };
 }
 
-module.exports = { fetchGameDataJson, fetchTraderResetsJson, normTraders, eachMatch, translate, JSON_URL };
+module.exports = { fetchGameDataJson, fetchTraderResetsJson, normTraders, eachMatch, translate, loadFile, JSON_URL };
