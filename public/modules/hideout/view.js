@@ -1,6 +1,6 @@
 // Hideout: default (Basecoat) view.
 import { S } from '../../core/store.js';
-import { esc } from '../../core/util.js';
+import { esc, fmtCount } from '../../core/util.js';
 import { badge, btn, checkbox, emptyState, icon, progressBar, select, stepperControl } from '../../ui/basecoat/components.js';
 import { itemTag, objectiveActions, objectiveChanges } from '../../ui/basecoat/objectives.js';
 import { builtLevel, hideoutReqs, levelBuilt, levelUnlocked, REQ_NEEDS, stationRows, setBuilt, setAllOpen, setShow, focusStation, stations } from './logic.js';
@@ -19,13 +19,20 @@ function renderHideout() {
     <div role="group" class="button-group">${btn('Expand all', 'data-act="stations-open" data-v="1"', { variant: 'outline', size: 'sm' })}${btn('Collapse all', 'data-act="stations-open" data-v="0"', { variant: 'outline', size: 'sm' })}</div>
     ${locked ? `<span class="auto">${icon('lock')} ${locked} station${locked === 1 ? '' : 's'} hidden until the stations they need are built · <a href="#" data-act="h-show" data-v="nextAll">show them</a></span>` : ''}</div>`;
   if (!rows.length) return toolbar + tools + emptyState('Nothing to show', 'Everything built? Show-off.', '', 'home');
-  return toolbar + tools + `<div class="grid">${rows.map(stationCard).join('')}</div>`;
+  // "Available upgrades": stations with nothing to build right now (fully built, or next level locked)
+  // stay reachable for unmarking, but in a collapsed group under the ones you can work on.
+  const waiting = f.show === 'next' ? rows.filter((r) => !r.levels.length) : [];
+  const work = waiting.length ? rows.filter((r) => r.levels.length) : rows;
+  const rest = waiting.length ? `<section class="accordion groups hideout-waiting" data-multiple><details class="group" data-hopen="__waiting" ${S.ui.hOpen.__waiting ? 'open' : ''}>
+      <summary><h3 class="group-name">Fully built or waiting</h3><span class="count">${waiting.length} station${waiting.length === 1 ? '' : 's'} · nothing to build now</span>${icon('chevron')}</summary>
+      <section><div class="grid">${waiting.map(stationCard).join('')}</div></section></details></section>` : '';
+  return toolbar + tools + (work.length ? `<div class="grid">${work.map(stationCard).join('')}</div>` : emptyState('', 'Nothing to build right now.', '', 'home')) + rest;
 }
 
 function stationCard({ st, built, levels }) {
   const max = st.levels[st.levels.length - 1]?.level || 0;
   const top = st.levels.find((l) => l.level === built);
-  const undo = top ? btn(`${icon('undo')} Unmark level ${built}`, `data-act="build" data-id="${top.id}" data-v="0"`, { variant: 'ghost', size: 'xs', tip: `Marked built by mistake? Sets the station back to level ${built - 1}` }) : '';
+  const undo = top ? btn(`${icon('undo')} Unmark level ${built}`, `data-act="build" data-id="${top.id}" data-v="0"`, { variant: 'ghost', size: 'xs', align: 'end', tip: `Marked built by mistake? Sets the station back to level ${built - 1}` }) : '';
   const next = st.levels.find((l) => l.level === built + 1);
   let state = '';
   if (built >= max) state = badge('Fully built', 'outline', 'status-completed');
@@ -54,7 +61,7 @@ function levelBlock(st, l) {
     else if (r.target > 1) control = stepperControl(`data-act="step" data-sec="hideoutReqs" data-key="${esc(r.key)}"`, r.cur, r.target);
     else control = checkbox(`data-act="check" data-sec="hideoutReqs" data-key="${esc(r.key)}" aria-label="Done"`, r.done);
     const label = r.kind === 'item'
-      ? `${itemTag(r.item)} ×${r.count} ${r.fir ? badge('FIR', 'primary', 'fir', 'Must be found in raid') : badge('not FIR', 'outline', 'nofir')}`
+      ? `${itemTag(r.item)} ×${fmtCount(r.count)} ${r.fir ? badge('FIR', 'primary', 'fir', 'Must be found in raid') : badge('not FIR', 'outline', 'nofir')}`
       : `${esc(r.label)} ${r.auto ? '<span class="auto">auto</span>' : ''}`;
     return `<li class="${r.done || built ? 'done' : ''}">${control}<div class="body"><div class="tags"><span class="type-icon">${REQ_NEEDS[r.kind]}</span> ${label}</div></div></li>`;
   });

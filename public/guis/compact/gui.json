@@ -1,6 +1,6 @@
 {
   "title": "Compact (second monitor)",
-  "description": "Tight layout for a second screen: active quests as a checklist, hideout and settings.",
+  "description": "For a second screen during a raid: pick your map and see only the quests there, pinned first, with the objectives still to do. Plus hideout and settings.",
   "modules": ["quests", "hideout", "settings"],
   "views": { "quests": "views/quests.js" },
   "styles": ["../../vendor/basecoat/basecoat.cdn.min.css", "../../ui/basecoat/style.css", "compact.css"],

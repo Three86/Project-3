@@ -1,9 +1,25 @@
 // Settings: default (Basecoat) view.
 import { S } from '../../core/store.js';
-import { esc, toLocalInput } from '../../core/util.js';
+import { esc, fmtWhen, toLocalInput } from '../../core/util.js';
 import { idx } from '../../core/game.js';
 import { badge, btn, icon, spinner, toggleSwitch } from '../../ui/basecoat/components.js';
 import { interfaces, setInterface, rescanLogs, exportProgress, importFile, freshStart, resetAll, refreshData } from './logic.js';
+
+// The game repeats a notification now and then; show each quest change once, newest first.
+const EVENT_VERB = { active: 'started', completed: 'completed', failed: 'failed' };
+function recentEvents(events = []) {
+  const seen = new Set();
+  const items = [];
+  for (const e of events) {
+    const key = `${e.taskId}:${e.status}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const name = idx.tasks.get(e.taskId)?.name;
+    items.push(`<span title="${esc(fmtWhen(e.at, ''))}">${name ? esc(name) : `<span style="color: var(--muted-foreground)" title="${esc(e.taskId)}">a quest not in the game data</span>`} ${esc(EVENT_VERB[e.status] || e.status)}</span>`);
+    if (items.length === 8) break;
+  }
+  return items.length ? `<p class="kv">Recent: ${items.join(' · ')}</p>` : '';
+}
 
 function renderSettings(ctx) {
   const s = S.progress?.settings || {};
@@ -28,19 +44,19 @@ function renderSettings(ctx) {
       <section class="field-row">${field('set-theme', 'Theme', `<select class="select" id="set-theme" data-act="theme-select">${[['dark', 'Dark'], ['light', 'Light']].map(([v, t]) => `<option value="${v}" ${theme === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`)}
         ${field('set-gui', 'Interface', `<select class="select" id="set-gui" data-act="gui-select">${guis.list.map((g) => `<option value="${esc(g.id)}" ${g.id === guis.current ? 'selected' : ''}>${esc(g.title || g.id)}</option>`).join('')}</select>`, `${esc(guis.list.find((g) => g.id === guis.current)?.description || '')} Remembered for this browser only.`)}</section>
     </div>
-    <div class="card" data-size="sm"><header><h2>Game data</h2><p>Source: <code>${esc(meta.source || '–')}</code> · fetched <code>${esc(meta.fetchedAt || 'never')}</code> · mode <code>${esc(meta.gameMode || '–')}</code></p></header>
+    <div class="card" data-size="sm"><header><h2>Game data</h2><p>Source: <code>${esc(meta.source || '–')}</code> · fetched <span title="${esc(meta.fetchedAt || '')}">${esc(fmtWhen(meta.fetchedAt))}</span> · mode <code>${esc(meta.gameMode === 'pve' ? 'PvE' : meta.gameMode === 'regular' ? 'PvP' : meta.gameMode || '–')}</code></p></header>
       ${st.refreshError ? `<section><div class="alert" data-variant="destructive">${icon('alert')}<h2>Last refresh failed</h2><section>${esc(st.refreshError)}</section></div></section>` : ''}
       <footer class="actions">${btn(st.refreshing ? `${spinner()} Refreshing…` : `${icon('refresh')} Refresh from tarkov.dev`, 'data-act="refresh"', { variant: 'outline', disabled: !!st.refreshing })}
         <label class="btn" data-variant="outline">${icon('upload')} Import data file…<input type="file" accept=".json" data-act="import-data" hidden></label></footer>
     </div>
     <div class="card" data-size="sm"><header><h2>Game log detection</h2>
-        <p>Folder: <code>${esc(logs.dir || '–')}</code> — ${logs.available ? `<span class="good">found</span>, ${logs.files} notification log files, ${logs.events} quest events read, last scan ${esc(logs.lastScan || '–')}` : '<span class="warn">not found</span>. Mount your EFT Logs folder (see README) to detect quest starts/completions automatically.'}</p>
+        <p>Folder: <code>${esc(logs.dir || '–')}</code> — ${logs.available ? `<span class="good">found</span>, ${logs.files} notification log files, ${logs.events} quest events read, last scan ${esc(fmtWhen(logs.lastScan, '–'))}` : '<span class="warn">not found</span>. Mount your EFT Logs folder (see README) to detect quest starts/completions automatically.'}</p>
         <div class="card-action">${badge(logs.available ? 'Connected' : 'Not found', 'outline', logs.available ? 'status-completed' : 'status-failed')}</div></header>
       <section class="stack">
         <div class="field-row">${field('set-logsSince', 'Count game logs from', `<input class="input" id="set-logsSince" type="datetime-local" data-set="logsSince" value="${esc(toLocalInput(s.logsSince))}">`, 'Quest events logged before this moment are ignored (the game keeps logs from every wipe, reset and prestige). Changing it re-reads all logs.')}
           <div class="field-btn">${btn('New start from now…', 'data-act="fresh-start"', { variant: 'destructive', tip: 'After a wipe, profile reset or prestige' })}</div></div>
         ${toggleSwitch('Update quest status from game logs', 'data-set="autoLogs"', s.autoLogs !== false)}
-        ${(logs.lastEvents || []).length ? `<p class="kv">Recent: ${logs.lastEvents.slice(0, 8).map((e) => `${esc(idx.tasks.get(e.taskId)?.name || e.taskId)} → ${esc(e.status)}`).join(' · ')}</p>` : ''}
+        ${recentEvents(logs.lastEvents)}
       </section>
       <footer class="actions">${btn(`${icon('refresh')} Re-read all logs`, 'data-act="rescan"', { variant: 'outline' })}</footer>
     </div>

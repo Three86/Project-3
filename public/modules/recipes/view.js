@@ -1,6 +1,6 @@
 // Recipes: default (Basecoat) view.
 import { S } from '../../core/store.js';
-import { esc, fmtDuration, fmtDurationSec } from '../../core/util.js';
+import { esc, fmtDuration, fmtDurationSec, itemIcon } from '../../core/util.js';
 import { badge, btn, emptyState, icon, toggleSwitch } from '../../ui/basecoat/components.js';
 import { itemTag } from '../../ui/basecoat/objectives.js';
 import { MAX_PINS, craftLock, craftTimeFactor, builtLevel, recipeGroups, bitcoinInfo, togglePin, setAllOpen } from './logic.js';
@@ -13,7 +13,7 @@ function craftCard(c, pins) {
   const timeNote = secs !== c.duration ? `base ${fmtDuration(c.duration)}` : '';
   // Product: full item name (ingredients keep the short name, full name on hover).
   const out = (c.rewardItems || []).map((r) => {
-    const img = r.item?.iconLink ? `<img class="req-icon" src="${esc(r.item.iconLink)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+    const img = itemIcon(r.item) ? `<img class="req-icon" src="${esc(itemIcon(r.item))}" alt="" loading="lazy" onerror="this.remove()">` : '';
     return `<span class="product">${img}${esc(r.item?.name || '?')}${r.count > 1 ? ` <span class="auto">×${r.count}</span>` : ''}</span>`;
   }).join(' ');
   const ins = (c.requiredItems || []).map((r) => `<li>${itemTag(r.item)} <span class="num">×${Number(r.count).toLocaleString('en-US')}</span>${r.tool ? ` ${badge('tool', 'outline', '', 'Tools are returned when the craft finishes')}` : ''}</li>`)
@@ -37,7 +37,7 @@ function bitcoinSection(st) {
   const tanks = b.tanks.map((t) => `<div class="ov-row"><span>${esc(t.name)} (${t.resource}) lasts ${fmtDuration(t.hours * 3600)}</span><span class="num"><b>${t.bitcoins.toFixed(2)}</b> bitcoins per tank</span></div>`).join('');
   const open = S.ui.recOpen.bitcoin ?? true;
   return `<details class="group recipes-station bitcoin-farm" data-recopen="bitcoin" ${open ? 'open' : ''}>
-    <summary><span class="group-name">${esc(st.name)}</span><span class="count">level ${builtLevel(st)} · ${b.gpus} GPU${b.gpus === 1 ? '' : 's'} · ${b.perDay.toFixed(4)} BTC/day</span>${icon('chevron')}</summary>
+    <summary><h3 class="group-name">${esc(st.name)}</h3><span class="count">level ${builtLevel(st)} · ${b.gpus} GPU${b.gpus === 1 ? '' : 's'} · ${b.perDay.toFixed(4)} BTC/day</span>${icon('chevron')}</summary>
     <section><div class="card btc-panel" data-size="sm">
       <header><h2>1 bitcoin every ${fmtDurationSec(b.secs)}</h2><p>${b.perDay.toFixed(4)} per day · farm holds ${b.storage}</p></header>
       <section>
@@ -56,7 +56,7 @@ function renderRecipes() {
   const sections = groups.map(({ st, pins, pinned, rest, unlocked }) => {
     const open = S.ui.recOpen[st.id] ?? !!pinned.length;
     return `<details class="group recipes-station" data-recopen="${esc(st.id)}" ${open || text ? 'open' : ''}>
-      <summary><span class="group-name">${esc(st.name)}</span><span class="count">level ${builtLevel(st)} · ${unlocked.length} available</span>${pins.length ? badge(`${icon('star')} ${pins.length}/${MAX_PINS} pinned`, 'secondary') : ''}${icon('chevron')}</summary>
+      <summary><h3 class="group-name">${esc(st.name)}</h3><span class="count">level ${builtLevel(st)} · ${unlocked.length} available</span>${pins.length ? badge(`${icon('star')} ${pins.length}/${MAX_PINS} pinned`, 'secondary') : ''}${icon('chevron')}</summary>
       <section>${pinned.length ? `<div class="pinned-row"><div class="grid">${pinned.map((c) => craftCard(c, pins)).join('')}</div></div>` : ''}
       ${rest.length ? `<div class="grid">${rest.map((c) => craftCard(c, pins)).join('')}</div>` : ''}</section>
     </details>`;

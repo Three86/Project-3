@@ -81,10 +81,24 @@ export async function startShell({ gui, modules, brand = 'TARKOV<span>TRACKER</s
   window.basecoat?.start();
 
   // ---------------------------------------------------------------- toasts, dialogs, banner, theme
-  function toast(category, title, description = '') {
+  // action: optional { label, run }. Basecoat only takes an onclick attribute string for the toast's
+  // button, so the handler is kept here under a key and called through window.__ttToastAction.
+  const toastActions = new Map();
+  let toastSeq = 0;
+  window.__ttToastAction = (key) => { const run = toastActions.get(key); toastActions.delete(key); run?.(); };
+  function toast(category, title, description = '', action = null) {
     const t = document.getElementById('toaster');
-    // Basecoat inserts title/description as HTML, so escape here.
-    if (t?.toast) t.toast({ category, title: esc(title), description: esc(description) });
+    if (!t?.toast) return;
+    let act;
+    if (action?.run) {
+      const key = String(++toastSeq);
+      toastActions.set(key, action.run);
+      setTimeout(() => toastActions.delete(key), 60000);
+      act = { label: esc(action.label), onclick: `window.__ttToastAction('${key}')` };
+    }
+    // Basecoat inserts title/description as HTML, so escape here. A toast with an action stays a bit
+    // longer, so there's time to reach Undo.
+    t.toast({ category, title: esc(title), description: esc(description), ...(act ? { action: act, duration: 8000 } : {}) });
   }
 
   // Confirmation dialog (Basecoat alert-dialog); resolves true when confirmed.
@@ -296,6 +310,37 @@ export async function startShell({ gui, modules, brand = 'TARKOV<span>TRACKER</s
     });
   }
 
+  // Basecoat's command filter keeps the original order, so "bitcoin" listed every station whose
+  // keywords mention it before Bitcoin Farm itself. After it filters, rank items (and groups) by where
+  // the query matches: label start, word start in the label, anywhere in the label, keywords only. Then
+  // let Basecoat re-read the order and filter again, so arrow keys and the highlight follow it.
+  function rankPalette(d, input) {
+    const menu = d.querySelector('[role="menu"]');
+    const original = new Map([...menu.querySelectorAll('[role="menuitem"]')].map((el, i) => [el, i]));
+    const groupOrder = new Map([...menu.children].map((g, i) => [g, i]));
+    let busy = false;
+    const score = (el, q) => {
+      const label = (el.dataset.filter || el.textContent).trim().toLowerCase();
+      if (label.startsWith(q)) return 0;
+      if (label.split(/[\s\-–(]+/).some((w) => w.startsWith(q))) return 1;
+      return label.includes(q) ? 2 : 3;
+    };
+    input.addEventListener('input', () => {
+      if (busy) return;
+      const q = input.value.trim().toLowerCase();
+      const best = new Map();
+      for (const g of menu.children) {
+        const items = [...g.querySelectorAll(':scope > [role="menuitem"]')];
+        const key = (el) => (q ? score(el, q) : 0) * 1e6 + original.get(el);
+        items.sort((a, b) => key(a) - key(b)).forEach((el) => g.appendChild(el));
+        best.set(g, q ? Math.min(3, ...items.filter((el) => el.getAttribute('aria-hidden') !== 'true').map((el) => score(el, q))) : 0);
+      }
+      [...menu.children].sort((a, b) => best.get(a) - best.get(b) || groupOrder.get(a) - groupOrder.get(b)).forEach((g) => menu.appendChild(g));
+      busy = true;
+      try { window.basecoat?.refresh(d.querySelector('.command')); input.dispatchEvent(new Event('input')); } finally { busy = false; }
+    });
+  }
+
   // Command palette (Basecoat command in a dialog): tabs, theme, and whatever each module offers
   // (view.commands). Items reuse the normal data-act routing. Rebuilt on every open.
   function openPalette() {
@@ -321,6 +366,7 @@ export async function startShell({ gui, modules, brand = 'TARKOV<span>TRACKER</s
     </div>`;
     window.basecoat?.init('command');
     const input = d.querySelector('#cmdk-input');
+    rankPalette(d, input);
     const all = d.querySelector('[data-act="search-all"]');
     if (all) {
       input.addEventListener('input', () => {
@@ -340,7 +386,7 @@ export async function startShell({ gui, modules, brand = 'TARKOV<span>TRACKER</s
     if ((mod.view.live || (mod.needsData && !S.data)) && !$('#view').contains(document.activeElement)) render();
   });
   on('banner', (html) => banner(html));
-  on('toast', ({ category, title, description }) => toast(category, title, description));
+  on('toast', ({ category, title, description, action }) => toast(category, title, description, action));
 
   if ($('#globalSearch')) $('#globalSearch').value = S.ui.search || '';
   if (guiInfo.warning) setTimeout(() => toast('warning', 'Interface fallback', guiInfo.warning), 300);

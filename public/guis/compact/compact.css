@@ -1,8 +1,6 @@
-/* Compact GUI: denser spacing, smaller type and a teal accent on top of the shared Basecoat styles. */
-body.compact { font-size: 13px; }
-/* Basecoat resolves its colours on the root element, so the accent is overridden there. */
-:root:has(body.compact) { --primary: oklch(0.55 0.1 195); --primary-foreground: oklch(0.99 0 0); --ring: oklch(0.6 0.1 195); }
-:root.dark:has(body.compact) { --primary: oklch(0.78 0.1 195); --primary-foreground: oklch(0.18 0.02 195); }
+/* Compact GUI: denser spacing on top of the shared Basecoat styles. Colours (the gold accent and the
+   status colours) are shared with the other GUIs; only layout and density change here. Type stays
+   readable at a glance on a second monitor: objectives are the main thing you read in a raid. */
 .compact .topbar { padding: 4px 10px; gap: 6px 10px; }
 .compact .brand { letter-spacing: 1px; font-size: 13px; }
 .compact .app-tabs { order: 0; flex-basis: auto; }
@@ -13,6 +11,12 @@ body.compact { font-size: 13px; }
 .compact details.qcard { padding-block: 8px; }
 .compact .table th, .compact .table td { padding: 4px 6px; }
 
+/* toolbar: map chips on their own row (the main choice), the other filters below */
+.cq-toolbar { display: grid; gap: 6px; }
+.cq-maps { flex-wrap: wrap; }
+.cq-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.cq-n { font-variant-numeric: tabular-nums; opacity: .7; margin-left: 2px; }
+
 /* compact quest checklist */
 .cq-list { list-style: none; display: grid; gap: 6px; }
 .cq-row { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--border); border-radius: var(--radius-lg, 10px); padding: 6px 10px; display: grid; gap: 6px; }
@@ -20,7 +24,10 @@ body.compact { font-size: 13px; }
 .cq-row.st-available { border-left-color: var(--warn); }
 .cq-row.st-completed { border-left-color: var(--good); opacity: .65; }
 .cq-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.cq-name { font-weight: 600; }
-.cq-meta { color: var(--muted-foreground); font-size: 12px; flex: 1; }
-.cq-row ul.objs li { padding: 3px 6px; }
+.cq-head .pin { margin-left: -4px; }
+.cq-name { font-weight: 600; font-size: 15px; }
+.cq-meta { color: var(--muted-foreground); font-size: 13px; flex: 1; }
+.cq-row ul.objs li { padding: 4px 6px; font-size: 14px; }
 .cq-row .progress { height: 4px; }
+.cq-done > summary { cursor: pointer; color: var(--muted-foreground); font-size: 13px; padding: 2px 6px; width: fit-content; }
+.cq-done[open] > summary { margin-bottom: 4px; }

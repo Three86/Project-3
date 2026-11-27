@@ -101,6 +101,10 @@ function applyOp({ section, id, value }) {
   if (section === 'tasks') {
     if (value == null) delete target[id];
     else if (['active', 'completed', 'failed'].includes(value)) target[id] = { status: value, updatedAt: Date.now(), source: 'manual' };
+    // Undo: put back the exact entry a change replaced (keeps "log" as the source and its time).
+    else if (value && typeof value === 'object' && ['active', 'completed', 'failed'].includes(value.status)) {
+      target[id] = { status: value.status, updatedAt: Number(value.updatedAt) || Date.now(), source: value.source === 'log' ? 'log' : 'manual' };
+    }
     else throw new Error(`bad task status ${value}`);
   } else if (value == null || value === false || value === 0) {
     if (section === 'settings') target[id] = value;
@@ -163,7 +167,8 @@ function dataIsStale() {
 // Pictures are downloaded once into the data folder and served by the tracker itself, so they work
 // offline. Missing ones are fetched after every data refresh and at start-up.
 const IMG_DIRS = { traders: path.join(DATA_DIR, 'images', 'traders'), stations: path.join(DATA_DIR, 'images', 'stations'), skills: path.join(DATA_DIR, 'images', 'skills'),
-  pmc: path.join(DATA_DIR, 'images', 'pmc') }; // pmc: your own usec / bear pictures (never downloaded)
+  pmc: path.join(DATA_DIR, 'images', 'pmc'), // pmc: your own usec / bear pictures (never downloaded)
+  items: path.join(DATA_DIR, 'images', 'items') }; // items: fetched the first time one is shown (there are thousands)
 const IMG_TYPES = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' };
 const IMG_EXTS = new Set(Object.values(IMG_TYPES));
 const safeId = (id) => /^[\w-]+$/.test(String(id));
@@ -178,9 +183,10 @@ function imageFile(kind, id) {
 }
 
 const imagesBusy = {};
-async function downloadImages(kind, entries) {
-  if (imagesBusy[kind] || !entries?.length) return;
-  imagesBusy[kind] = true;
+// opts.single: one on-demand picture (item icons): no per-kind lock, shorter timeout, no log spam.
+async function downloadImages(kind, entries, { single = false } = {}) {
+  if ((!single && imagesBusy[kind]) || !entries?.length) return;
+  if (!single) imagesBusy[kind] = true;
   try {
     fs.mkdirSync(IMG_DIRS[kind], { recursive: true });
     let got = 0;
@@ -188,7 +194,7 @@ async function downloadImages(kind, entries) {
       const url = e.image4xLink || e.imageLink;
       if (!url || !safeId(e.id) || imageFile(kind, e.id)) continue;
       try {
-        const res = await fetch(url, { headers: { 'User-Agent': 'tarkov-quest-tracker/1.0 (+self-hosted)' }, signal: AbortSignal.timeout(30000) });
+        const res = await fetch(url, { headers: { 'User-Agent': 'tarkov-quest-tracker/1.0 (+self-hosted)' }, signal: AbortSignal.timeout(single ? 8000 : 30000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const type = (res.headers.get('content-type') || '').split(';')[0].trim();
         const urlExt = path.extname(new URL(url).pathname).toLowerCase();
@@ -197,13 +203,49 @@ async function downloadImages(kind, entries) {
         fs.writeFileSync(path.join(IMG_DIRS[kind], `${e.id}${ext}`), Buffer.from(await res.arrayBuffer()));
         got++;
       } catch (err) {
+        if (single) throw err;
         log(`${kind} picture for ${e.name} not downloaded: ${err.message}`);
       }
     }
-    if (got) log(`${kind} pictures: ${got} downloaded`);
+    if (got && !single) log(`${kind} pictures: ${got} downloaded`);
   } finally {
-    imagesBusy[kind] = false;
+    if (!single) imagesBusy[kind] = false;
   }
+}
+
+// Item icons: id -> iconLink, collected from every item in the game data (built once per data load).
+// Only these URLs are ever fetched, so the image route can't be used to reach other addresses.
+let itemIconIndex = { src: null, links: new Map() };
+function itemIconLink(id) {
+  if (itemIconIndex.src !== gameData) {
+    const links = new Map();
+    const walk = (v) => {
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') {
+        if (typeof v.id === 'string' && typeof v.iconLink === 'string' && /^https:\/\/assets\.tarkov\.dev\//.test(v.iconLink)) links.set(v.id, v.iconLink);
+        for (const x of Object.values(v)) if (x && typeof x === 'object') walk(x);
+      }
+    };
+    walk(withWikiQuests(gameData));
+    itemIconIndex = { src: gameData, links };
+  }
+  return itemIconIndex.links.get(id) || null;
+}
+
+const itemFetches = new Map(); // id -> pending download, so a page full of the same icon fetches it once
+const itemFailed = new Map(); // id -> time a download failed; not retried for 10 minutes (offline)
+async function itemIconFile(id) {
+  const have = imageFile('items', id);
+  if (have) return have;
+  const link = itemIconLink(id);
+  if (!link || Date.now() - (itemFailed.get(id) || 0) < 10 * 60 * 1000) return null;
+  if (!itemFetches.has(id)) {
+    itemFetches.set(id, downloadImages('items', [{ id, name: id, imageLink: link }], { single: true })
+      .catch(() => { itemFailed.set(id, Date.now()); })
+      .finally(() => itemFetches.delete(id)));
+  }
+  await itemFetches.get(id);
+  return imageFile('items', id);
 }
 
 function downloadAllImages() {
@@ -242,7 +284,11 @@ const watcher = new LogWatcher({
       changed++;
     }
     logState.events += events.length;
-    logState.lastEvents = [...events.slice(-20).reverse(), ...logState.lastEvents].slice(0, 20);
+    // The game sometimes writes the same notification more than once: keep each event once.
+    const seenEv = new Set();
+    logState.lastEvents = [...events.slice(-20).reverse(), ...logState.lastEvents]
+      .filter((e) => { const k = `${e.taskId}:${e.status}:${e.at}`; return !seenEv.has(k) && seenEv.add(k); })
+      .slice(0, 20);
     writeJson(LOGSTATE_FILE, logState);
     if (changed) {
       saveProgress();
@@ -388,13 +434,28 @@ function listUiFolders(kind, file) {
   return out;
 }
 
+// Any web page open in the browser can send a "simple" cross-site POST (text/plain, no preflight) to
+// localhost. Only accept writes that come from the tracker's own page: a JSON body, and an Origin
+// (when the browser sends one) on this host.
+function crossSiteWrite(req) {
+  if (req.method === 'GET' || req.method === 'HEAD') return false;
+  const type = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+  if (type && type !== 'application/json') return true;
+  const origin = req.headers.origin;
+  if (!origin || origin === 'null') return !!origin;
+  try { return new URL(origin).host !== req.headers.host; } catch { return true; }
+}
+
 async function handleApi(req, res, url) {
+  if (crossSiteWrite(req)) return send(res, 403, { error: 'cross-site request refused' });
   const route = `${req.method} ${url.pathname}`;
-  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/(traders|stations|skills|pmc)\/([\w-]+)$/);
+  const img = req.method === 'GET' && url.pathname.match(/^\/api\/images\/(traders|stations|skills|pmc|items)\/([\w-]+)$/);
   if (img) {
-    const file = imageFile(img[1], img[2]);
+    const file = img[1] === 'items' ? await itemIconFile(img[2]) : imageFile(img[1], img[2]);
     if (!file) return send(res, 404, { error: 'no picture for this yet' });
-    return send(res, 200, fs.readFileSync(file), MIME[path.extname(file)]);
+    // Pictures never change under the same id: let the browser keep them (the API's JSON stays no-store).
+    res.writeHead(200, { 'Content-Type': MIME[path.extname(file)], 'Cache-Control': 'max-age=86400' });
+    return res.end(fs.readFileSync(file));
   }
   switch (route) {
     case 'GET /api/status':

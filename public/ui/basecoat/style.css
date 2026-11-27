@@ -3,15 +3,18 @@
    Basecoat provides the components (buttons, cards, badges, inputs, tables, dialogs, …) and the colour
    tokens; this file only does layout, which Basecoat's prebuilt CSS has no utility classes for. */
 
-/* Brand accent (Tarkov tan) and status colours, for both themes. */
+/* Brand accent (Tarkov tan) and status colours, for both themes. Light-theme values are dark enough for
+   4.5:1 on white, so status text and small muted text stay readable (Basecoat's light muted grey is 4.3:1).
+   .dark repeats every token set here: html matches both :root and .dark, and this file loads last. */
 :root {
-  --primary: oklch(0.55 0.08 95);
+  --primary: oklch(0.52 0.08 95);
   --primary-foreground: oklch(0.99 0 0);
   --ring: oklch(0.6 0.08 95);
-  --good: oklch(0.55 0.13 140);
-  --warn: oklch(0.62 0.13 75);
-  --bad: oklch(0.58 0.19 30);
-  --info: oklch(0.56 0.09 240);
+  --muted-foreground: oklch(0.5 0 0);
+  --good: oklch(0.5 0.13 140);
+  --warn: oklch(0.53 0.12 70);
+  --bad: oklch(0.55 0.19 30);
+  --info: oklch(0.52 0.09 240);
   --fir: oklch(0.65 0.16 50);
   --fir-foreground: oklch(0.18 0 0);
 }
@@ -19,6 +22,7 @@
   --primary: oklch(0.78 0.08 95);
   --primary-foreground: oklch(0.18 0.01 95);
   --ring: oklch(0.7 0.08 95);
+  --muted-foreground: oklch(0.708 0 0);
   --good: oklch(0.72 0.13 140);
   --warn: oklch(0.78 0.13 80);
   --bad: oklch(0.68 0.17 30);
@@ -49,7 +53,7 @@ code { font-family: var(--font-mono); font-size: 12px; color: var(--foreground);
 .app-tabs > [role=tablist]::-webkit-scrollbar { display: none; }
 .app-tabs > [role=tablist] > [role=tab] { flex: none; }
 .global-search { width: 300px; max-width: 100%; }
-.global-search .kbd { font-size: 10px; }
+.global-search .kbd { font-size: 11px; }
 .theme-toggle .icon-sun { display: none; }
 .dark .theme-toggle .icon-sun { display: inline; }
 .dark .theme-toggle .icon-moon { display: none; }
@@ -150,6 +154,7 @@ ul.objs li.done .desc { text-decoration: line-through; }
 ul.objs li .body { flex: 1; min-width: 0; }
 ul.objs li .desc { overflow-wrap: anywhere; }
 ul.objs li .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 3px; }
+ul.objs li .tags .tag-list { flex: 1 1 20ch; min-width: 0; color: var(--muted-foreground); }
 ul.objs li > input[type=checkbox], ul.objs li > .tip-wrap { margin-top: 2px; }
 .custom-list { margin-top: 6px !important; }
 .auto { font-size: 11px; color: var(--muted-foreground); }
@@ -361,5 +366,10 @@ ul.ingredients .num { color: var(--muted-foreground); }
 .rp-note.auto { background: var(--muted); }
 .rp-pins { max-height: 280px; overflow-y: auto; }
 .rp-q .btn.pin.auto { opacity: .8; }
-.badge.wiki-src { margin-left: 6px; font-size: 10px; padding: 0 5px; vertical-align: 2px; font-weight: 500; }
+.badge.wiki-src { margin-left: 6px; font-size: 11px; padding: 0 5px; vertical-align: 2px; font-weight: 500; }
 .wiki-notes { margin: 0 0 6px; padding-left: 18px; font-size: 12px; color: var(--muted-foreground); }
+
+/* Reduced motion: no spinning, flashing or sliding; state changes still show, just without the movement. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

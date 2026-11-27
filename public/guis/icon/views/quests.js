@@ -4,13 +4,13 @@
 import { S } from '../../../core/store.js';
 import { esc } from '../../../core/util.js';
 import { STATUS_LABEL, idx, objValue, taskMapText, taskStatus } from '../../../core/game.js';
-import { badge, btn, emptyState, icon } from '../../../ui/basecoat/components.js';
+import { badge, btn, checkbox, emptyState, icon } from '../../../ui/basecoat/components.js';
 import { objRow, objectiveActions, objectiveChanges } from '../../../ui/basecoat/objectives.js';
 import { questCardToggle, wikiBadge, wikiNotes } from '../../../ui/basecoat/quest-card.js';
 import defaultView from '../../../modules/quests/view.js';
-import { filteredTasks, sortTasks, toggleStatusFilter, focusTask, setTaskStatus, startWithPrereqs, traderCards, selectTrader, setLoyaltyOverride, restockIn } from '../../../modules/quests/logic.js';
+import { STATUS_FILTERS, filteredTasks, sortTasks, toggleStatusFilter, focusTask, setTaskStatus, startWithPrereqs, traderCards, selectTrader, setLoyaltyOverride, restockIn } from '../../../modules/quests/logic.js';
 
-const STATUSES = ['active', 'locked', 'completed', 'failed'];
+// Same status filters as the other GUIs; a status this trader has no quests in is left out unless it's switched on.
 const CLOCK = '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>';
 const clock = `<svg class="lucide" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CLOCK}</svg>`;
 
@@ -122,10 +122,12 @@ function render(ctx) {
   for (const t of S.data.tasks) if (t.trader?.name === cur.trader.name) { const s = taskStatus(t.id); counts[s] = (counts[s] || 0) + 1; }
   const list = sortTasks(filteredTasks());
   const toolbar = `<div class="toolbar">
-    <div class="chips" role="group" aria-label="Status">${STATUSES.filter((s) => s !== 'failed' || counts.failed).map((s) => {
+    <div class="chips" role="group" aria-label="Status">${STATUS_FILTERS.filter((s) => counts[s] || f.statuses.includes(s)).map((s) => {
       const on = f.statuses.includes(s);
       return btn(`${STATUS_LABEL[s]} ${badge(counts[s] || 0, on ? 'secondary' : 'outline', 'count-badge')}`, `data-act="qstatus" data-s="${s}" aria-pressed="${on}"`, { variant: on ? 'primary' : 'outline', size: 'sm' });
     }).join('')}</div>
+    <label class="label cb-field">${checkbox('data-ui="q.kappa"', f.kappa)}Kappa</label>
+    <label class="label cb-field">${checkbox('data-ui="q.lightkeeper"', f.lightkeeper)}Lightkeeper</label>
     <input type="search" class="input tb-search" data-ui="q.text" value="${esc(f.text)}" placeholder="Filter ${esc(cur.trader.name)}'s quests…" aria-label="Filter quests">
     <span class="count">${list.length} of ${cur.counts.total} quests</span>
   </div>`;

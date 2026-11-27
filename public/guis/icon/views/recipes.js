@@ -2,7 +2,7 @@
 // shows its recipes on the right (pinned first, in pin order), or for the Bitcoin Farm the graphics
 // cards, production time and bitcoins per fuel tank.
 import { S, saveUi, setSetting } from '../../../core/store.js';
-import { esc, fmtDuration, fmtDurationSec } from '../../../core/util.js';
+import { esc, fmtDuration, fmtDurationSec, itemIcon } from '../../../core/util.js';
 import { badge, btn, emptyState, icon, toggleSwitch } from '../../../ui/basecoat/components.js';
 import { stationImage } from '../../../modules/hideout/logic.js';
 import { MAX_PINS, bitcoinInfo, craftLock, craftStations, craftTimeFactor, generatorFuel, stationRecipes, togglePin } from '../../../modules/recipes/logic.js';
@@ -33,12 +33,12 @@ function recipeRow(c, pins) {
   const secs = c.duration * craftTimeFactor();
   const out = c.rewardItems?.[0];
   const name = (c.rewardItems || []).map((r) => `${esc(r.item?.name || '?')}${r.count > 1 ? ` <span class="count">×${fmt(r.count)}</span>` : ''}`).join(', ');
-  const ings = (c.requiredItems || []).map((r) => `<span class="ing" title="${esc(r.item?.name || '')}">${pic(r.item?.iconLink, r.item?.shortName || r.item?.name, 'ico')}${esc(r.item?.shortName || r.item?.name || '?')} <b>×${fmt(r.count)}</b>${r.tool ? ` ${badge('tool', 'outline', '', 'Tools are returned when the craft finishes')}` : ''}</span>`)
+  const ings = (c.requiredItems || []).map((r) => `<span class="ing" title="${esc(r.item?.name || '')}">${pic(itemIcon(r.item), r.item?.shortName || r.item?.name, 'ico')}${esc(r.item?.shortName || r.item?.name || '?')} <b>×${fmt(r.count)}</b>${r.tool ? ` ${badge('tool', 'outline', '', 'Tools are returned when the craft finishes')}` : ''}</span>`)
     .concat((c.requiredQuestItems || []).map((q) => `<span class="ing">${esc(q.name)} ${badge('quest item')}</span>`)).join('');
   const tip = pinned ? 'Unpin' : lock ? 'Locked recipes can’t be pinned' : full ? `${MAX_PINS} pinned; unpin one first` : 'Pin to the top';
   return `<li class="rrow${pinned ? ' pinned' : ''}${lock ? ' locked' : ''}" data-craft="${esc(c.id)}">
     <div class="rrow-head">
-      <span class="rprod">${pic(out?.item?.iconLink, out?.item?.shortName || out?.item?.name, 'ico')}<span class="rp-name">${name}</span>${pinned ? `<span class="pin-no" title="Pinned ${at + 1}.">${at + 1}</span>` : ''}</span>
+      <span class="rprod">${pic(itemIcon(out?.item), out?.item?.shortName || out?.item?.name, 'ico')}<span class="rp-name">${name}</span>${pinned ? `<span class="pin-no" title="Pinned ${at + 1}.">${at + 1}</span>` : ''}</span>
       <span class="rtime"><b>${fmtDuration(secs)}</b>${secs !== c.duration ? `<small>base ${fmtDuration(c.duration)}</small>` : ''}</span>
       ${btn(icon('star', pinned ? 'filled' : ''), `data-act="rx-pin" data-station="${esc(c.station.id)}" data-id="${esc(c.id)}" aria-pressed="${pinned}" aria-label="${pinned ? 'Unpin' : 'Pin'}"`,
         { variant: pinned ? 'secondary' : 'ghost', size: 'icon-sm', cls: 'pin', disabled: !pinned && (full || !!lock), tip, side: 'left' })}

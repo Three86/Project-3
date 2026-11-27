@@ -27,6 +27,9 @@ function goalsCard() {
   const g = goals();
   if (!g) return `<div class="card ovw-goals">${emptyState('No quest data yet', 'Kappa and Lightkeeper progress appear once game data is downloaded.', '', 'database')}</div>`;
   const row = ({ key, title, done, active, total }) => {
+    // tarkov.dev hasn't flagged any quest for this goal (Lightkeeper often has none): say so instead of 0%.
+    if (!total) return `<div class="goal" data-goal="${key}"><div class="goal-head"><h3>${icon(key === 'kappa' ? 'star' : 'sun')} ${title}</h3><span class="pct">–</span></div>
+      <p class="auto">The game data marks no quests as needed for ${title} yet, so there's nothing to count.</p></div>`;
     const p = total ? Math.round((done / total) * 100) : 0;
     const w = (n) => (total ? (n / total) * 100 : 0);
     return `<div class="goal" data-goal="${key}"><div class="goal-head"><h3>${icon(key === 'kappa' ? 'star' : 'sun')} ${title}</h3><span class="pct">${p}%</span></div>

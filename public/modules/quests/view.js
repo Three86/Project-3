@@ -21,8 +21,6 @@ function renderQuests() {
     ${select('q.trader', f.trader, [['', 'All traders'], ...idx.traders.map((x) => [x, x])], 'Trader')}
     ${select('q.map', f.map, [['', 'All maps'], ...idx.maps.map((x) => [x, x])], 'Map')}
     ${select('q.need', f.need, [['', 'Anything'], ...Object.entries(NEEDS)], 'Needs')}
-    ${select('q.groupBy', f.groupBy, [['none', 'No grouping'], ['trader', 'Trader'], ['map', 'Map'], ['need', 'Requirement type'], ['status', 'Status']], 'Group')}
-    ${select('q.sortBy', f.sortBy, [['level', 'Level'], ['trader', 'Trader'], ['map', 'Map'], ['name', 'Name'], ['progress', 'Progress']], 'Sort')}
     <label class="label cb-field">${checkbox('data-ui="q.kappa"', f.kappa)}Kappa</label>
     <label class="label cb-field">${checkbox('data-ui="q.lightkeeper"', f.lightkeeper)}Lightkeeper</label>
     <input type="search" class="input tb-search" data-ui="q.text" value="${esc(f.text)}" placeholder="Filter…" aria-label="Filter quests">
@@ -30,7 +28,10 @@ function renderQuests() {
   </div>`;
   if (!list.length) return toolbar + emptyState('No quests match these filters', 'Loosen a filter or pick more statuses above.', '', 'search');
   const groups = groupTasks(list);
+  // Filters (what's listed) sit in the toolbar above; how the list is laid out sits here.
   const tools = `<div class="collapse-tools">
+    ${select('q.groupBy', f.groupBy, [['none', 'No grouping'], ['trader', 'Trader'], ['map', 'Map'], ['need', 'Requirement type'], ['status', 'Status']], 'Group')}
+    ${select('q.sortBy', f.sortBy, [['level', 'Level'], ['trader', 'Trader'], ['map', 'Map'], ['name', 'Name'], ['progress', 'Progress']], 'Sort')}
     <div role="group" class="button-group">${btn('Expand all quests', 'data-act="quests-open" data-v="1"', { variant: 'outline', size: 'sm' })}${btn('Collapse all quests', 'data-act="quests-open" data-v="0"', { variant: 'outline', size: 'sm' })}</div>
     ${groups.length > 1 ? `<div role="group" class="button-group">${btn('Expand all groups', 'data-act="groups-open" data-v="1"', { variant: 'outline', size: 'sm' })}${btn('Collapse all groups', 'data-act="groups-open" data-v="0"', { variant: 'outline', size: 'sm' })}</div>` : ''}</div>`;
   // Per-group completion across every quest in that group (not just the filtered ones).
@@ -43,8 +44,8 @@ function renderQuests() {
     const all = totals.get(name);
     const doneAll = all ? all.filter((t) => taskStatus(t.id) === 'completed').length : 0;
     return `<details class="group" data-group="${esc(key)}" ${S.ui.groups[key] === false ? '' : 'open'}>
-      <summary><span class="group-name">${esc(name)}</span><span class="count">${ts.length} quest${ts.length === 1 ? '' : 's'}${active ? ` · ${active} active` : ''}</span>
-        ${all ? `<span class="group-progress" data-tooltip="${doneAll} of ${all.length} ${esc(name)} quests completed">${progressBar(doneAll, all.length, `${name} quests completed`)}<span class="count">${doneAll}/${all.length}</span></span>` : ''}${icon('chevron')}</summary>
+      <summary><h3 class="group-name">${esc(name)}</h3><span class="count">${ts.length} quest${ts.length === 1 ? '' : 's'}${active ? ` · ${active} active` : ''}</span>
+        ${all ? `<span class="group-progress" data-tooltip="${doneAll} of ${all.length} ${esc(name)} quests completed">${progressBar(doneAll, all.length, `${name} quests completed`)}<span class="count">${doneAll}/${all.length} done</span></span>` : ''}${icon('chevron')}</summary>
       <section>${grid}</section></details>`;
   });
   return toolbar + tools + (groups.length === 1 && !groups[0][0] ? sections.join('') : `<section class="accordion groups" data-multiple>${sections.join('')}</section>`);

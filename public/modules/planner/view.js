@@ -1,7 +1,7 @@
 // Raid planner: default (Basecoat) view. Map chips, the quest list for that map (every trader) with
 // pins, and on the right what the pinned quests still need in total.
 import { S, saveUi } from '../../core/store.js';
-import { esc } from '../../core/util.js';
+import { esc, fmtCount, itemIcon } from '../../core/util.js';
 import { STATUS_LABEL, objValue, taskMapNotes, taskMaps, taskStatus } from '../../core/game.js';
 import { badge, btn, emptyState, icon, toggleSwitch } from '../../ui/basecoat/components.js';
 import { objRow, objectiveActions, objectiveChanges } from '../../ui/basecoat/objectives.js';
@@ -53,10 +53,10 @@ function totalsPanel() {
       <section>${emptyState('', 'Nothing pinned yet. Pin quests with the star, or switch on auto-pin for Kappa &amp; Lightkeeper. Completed quests unpin themselves.', '', 'star')}</section></div>`;
   }
   const line = (lead, name, sub, ct = '', ctSub = '') => `<div class="rp-line">${lead}<span class="nm">${name}<small>${sub}</small></span><span class="ct">${ct}${ctSub ? `<small>${ctSub}</small>` : ''}</span></div>`;
-  const ico = (items) => pic(items[0]?.iconLink, items[0]?.shortName || items[0]?.name, 'ico');
+  const ico = (items) => pic(itemIcon(items[0]), items[0]?.shortName || items[0]?.name, 'ico');
   const anyOf = (items) => (items.length > 1 ? `any of: ${names(items)}` : esc(items[0]?.name || '?'));
   const items = [
-    ...T.items.map((e) => line(ico(e.items), `${anyOf(e.items)} ${e.fir ? badge('FIR', 'primary', 'fir') : ''}`, esc(e.from.join(', ')), `×${e.count - e.have}`, e.have ? `of ${e.count} · ${e.have} done` : '')),
+    ...T.items.map((e) => line(ico(e.items), `${anyOf(e.items)} ${e.fir ? badge('FIR', 'primary', 'fir') : ''}`, esc(e.from.join(', ')), `×${fmtCount(e.count - e.have)}`, e.have ? `of ${fmtCount(e.count)} · ${fmtCount(e.have)} done` : '')),
     ...T.questItems.map((e) => line(pic(null, e.item.name, 'ico'), `${esc(e.item.name)} ${badge('quest item')}`, `found in raid · ${esc(e.from.join(', '))}`, '×1')),
   ].join('');
   const keys = T.keys.map((e) => line(ico(e.keys), e.keys.length > 1 ? `any one of: ${names(e.keys)}` : esc(e.keys[0].name), `${esc(e.maps.map(mapLabel).join(', '))} · ${esc(e.from.join(', '))}`)).join('');

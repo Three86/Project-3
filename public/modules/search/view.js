@@ -13,12 +13,15 @@ function renderSearch() {
   const res = searchResults();
   if (!res) return head + emptyState('Search everything', 'Type at least two characters. Searches quest names, objectives, and every item any quest, hideout level or prestige needs.', '', 'search');
   const { quests, skills: skillHits, items } = res;
-  return head + `<h3 class="section-title">Quests ${badge(quests.length, 'secondary')}</h3>
-    ${quests.length ? `<div class="grid">${quests.slice(0, 60).map(taskCard).join('')}</div>` : emptyState('', 'No quests by that name.', '', 'search')}
+  // Only sections with hits; one message when nothing matched at all.
+  if (!quests.length && !skillHits.length && !items.length) {
+    return head + emptyState('Nothing matches', `No quest or skill by that name, and no current or future quest, hideout level or prestige needs an item matching it. If it's an item: sell it.${S.ui.searchCompleted ? '' : ' Completed quests are left out; switch on "Include completed" to search them too.'}`, '', 'search');
+  }
+  return head + `${quests.length ? `<h3 class="section-title">Quests ${badge(quests.length, 'secondary')}</h3>
+    <div class="grid">${quests.slice(0, 60).map(taskCard).join('')}</div>` : ''}
     ${skillHits.length ? `<h3 class="section-title">Skills ${badge(skillHits.length, 'secondary')}</h3><div class="chips">${skillHits.map((sk) => btn(`${esc(sk.name)} ${badge(`lvl ${Number(S.progress.skills[sk.id] || 0)}`, 'secondary')}`, `data-act="goto-skill" data-module="skills" data-id="${esc(sk.name)}"`, { variant: 'outline', size: 'sm' })).join('')}</div>` : ''}
-    <h3 class="section-title">Items ${badge(items.length, 'secondary')}</h3>
-    ${items.length ? `<div class="card table-card"><div class="table-container"><table class="table items"><thead><tr><th>Item</th><th>Needed for (current &amp; future)</th></tr></thead><tbody>${items.map((a) => `<tr><td>${itemTag(a.item)}<div class="auto">${esc(a.item.name)}</div></td><td class="sources">${a.sources.map(sourceLine).join('')}</td></tr>`).join('')}</tbody></table></div></div>`
-      : emptyState('', 'No current or future quest, hideout level or prestige needs an item matching that. Sell it.', '', 'list')}`;
+    ${items.length ? `<h3 class="section-title">Items ${badge(items.length, 'secondary')}</h3>
+    <div class="card table-card"><div class="table-container"><table class="table items"><thead><tr><th>Item</th><th>Needed for (current &amp; future)</th></tr></thead><tbody>${items.map((a) => `<tr><td>${itemTag(a.item)}<div class="auto">${esc(a.item.name)}</div></td><td class="sources">${a.sources.map(sourceLine).join('')}</td></tr>`).join('')}</tbody></table></div></div>` : ''}`;
 }
 
 export default {

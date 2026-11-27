@@ -1,13 +1,13 @@
 // Objective / requirement rows (checkbox or counter), item tags and "needed for" lines, shared by the
 // default views of quests, hideout, prestige, needed items and search.
 import { setRequirement, stepRequirement } from '../../core/progress.js';
-import { esc, readableType } from '../../core/util.js';
+import { esc, fmtCount, itemIcon, readableType } from '../../core/util.js';
 import { NEEDS, STATUS_LABEL, buildSpec, objItems, objKeys, objNeeds, objTarget, objTitle, objValue } from '../../core/game.js';
 import { badge, checkbox, stepperControl } from './components.js';
 
 export function itemTag(it) {
   if (!it) return '';
-  const img = it.iconLink ? `<img src="${esc(it.iconLink)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+  const img = itemIcon(it) ? `<img src="${esc(itemIcon(it))}" alt="" loading="lazy" onerror="this.remove()">` : '';
   return `<span class="it-tag" title="${esc(it.name)}">${img}${esc(it.shortName || it.name)}</span>`;
 }
 
@@ -32,7 +32,8 @@ export function objTags(o) {
   if (o.zoneNames?.length) tags.push(`<span class="badge" data-variant="outline">zone: ${esc(o.zoneNames.join(', '))}</span>`);
   if (o.usingWeapon?.length) tags.push(`<span class="badge" data-variant="outline">weapon:</span> ${o.usingWeapon.slice(0, 6).map(itemTag).join(' ')}${o.usingWeapon.length > 6 ? ` +${o.usingWeapon.length - 6}` : ''}`);
   for (const set of o.wearing || []) if (set?.length) tags.push(`<span class="badge" data-variant="outline">wearing:</span> ${set.map(itemTag).join(' + ')}`);
-  if (o.notWearing?.length) tags.push(`<span class="badge" data-variant="outline">not wearing: ${esc(o.notWearing.map((i) => i.shortName || i.name).join(', '))}</span>`);
+  // Some quests forbid dozens of armours: a badge doesn't wrap, so list them as wrapping text.
+  if (o.notWearing?.length) tags.push(`<span class="badge" data-variant="outline">not wearing:</span> <span class="tag-list">${esc(o.notWearing.map((i) => i.shortName || i.name).join(', '))}</span>`);
   for (const set of objKeys(o)) tags.push(`<span class="badge" data-variant="outline">${set.length > 1 ? 'key, any of:' : 'key:'}</span> ${set.map(itemTag).join(' ')}`);
   if (o.skillLevel) tags.push(`<span class="badge" data-variant="outline">${esc(o.skillLevel.name)} ${o.skillLevel.level}</span>`);
   if (o.exitStatus?.length) tags.push(`<span class="badge" data-variant="outline">${esc(o.exitStatus.join('/'))}</span>`);
@@ -53,7 +54,7 @@ export function objRow(section, key, o, { disabled = false, forceDone = false } 
   const generated = !o.description || o.description === o.type;
   if (generated) {
     const title = objTitle(o) || readableType(o.type);
-    const icon = o.type === 'haveItem' && objItems(o)[0]?.iconLink ? `<img class="req-icon" src="${esc(objItems(o)[0].iconLink)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+    const icon = o.type === 'haveItem' && itemIcon(objItems(o)[0]) ? `<img class="req-icon" src="${esc(itemIcon(objItems(o)[0]))}" alt="" loading="lazy" onerror="this.remove()">` : '';
     return `<li class="${v.done ? 'done' : ''}">${control}<div class="body">
       <div class="desc">${icon}${esc(title)} ${o.optional ? '<span class="optional">(optional)</span>' : ''}</div>
       ${auto ? `<div class="tags">${auto}</div>` : ''}
@@ -71,7 +72,7 @@ export function sourceLine(r) {
   const where = r.kind === 'quest' || r.kind === 'equipment'
     ? `<a href="#" data-act="goto" data-module="quests" data-id="${r.taskId}">${esc(r.label)}</a> ${badge(STATUS_LABEL[r.status] || r.status, 'outline', `status-${r.status}`)}`
     : `<b>${esc(r.label)}</b> ${badge(r.kind, 'secondary')}`;
-  const qty = r.kind === 'equipment' ? badge('equipment', 'secondary') : `×${r.count} ${r.fir ? badge('FIR', 'primary', 'fir') : badge('not FIR', 'outline', 'nofir')}${r.alt ? ' <span class="optional">(one of several accepted items)</span>' : ''}`;
+  const qty = r.kind === 'equipment' ? badge('equipment', 'secondary') : `×${fmtCount(r.count)} ${r.fir ? badge('FIR', 'primary', 'fir') : badge('not FIR', 'outline', 'nofir')}${r.alt ? ' <span class="optional">(one of several accepted items)</span>' : ''}`;
   return `<div>${r.done ? '✓ ' : ''}${where} — ${qty}${r.have && !r.done ? ` <span class="auto">${r.have} collected</span>` : ''}${r.sub ? `<br><span class="auto">${esc(r.sub)}</span>` : ''}</div>`;
 }
 

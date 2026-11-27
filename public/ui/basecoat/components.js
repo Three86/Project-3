@@ -9,6 +9,7 @@ export const ICON_PATHS = {
   chevron: '<path d="m6 9 6 6 6-6"/>',
   more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
   minus: '<path d="M5 12h14"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
   plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/>',
@@ -40,11 +41,13 @@ export const icon = (name, cls = '') => `<svg class="lucide ${cls}" xmlns="http:
 export const spinner = () => `<svg aria-label="Loading" role="status" class="animate-spin lucide" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_PATHS.loader}</svg>`;
 
 // <button class="btn">. opts: variant (primary|secondary|outline|ghost|link|destructive), size
-// (xs|sm|lg|icon|icon-xs|icon-sm), tip (tooltip text), side, disabled, cls. attrs: raw data-* attributes.
-export function btn(label, attrs = '', { variant, size, tip, side, disabled, cls = '' } = {}) {
-  const b = `<button type="button" class="btn ${cls}"${variant ? ` data-variant="${variant}"` : ''}${size ? ` data-size="${size}"` : ''}${tip && !disabled ? ` data-tooltip="${esc(tip)}"${side ? ` data-side="${side}"` : ''}` : ''} ${attrs}${disabled ? ' disabled' : ''}>${label}</button>`;
+// (xs|sm|lg|icon|icon-xs|icon-sm), tip (tooltip text), side, align (start|end: keeps a long tooltip
+// near the page edge from widening the page), disabled, cls. attrs: raw data-* attributes.
+export function btn(label, attrs = '', { variant, size, tip, side, align, disabled, cls = '' } = {}) {
+  const pos = `${side ? ` data-side="${side}"` : ''}${align ? ` data-align="${align}"` : ''}`;
+  const b = `<button type="button" class="btn ${cls}"${variant ? ` data-variant="${variant}"` : ''}${size ? ` data-size="${size}"` : ''}${tip && !disabled ? ` data-tooltip="${esc(tip)}"${pos}` : ''} ${attrs}${disabled ? ' disabled' : ''}>${label}</button>`;
   // Disabled buttons get no hover events; wrap them so the tooltip still shows (as in the Basecoat docs).
-  return tip && disabled ? `<span class="tip-wrap" data-tooltip="${esc(tip)}"${side ? ` data-side="${side}"` : ''}>${b}</span>` : b;
+  return tip && disabled ? `<span class="tip-wrap" data-tooltip="${esc(tip)}"${pos}>${b}</span>` : b;
 }
 // <span class="badge">. variant: primary (default) | secondary | outline | destructive | ghost.
 export const badge = (text, variant = 'outline', cls = '', tip = '') => `<span class="badge ${cls}" data-variant="${variant}"${tip ? ` data-tooltip="${esc(tip)}"` : ''}>${text}</span>`;
@@ -59,12 +62,16 @@ export function progressBar(done, total, label = 'Progress') {
   const pct = total ? Math.round((done / total) * 100) : 0;
   return `<div class="progress" role="progressbar" aria-label="${esc(label)}" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>`;
 }
-// Counter for multi-count requirements: [−] 3/5 [+].
+// Counter for multi-count requirements: [−] 3/5 [+]. Big counts (roubles, 100+ items) also get an
+// "all" button, since nobody clicks + a million times.
 export function stepperControl(attrs, cur, target, disabled = false) {
+  const n = (v) => Number(v || 0).toLocaleString('en-US');
+  const all = Number(target) >= 100 && Number(cur) < Number(target)
+    ? btn(icon('check'), `${attrs} data-d="${target}" data-max="${target}" aria-label="All ${n(target)} done"`, { variant: 'outline', size: 'icon-xs', disabled, tip: `Mark all ${n(target)} done` }) : '';
   return `<div role="group" class="button-group stepper" aria-label="Count">
     ${btn(icon('minus'), `${attrs} data-d="-1" data-max="${target}" aria-label="One less"`, { variant: 'outline', size: 'icon-xs', disabled })}
-    <span class="step-val">${cur}/${target}</span>
-    ${btn(icon('plus'), `${attrs} data-d="1" data-max="${target}" aria-label="One more"`, { variant: 'outline', size: 'icon-xs', disabled })}</div>`;
+    <span class="step-val">${n(cur)}/${n(target)}</span>
+    ${btn(icon('plus'), `${attrs} data-d="1" data-max="${target}" aria-label="One more"`, { variant: 'outline', size: 'icon-xs', disabled })}${all}</div>`;
 }
 // Empty state.
 export const emptyState = (title, text = '', footer = '', ic = 'info') => `<section class="empty">

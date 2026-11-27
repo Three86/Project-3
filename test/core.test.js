@@ -5,10 +5,12 @@ const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 
 const PUBLIC = path.join(__dirname, '..', 'public');
 const FIX = path.join(__dirname, 'fixtures', 'ui');
-const load = (rel) => import(path.join(PUBLIC, rel));
+// import() needs a file:// URL; a plain path breaks on Windows (C:\...).
+const load = (rel) => import(pathToFileURL(path.join(PUBLIC, rel)).href);
 const DEBUT = '5936d90786f7742b1420ba5b';
 const CHECKING = '59674cd986f7744ab26e32f2';
 
@@ -48,6 +50,31 @@ test('quest status: prerequisites, implied completion and start-with-prereqs', a
   delete S.progress.tasks[DEBUT];
   game.resetMemo();
   assert.strictEqual(game.taskStatus(DEBUT), 'completed');
+});
+
+test('quest status changes toast with Undo, which puts back the exact entries', async () => {
+  const S = await reset();
+  const progress = await load('core/progress.js');
+  const toasts = [];
+  const off = store.on('toast', (t) => toasts.push(t));
+  const logged = { status: 'active', updatedAt: 1700000000000, source: 'log' };
+  S.progress.tasks[CHECKING] = { ...logged };
+  await progress.setTaskStatus(CHECKING, 'completed');
+  assert.match(toasts[0].title, /^Completed: /);
+  assert.strictEqual(toasts[0].action.label, 'Undo');
+  posted = [];
+  await toasts[0].action.run();
+  assert.deepStrictEqual(posted, [{ section: 'tasks', id: CHECKING, value: logged }], 'undo restores the logged entry, source and time');
+  assert.deepStrictEqual(S.progress.tasks[CHECKING], logged);
+  // Start + complete prereqs: undo removes the entries that weren't there before.
+  delete S.progress.tasks[CHECKING];
+  game.resetMemo();
+  toasts.length = 0;
+  await progress.startWithPrereqs(CHECKING);
+  assert.match(toasts[0].description, /1 earlier quest marked completed/);
+  await toasts[0].action.run();
+  assert.ok(!(DEBUT in S.progress.tasks) && !(CHECKING in S.progress.tasks));
+  off();
 });
 
 test('requirement counter clamps between 0 and the target', async () => {
@@ -365,6 +392,7 @@ test('maps: variants fold into their base map with a note; objectives on 6+ maps
     T('night', [{ id: 'n1', type: 'shoot', maps: [map('Night Factory')] }]),
     T('dark', [{ id: 'd1', type: 'shoot', maps: [map('Woods')], timeFromHour: 21, timeUntilHour: 4 }]),
     T('infected', [], map('Infected Lab')),
+    T('anytime', [{ id: 'z1', type: 'shoot', maps: [map('Woods')], timeFromHour: 0, timeUntilHour: 0 }]),
   );
   game.buildIndex();
   const tm = (id) => game.taskMaps(S.data.tasks.find((t) => t.id === id));
@@ -377,6 +405,7 @@ test('maps: variants fold into their base map with a note; objectives on 6+ maps
   assert.deepStrictEqual(notes('night'), [{ map: 'Factory', note: 'night' }]);
   assert.deepStrictEqual(notes('dark'), [{ map: 'Woods', note: '21:00–04:00' }]);
   assert.deepStrictEqual(notes('anyKill'), [], 'no notes from any-map objectives');
+  assert.deepStrictEqual(notes('anytime'), [], '0–0 means any time: no window note');
   assert.strictEqual(game.taskMapText(S.data.tasks.find((t) => t.id === 'night')), 'Factory (night)');
   // Raid planner: The Labyrinth and Icebreaker only with an active quest there.
   const locked = (task) => ({ ...task, taskRequirements: [{ task: { id: '5936d90786f7742b1420ba5b', name: 'Debut' }, status: ['complete'] }] });

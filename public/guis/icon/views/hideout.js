@@ -2,7 +2,7 @@
 // everything a level needs, grouped (other modules, skills, traders, items). Items are only listed
 // (what and how many); they are not tracked and do not count towards Ready / N missing.
 import { S, saveUi } from '../../../core/store.js';
-import { esc } from '../../../core/util.js';
+import { esc, itemIcon } from '../../../core/util.js';
 import { hideoutReqs, levelBuilt } from '../../../core/game.js';
 import { badge, btn, checkbox, emptyState, icon, progressBar } from '../../../ui/basecoat/components.js';
 import { objectiveActions, objectiveChanges } from '../../../ui/basecoat/objectives.js';
@@ -37,7 +37,7 @@ const GROUPS = [['station', 'Hideout'], ['skill', 'Skills'], ['trader', 'Traders
 function reqRow(r, built) {
   const done = built || r.done;
   if (r.kind === 'item') {
-    return `<div class="req item${built ? ' done' : ''}">${pic(r.item.iconLink, r.item.shortName || r.item.name, 'r-ico')}
+    return `<div class="req item${built ? ' done' : ''}">${pic(itemIcon(r.item), r.item.shortName || r.item.name, 'r-ico')}
       <span class="r-main">${esc(r.item.name)} ${r.fir ? badge('FIR', 'primary', 'fir', 'Must be found in raid') : ''}</span><span class="r-count">×${fmt(r.count)}</span></div>`;
   }
   const lead = r.kind === 'station' ? pic(stationImage(r.station?.id), r.station?.name || '', 'r-ico') : '';

@@ -5,9 +5,9 @@
 //   change   state changed (progress, data, module state); redraw
 //   status   periodic status poll with no progress change (only "live" views need a redraw)
 //   banner   (html) persistent message strip; '' clears it
-//   toast    ({ category, title, description }) short notification
+//   toast    ({ category, title, description, action }) short notification; action: { label, run } or null
 //   setting  ({ key, value }) a settings value was saved
-import { esc } from './util.js';
+import { esc, fmtWhen } from './util.js';
 import { buildIndex, maxGpus, resetMemo } from './game.js';
 
 export const S = {
@@ -30,7 +30,8 @@ export function emit(name, payload) {
   }
 }
 const banner = (html) => emit('banner', html || '');
-const toast = (category, title, description = '') => emit('toast', { category, title, description });
+// action: optional { label, run } button on the toast (e.g. Undo).
+export const toast = (category, title, description = '', action = null) => emit('toast', { category, title, description, action });
 
 export async function api(path, opts = {}) {
   const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opts });
@@ -45,7 +46,7 @@ export async function setProgress(ops) {
   if (!Array.isArray(ops)) ops = [ops];
   for (const { section, id, value } of ops) {
     const t = (S.progress[section] ||= {});
-    if (section === 'tasks') value == null ? delete t[id] : (t[id] = { status: value, updatedAt: Date.now(), source: 'manual' });
+    if (section === 'tasks') value == null ? delete t[id] : (t[id] = typeof value === 'object' ? { ...value } : { status: value, updatedAt: Date.now(), source: 'manual' });
     else if (section === 'settings') t[id] = value;
     else if (value == null || value === false || value === 0) delete t[id];
     else t[id] = value;
@@ -56,7 +57,10 @@ export async function setProgress(ops) {
     const { body } = await api('/api/progress', { method: 'POST', body: JSON.stringify({ ops }) });
     S.progress.rev = body.rev;
   } catch (err) {
-    toast('error', 'Could not save progress', err.message);
+    toast('error', 'Change not saved', `The tracker server didn't accept it (${err.message}). Showing your saved progress again.`);
+    // The change was applied locally above; reload the server's copy so the page doesn't keep showing
+    // progress that was never saved (the next poll wouldn't, as the server's rev hasn't moved).
+    await poll(true);
   }
 }
 
@@ -158,7 +162,7 @@ export async function loadAll() {
     if (await browserDownload()) return loadAll();
   }
   if (S.data && !S.status.refreshError) banner('');
-  else if (S.status.refreshError && S.data) banner(`Could not refresh game data (${esc(S.status.refreshError)}). Using cached data from ${esc(S.data.meta?.fetchedAt)}.`);
+  else if (S.status.refreshError && S.data) banner(`Could not refresh game data (${esc(S.status.refreshError)}). Using cached data from ${esc(fmtWhen(S.data.meta?.fetchedAt, 'an unknown time'))}.`);
   emit('change');
 }
 

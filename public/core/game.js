@@ -88,7 +88,8 @@ export function taskMapNotes(t) {
   const hh = (h) => `${String(h).padStart(2, '0')}:00`;
   for (const o of t.objectives) {
     if (objBaseMaps(o).length < ANY_MAP_FROM) (o.maps || []).forEach(named);
-    if (o.timeFromHour != null && o.timeUntilHour != null) add(objBaseMaps(o).length === 1 ? objBaseMaps(o)[0] : (t.map ? baseMap(t.map.name).base : ''), `${hh(o.timeFromHour)}–${hh(o.timeUntilHour)}`);
+    // tarkov.dev sends 0–0 (same start and end hour) for "any time"; only a real window is a constraint.
+    if (o.timeFromHour != null && o.timeUntilHour != null && o.timeFromHour % 24 !== o.timeUntilHour % 24) add(objBaseMaps(o).length === 1 ? objBaseMaps(o)[0] : (t.map ? baseMap(t.map.name).base : ''), `${hh(o.timeFromHour)}–${hh(o.timeUntilHour)}`);
   }
   return out;
 }
